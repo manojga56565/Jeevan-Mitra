@@ -741,8 +741,6 @@ body{
     <button class="nav-btn" onclick="aTab('settings',this)"><span class="nav-ico">⚙️</span><span class="nav-lbl">More</span></button>
   </div>
 </section>
-
-
 <div class="modal-overlay" id="accept-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -752,7 +750,6 @@ body{
     <button class="btn btn-outline" onclick="closeModal('accept-modal')" style="margin-top:8px;">Cancel</button>
   </div>
 </div>
-
 <!-- REDEEM MODAL -->
 <div class="modal-overlay" id="redeem-modal">
   <div class="modal">
@@ -762,7 +759,6 @@ body{
     <button class="btn btn-red" onclick="closeModal('redeem-modal')" style="margin-top:14px;">Close</button>
   </div>
 </div>
-
 <!-- MAP MODAL — shown after donor accepts request -->
 <div class="map-overlay" id="map-overlay">
   <div class="map-modal">
@@ -920,7 +916,7 @@ body{
 </div>
 
 <script>
-// ═══ TELANGANA DATA ═══
+  // ═══ TELANGANA DATA ═══
 const TG = {
   "Hyderabad":{"Amberpet":["Amberpet","Tarnaka","Nacharam","Habsiguda","Ramanthapur"],"Bahadurpura":["Bahadurpura","Mangalhat","Saidabad","Santoshnagar"],"Charminar":["Charminar","Falaknuma","Chandrayangutta","Mailardevpally"],"Golconda":["Golconda","Langar Houz","Karwan","Tolichowki"],"Khairatabad":["Khairatabad","Banjara Hills","Jubilee Hills","Panjagutta","Somajiguda"],"LB Nagar":["LB Nagar","Saroornagar","Vanasthalipuram","Hayathnagar","Nagole"],"Malakpet":["Malakpet","Chaderghat","Yakutpura","Rein Bazar"],"Malkajgiri":["Malkajgiri","Neredmet","Lothkunta","Alwal","Yapral"],"Musheerabad":["Musheerabad","Trimulgherry","Marredpally","Chilkalguda"],"Nampally":["Nampally","Abids","Himayatnagar","Narayanguda","Barkatpura"],"Rajendranagar":["Rajendranagar","Attapur","Budvel","Kismatpur"],"Secunderabad":["Secunderabad","Bowenpally","Padmarao Nagar","West Maredpally"],"Serlingampally":["Serlingampally","Kondapur","Madhapur","Gachibowli","Nanakramguda"],"Uppal":["Uppal","Boduppal","Ghatkesar","Medipally","Peerzadiguda"]},
   "Rangareddy":{"Chevella":["Chevella","Marpally","Shabad","Pargi"],"Farooqnagar":["Farooqnagar","Kothur","Jadcherla","Kandukur"],"Ibrahimpatnam":["Ibrahimpatnam","Manchal","Yacharam","Saroornagar"],"Maheshwaram":["Maheshwaram","Bandlaguda","Rajendranagar","Kismatpur"],"Moinabad":["Moinabad","Shankarpally","Chevella","Gandipet"],"Shadnagar":["Shadnagar","Kothur","Farooqnagar","Jadcherla"],"Shamshabad":["Shamshabad","Rajendranagar","Bandlaguda","Attapur"],"Vikarabad":["Vikarabad","Tandur","Pargi","Dharur"],"Yacharam":["Yacharam","Ibrahimpatnam","Manchal","Hayathnagar"]},
@@ -1082,7 +1078,7 @@ async function api(ep,method='GET',body=null){
   if(t)h['Authorization']=`Bearer ${t}`;
   const o={method,headers:h};
   if(body)o.body=JSON.stringify(body);
-  const r=await fetch(`${API}/api${ep}`,o);
+  const r=await fetch(`${API}${ep}`,o);
   const d=await r.json();
   if(!r.ok)throw new Error(d.message||'Server error');
   return d;
@@ -1442,7 +1438,6 @@ function renderDProfile(){
   // Generate inline mini QR
   setTimeout(()=>generateQR('qr-inline-wrap',80),100);
 }
-
 // ═══ HOSPITAL DASHBOARD ═══
 function initHospital(){
   showScreen('hospital-home');

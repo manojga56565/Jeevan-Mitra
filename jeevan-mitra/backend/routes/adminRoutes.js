@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken'); // Added JWT import for login
 const Donor = require('../models/Donor');
 const Hospital = require('../models/Hospital');
 const Request = require('../models/Request');
@@ -18,6 +19,35 @@ async function log(req, action, target, targetId, details) {
     });
   } catch (e) { console.log('Log error:', e.message); }
 }
+
+// ═══ AUTHENTICATION ══════════════════════════════════════════
+
+// POST /api/admin/login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check against environment variables, or fallback to defaults
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@jeevanmitra.in';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@JM2026';
+
+    if (email === adminEmail && password === adminPassword) {
+      // Generate the token so the adminAuth middleware lets them pass later
+      const token = jwt.sign(
+        { id: 'admin', email: adminEmail, role: 'admin' },
+        process.env.JWT_SECRET || 'default_secret_key',
+        { expiresIn: '24h' }
+      );
+      
+      await log(req, 'Admin logged in', 'admin', null, '');
+      return res.json({ success: true, token });
+    } else {
+      return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 // ═══ DONORS ══════════════════════════════════════════════════
 
