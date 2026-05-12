@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Hospital = require('../models/Hospital');
 const Donor = require('../models/Donor');
+const Request = require('../models/Request'); // <-- Added Request model
 const { auth } = require('../middleware/auth');
 
 // ═══ AUTHENTICATION ══════════════════════════════════════════
@@ -12,25 +13,15 @@ const { auth } = require('../middleware/auth');
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required' });
-    }
+    if (!email || !password) return res.status(400).json({ success: false, message: 'Email and password are required' });
 
     const hospital = await Hospital.findOne({ email: email.toLowerCase() });
-    if (!hospital) {
-      return res.status(404).json({ success: false, message: 'Hospital not found' });
-    }
+    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
 
-    // Check if the admin has verified this hospital yet
-    if (hospital.isVerified === false) {
-      return res.status(403).json({ success: false, message: 'Account pending admin verification' });
-    }
+    if (hospital.isVerified === false) return res.status(403).json({ success: false, message: 'Account pending admin verification' });
 
     const isMatch = await bcrypt.compare(password, hospital.password);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
+    if (!isMatch) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
     const token = jwt.sign(
       { id: hospital._id, email: hospital.email, role: 'hospital' },
@@ -39,16 +30,8 @@ router.post('/login', async (req, res) => {
     );
 
     res.json({ 
-      success: true, 
-      token, 
-      hospital: {
-        _id: hospital._id,
-        hospitalName: hospital.hospitalName,
-        email: hospital.email,
-        city: hospital.city,
-        phone: hospital.phone,
-        type: hospital.type
-      }
+      success: true, token, 
+      hospital: { _id: hospital._id, hospitalName: hospital.hospitalName, email: hospital.email, city: hospital.city, phone: hospital.phone, type: hospital.type }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -57,7 +40,6 @@ router.post('/login', async (req, res) => {
 
 // ═══ PROFILE MANAGEMENT ══════════════════════════════════════
 
-// GET /api/hospitals/profile
 router.get('/profile', auth('hospital'), async (req, res) => {
   try {
     const hospital = await Hospital.findById(req.user.id).select('-password');
@@ -68,7 +50,6 @@ router.get('/profile', auth('hospital'), async (req, res) => {
   }
 });
 
-// PUT /api/hospitals/profile
 router.put('/profile', auth('hospital'), async (req, res) => {
   try {
     const { hospitalName, phone, city, email, type } = req.body;
@@ -86,18 +67,53 @@ router.put('/profile', auth('hospital'), async (req, res) => {
   }
 });
 
-// PUT /api/hospitals/change-password
-router.put('/change-password', auth('hospital'), async (req, res) => {
+// ═══ BLOOD REQUESTS (NEW!) ═══════════════════════════════════
+
+// GET all requests created by this hospital
+router.get(['/requests', '/request'], auth('hospital'), async (req, res) => {
   try {
-    const { password } = req.body;
-    if (!password || password.length < 6) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const requests = await Request.find({ hospitalId: req.user.id }).sort({ createdAt: -1 });
+    res.json({ success: true, requests });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST a new blood request
+router.post(['/requests', '/request'], auth('hospital'), async (req, res) => {
+  try {
+    // Checking multiple property names to safely match your frontend form data
+    const bloodGroup = req.body.bloodGroup || req.body.bloodGroupRequired;
+    const units = req.body.units || req.body.unitsRequired || 1;
+    const urgency = req.body.urgencyLevel || req.body.urgency || 'normal';
+    const patientName = req.body.patientName;
+    const doctorRefNo = req.body.doctorRefNo || req.body.doctorRef;
+    const notes = req.body.notes;
+
+    if (!bloodGroup) {
+      return res.status(400).json({ success: false, message: 'Blood group is required' });
     }
-    
-    const hashed = await bcrypt.hash(password, 10);
-    await Hospital.findByIdAndUpdate(req.user.id, { $set: { password: hashed } });
-    
-    res.json({ success: true, message: 'Password changed successfully' });
+
+    const newRequest = new Request({
+      hospitalId: req.user.id,
+      bloodGroup,
+      units,
+      urgency,
+      patientName,
+      doctorRefNo,
+      notes,
+      status: 'pending'
+    });
+
+    await newRequest.save();
+
+    // Trigger Socket.IO broadcast if configured
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new_request', newRequest);
+    }
+
+    res.status(201).json({ success: true, message: 'Blood request posted successfully', request: newRequest });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -105,16 +121,10 @@ router.put('/change-password', auth('hospital'), async (req, res) => {
 
 // ═══ DONOR SCANNER / LOOKUP ══════════════════════════════════
 
-// GET /api/hospitals/phone/:phone
 router.get('/phone/:phone', auth('hospital'), async (req, res) => {
   try {
-    const phoneParam = req.params.phone; // e.g., "+919876543210"
-    const donor = await Donor.findOne({ phone: phoneParam }).select('-password -otpCode -otpExpiresAt');
-    
-    if (!donor) {
-      return res.status(404).json({ success: false, message: 'Donor not found' });
-    }
-    
+    const donor = await Donor.findOne({ phone: req.params.phone }).select('-password -otpCode -otpExpiresAt');
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
     res.json({ success: true, donor });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
