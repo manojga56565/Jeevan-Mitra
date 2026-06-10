@@ -7,10 +7,10 @@ const Request = require('../models/Request');
 const { Alert } = require('../models/Other');
 const { auth } = require('../middleware/auth');
 
-// ═══ UNIFIED PUBLIC FEED FOR DONOR DASHBOARD (Searches for 'pending') ═══
-router.get('/feed', auth('donor'), async (req, res) => {
+// ═══ UNIFIED PUBLIC FEED FOR DONOR DASHBOARD ═══
+router.get('/feed', async (req, res) => {
   try {
-    // 🔍 Searches for 'pending' requests to align with Mongoose validation
+    // Finds all pending records regardless of middleware token status to prevent dashboard locking
     const openRequests = await Request.find({ status: 'pending' })
       .populate('hospitalId', 'hospitalName city phone address')
       .sort({ createdAt: -1 });
