@@ -16,11 +16,11 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Error:', err));
 
-// Routes - Fixed to accept both singular and plural paths
+// Routes - Updated to route /api/admin requests through auth logic first!
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use(['/api/donor', '/api/donors'], require('./routes/donorRoutes'));
 app.use(['/api/hospital', '/api/hospitals'], require('./routes/hospitalRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin', require('./routes/authRoutes'), require('./routes/adminRoutes'));
 
 // 🛡️ JSON Fallback for 404s (Prevents the <!DOCTYPE error)
 app.use((req, res) => {

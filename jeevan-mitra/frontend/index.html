@@ -1195,7 +1195,7 @@ async function adminLogin(){
   const pass=document.getElementById('adm-pass').value.trim();
   if(!email||!pass)return showToast('Enter email and password','error');
   try{
-    const data=await api('/admin/login','POST',{email,password:pass});
+    const data=await api('/auth/login','POST',{email,password:pass});
     localStorage.setItem('jm_token',data.token);
     localStorage.setItem('jm_role','admin');
     localStorage.setItem('jm_user',JSON.stringify({email}));
@@ -1256,7 +1256,7 @@ function renderDonorHome(){
 
 async function loadReqsPreview(){
   try{
-    const d=await api('/requests/pending');
+    const d=await api('donors/requests/pending');
     const c=document.getElementById('home-reqs');
     if(!d.requests?.length){c.innerHTML=`<div class="empty"><div class="empty-ico">✅</div><div class="empty-title">No requests nearby</div><div class="empty-sub">All good! Check back later</div></div>`;return}
     c.innerHTML=d.requests.map(r=>reqCard(r)).join('');
@@ -1469,7 +1469,7 @@ function renderHospHome(){
 
 async function loadHospReqs(preview=false){
   try{
-    const d=await api('/requests/hospital/mine');
+    const d=await api('/hospitals/requests/mine');
     const reqs=d.requests||[];
     document.getElementById('hh-total').textContent=d.stats?.total||reqs.length;
     document.getElementById('hh-open').textContent=d.stats?.pending||reqs.filter(r=>r.status==='pending').length;
@@ -1945,7 +1945,7 @@ async function renderAdminRequests(){
     </div>
     <div id="adm-req-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
   try{
-    const d=await api('/requests/pending');
+    const d=await api('/admin/request');
     window._allAdminReqs=d.requests||[];
     renderAdminReqList(window._allAdminReqs);
   }catch(e){document.getElementById('adm-req-list').innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
