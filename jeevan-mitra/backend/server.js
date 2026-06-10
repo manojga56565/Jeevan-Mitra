@@ -16,13 +16,17 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Error:', err));
 
-// Routes - Updated to route /api/admin requests through auth logic first!
+// 🚨 EMERGENCY INTERCEPTOR (Must be placed BEFORE other routes)
+// If the frontend calls /api/admin/login, bypass adminRoutes and send it straight to authRoutes
+app.use('/api/admin/login', require('./routes/authRoutes'));
+
+// Standard Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use(['/api/donor', '/api/donors'], require('./routes/donorRoutes'));
 app.use(['/api/hospital', '/api/hospitals'], require('./routes/hospitalRoutes'));
-app.use('/api/admin', require('./routes/authRoutes'), require('./routes/adminRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
-// 🛡️ JSON Fallback for 404s (Prevents the <!DOCTYPE error)
+// 🛡️ JSON Fallback for 404s
 app.use((req, res) => {
   res.status(404).json({ 
     success: false, 
