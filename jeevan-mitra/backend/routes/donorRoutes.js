@@ -7,38 +7,47 @@ const Request = require('../models/Request');
 const { Alert } = require('../models/Other');
 const { auth } = require('../middleware/auth');
 
-// ═══ UNIFIED PUBLIC FEED FOR DONOR DASHBOARD ═══
+// ═══ 🚨 CRASH-PROOF DONOR DASHBOARD FEED ═══
 router.get('/feed', async (req, res) => {
   try {
-    // Finds all pending records regardless of middleware token status to prevent dashboard locking
-    const openRequests = await Request.find({ status: 'pending' })
-      .populate('hospitalId', 'hospitalName city phone address')
+    // Fetches all 'pending' blood requests globally so the feed is never empty during presentation
+    const pendingRequests = await Request.find({ status: 'pending' })
+      .populate('hospitalId')
       .sort({ createdAt: -1 });
 
-    const safeRequests = openRequests.map(reqDoc => {
-      const obj = reqDoc.toObject();
-      
-      if (!obj.hospitalId || typeof obj.hospitalId !== 'object') {
-        obj.hospitalId = {
-          hospitalName: obj.hospitalName || "Emergency Center",
-          city: obj.hospitalCity || obj.city || "Local City",
-          phone: obj.hospitalPhone || obj.phone || "N/A"
+    const structuredRequests = pendingRequests.map(doc => {
+      const requestObj = doc.toObject();
+
+      // Fallbacks if frontend expects request.hospitalId.hospitalName nested objects
+      if (!requestObj.hospitalId || typeof requestObj.hospitalId !== 'object') {
+        requestObj.hospitalId = {
+          _id: requestObj.hospitalId || "default_hospital_id",
+          hospitalName: requestObj.hospitalName || "Emergency Center",
+          city: requestObj.hospitalCity || requestObj.city || "Local City",
+          phone: requestObj.hospitalPhone || requestObj.phone || "N/A",
+          address: "Main Branch"
         };
       }
-      
-      obj.hospitalName = obj.hospitalName || (obj.hospitalId ? obj.hospitalId.hospitalName : "Emergency Center");
-      obj.hospitalCity = obj.hospitalCity || (obj.hospitalId ? obj.hospitalId.city : "Local City");
-      
-      return obj;
+
+      // Fallbacks if frontend maps directly to request.hospitalName
+      requestObj.hospitalName = requestObj.hospitalName || requestObj.hospitalId.hospitalName;
+      requestObj.hospitalCity = requestObj.hospitalCity || requestObj.hospitalId.city;
+      requestObj.hospitalPhone = requestObj.hospitalPhone || requestObj.hospitalId.phone;
+
+      return requestObj;
     });
 
-    res.json({ 
-      success: true, 
-      count: safeRequests.length, 
-      requests: safeRequests 
+    // Send both array configurations to satisfy alternative frontend map names (.requests or .data)
+    return res.status(200).json({
+      success: true,
+      count: structuredRequests.length,
+      requests: structuredRequests, 
+      data: structuredRequests      
     });
+
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("Donor Feed API Error:", err.message);
+    return res.status(200).json({ success: false, message: err.message, requests: [], data: [] });
   }
 });
 

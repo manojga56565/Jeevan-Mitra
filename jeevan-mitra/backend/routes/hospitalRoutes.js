@@ -6,7 +6,6 @@ const Hospital = require('../models/Hospital');
 const Donor = require('../models/Donor');
 const Request = require('../models/Request');
 const { Alert } = require('../models/Other');
-const { auth } = require('../middleware/auth');
 
 // ═══ HOSPITAL LOGIN ═══
 router.post('/login', async (req, res) => {
@@ -32,12 +31,12 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ═══ CREATE REQUEST (With Token Bypass Fallback for Presentations) ═══
+// ═══ CREATE REQUEST (With Token Bypass Fallback for Presentation) ═══
 router.post(['/', '/requests', '/request'], async (req, res) => {
   try {
     let hospitalId = null;
 
-    // 1. Check if a token was sent and try to extract hospital ID
+    // Check if a token was sent in headers
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
@@ -47,11 +46,11 @@ router.post(['/', '/requests', '/request'], async (req, res) => {
           hospitalId = decoded.id;
         }
       } catch (tokenErr) {
-        console.log("Token validation skipped, running presentation fallback...");
+        console.log("Token invalid, using presentation fallback...");
       }
     }
 
-    // 2. PRESENTATION FALLBACK: If no token or wrong role, fetch the first available hospital in DB
+    // PRESENTATION FALLBACK: If no token, automatically grab the first hospital from your DB
     if (!hospitalId) {
       const defaultHospital = await Hospital.findOne();
       if (!defaultHospital) {
@@ -60,9 +59,8 @@ router.post(['/', '/requests', '/request'], async (req, res) => {
       hospitalId = defaultHospital._id;
     }
 
-    // 3. Fetch full hospital record to populate data fields
     const hospital = await Hospital.findById(hospitalId);
-    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital context not found' });
+    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
 
     const newRequest = new Request({
       hospitalId: hospital._id,
@@ -76,12 +74,12 @@ router.post(['/', '/requests', '/request'], async (req, res) => {
       patientName: req.body.patientName || 'Emergency Patient',
       patientReason: req.body.patientReason || 'Urgent Requirement', 
       doctorRefNo: req.body.doctorRefNo || '',
-      status: 'pending' 
+      status: 'pending' // Matches Mongoose Model Enum perfectly
     });
 
     await newRequest.save();
 
-    // 4. Matching Engine Sync
+    // Matching Engine: Match local donors
     const matchingDonors = await Donor.find({
       bloodGroup: newRequest.bloodGroup,
       city: hospital.city,
@@ -118,7 +116,6 @@ router.get(['/', '/requests', '/request'], async (req, res) => {
       } catch (e) {}
     }
 
-    // Fallback context if viewing without being logged into a hospital account
     const filter = hospitalId ? { hospitalId } : {};
     const requests = await Request.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, requests });
