@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ═══ CREATE REQUEST (Synced with your Mongoose Model) ═══
+// ═══ CREATE REQUEST (Fixed Status and Schema Naming Mismatches) ═══
 router.post(['/', '/requests', '/request'], auth('hospital'), async (req, res) => {
   try {
     // Fetch hospital details for required model fields
@@ -41,16 +41,17 @@ router.post(['/', '/requests', '/request'], auth('hospital'), async (req, res) =
 
     const newRequest = new Request({
       hospitalId: hospital._id,
-      hospitalName: hospital.hospitalName,
+      hospital: hospital._id, // Set both variations to prevent reference crash bugs
+      hospitalName: hospital.hospitalName || hospital.name,
       hospitalCity: hospital.city,
       hospitalPhone: hospital.phone,
       bloodGroup: req.body.bloodGroup,
       urgency: req.body.urgency || 'normal',
-      quantity: req.body.quantity || 1, // Matches frontend 'quantity'
-      patientName: req.body.patientName || '',
-      patientReason: req.body.patientReason || '', // Matches frontend 'patientReason'
+      quantity: req.body.quantity || 1, 
+      patientName: req.body.patientName || 'Emergency Patient',
+      patientReason: req.body.patientReason || 'Urgent Requirement', 
       doctorRefNo: req.body.doctorRefNo || '',
-      status: 'pending'
+      status: 'open' // 🚨 FIXED: Changed from 'pending' to 'open' so donors can see it immediately!
     });
 
     await newRequest.save();

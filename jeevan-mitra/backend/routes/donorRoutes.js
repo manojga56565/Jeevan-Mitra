@@ -7,6 +7,28 @@ const Request = require('../models/Request');
 const { Alert } = require('../models/Other');
 const { auth } = require('../middleware/auth');
 
+// ========================================================
+// 🚨 MISSING FEED ROUTE: Fetches active requests for Donors
+// ========================================================
+router.get('/feed', auth('donor'), async (req, res) => {
+  try {
+    // 1. Fetch open requests 
+    // 2. Automatically look up and link hospital details ('hospitalId' or 'hospital')
+    const requests = await Request.find({ status: 'open' })
+      .populate('hospitalId', 'hospitalName city phone address') 
+      .populate('hospital', 'hospitalName name city phone address') // Fallback matching either schema naming
+      .sort({ createdAt: -1 });
+
+    res.json({ 
+      success: true, 
+      count: requests.length, 
+      requests 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // GET /api/donors/profile
 router.get('/profile', auth('donor'), async (req, res) => {
   try {
@@ -23,7 +45,7 @@ router.put('/profile', auth('donor'), async (req, res) => {
   try {
     const { fullName, email, city, availabilityStatus, dob } = req.body;
     const updates = {};
-    if (fullName) updates.name = fullName; // Maps frontend fullName to backend name
+    if (fullName) updates.name = fullName;
     if (email) updates.email = email;
     if (city) updates.city = city;
     if (availabilityStatus) updates.availabilityStatus = availabilityStatus;
