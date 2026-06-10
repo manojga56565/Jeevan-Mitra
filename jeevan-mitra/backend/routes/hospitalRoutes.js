@@ -32,16 +32,15 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ═══ CREATE REQUEST (Fixed Status and Schema Naming Mismatches) ═══
+// ═══ CREATE REQUEST (Fixed Status to Match Mongoose Model Enum) ═══
 router.post(['/', '/requests', '/request'], auth('hospital'), async (req, res) => {
   try {
-    // Fetch hospital details for required model fields
     const hospital = await Hospital.findById(req.user.id);
     if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
 
     const newRequest = new Request({
       hospitalId: hospital._id,
-      hospital: hospital._id, // Set both variations to prevent reference crash bugs
+      hospital: hospital._id, 
       hospitalName: hospital.hospitalName || hospital.name,
       hospitalCity: hospital.city,
       hospitalPhone: hospital.phone,
@@ -51,7 +50,7 @@ router.post(['/', '/requests', '/request'], auth('hospital'), async (req, res) =
       patientName: req.body.patientName || 'Emergency Patient',
       patientReason: req.body.patientReason || 'Urgent Requirement', 
       doctorRefNo: req.body.doctorRefNo || '',
-      status: 'open' // 🚨 FIXED: Changed from 'pending' to 'open' so donors can see it immediately!
+      status: 'pending' // 🚨 MATCHES ENUM VALIDATION
     });
 
     await newRequest.save();

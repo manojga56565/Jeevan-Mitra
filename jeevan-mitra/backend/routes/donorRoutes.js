@@ -7,22 +7,35 @@ const Request = require('../models/Request');
 const { Alert } = require('../models/Other');
 const { auth } = require('../middleware/auth');
 
-// ========================================================
-// 🚨 MISSING FEED ROUTE: Fetches active requests for Donors
-// ========================================================
+// ═══ UNIFIED PUBLIC FEED FOR DONOR DASHBOARD (Searches for 'pending') ═══
 router.get('/feed', auth('donor'), async (req, res) => {
   try {
-    // 1. Fetch open requests 
-    // 2. Automatically look up and link hospital details ('hospitalId' or 'hospital')
-    const requests = await Request.find({ status: 'open' })
-      .populate('hospitalId', 'hospitalName city phone address') 
-      .populate('hospital', 'hospitalName name city phone address') // Fallback matching either schema naming
+    // 🔍 Searches for 'pending' requests to align with Mongoose validation
+    const openRequests = await Request.find({ status: 'pending' })
+      .populate('hospitalId', 'hospitalName city phone address')
       .sort({ createdAt: -1 });
+
+    const safeRequests = openRequests.map(reqDoc => {
+      const obj = reqDoc.toObject();
+      
+      if (!obj.hospitalId || typeof obj.hospitalId !== 'object') {
+        obj.hospitalId = {
+          hospitalName: obj.hospitalName || "Emergency Center",
+          city: obj.hospitalCity || obj.city || "Local City",
+          phone: obj.hospitalPhone || obj.phone || "N/A"
+        };
+      }
+      
+      obj.hospitalName = obj.hospitalName || (obj.hospitalId ? obj.hospitalId.hospitalName : "Emergency Center");
+      obj.hospitalCity = obj.hospitalCity || (obj.hospitalId ? obj.hospitalId.city : "Local City");
+      
+      return obj;
+    });
 
     res.json({ 
       success: true, 
-      count: requests.length, 
-      requests 
+      count: safeRequests.length, 
+      requests: safeRequests 
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
