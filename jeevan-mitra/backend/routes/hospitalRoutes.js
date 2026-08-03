@@ -31,12 +31,12 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ═══ CREATE REQUEST (With Token Bypass Fallback for Presentation) ═══
+// ═══ CREATE REQUEST (Presentation Fallback + GeoJSON Map Location) ═══
 router.post(['/', '/requests', '/request'], async (req, res) => {
   try {
     let hospitalId = null;
 
-    // Check if a token was sent in headers
+    // Check if auth token was sent in headers
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
@@ -50,7 +50,7 @@ router.post(['/', '/requests', '/request'], async (req, res) => {
       }
     }
 
-    // PRESENTATION FALLBACK: If no token, automatically grab the first hospital from your DB
+    // PRESENTATION FALLBACK: Automatically grab the first hospital from DB if token is missing/invalid
     if (!hospitalId) {
       const defaultHospital = await Hospital.findOne();
       if (!defaultHospital) {
@@ -61,6 +61,10 @@ router.post(['/', '/requests', '/request'], async (req, res) => {
 
     const hospital = await Hospital.findById(hospitalId);
     if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
+
+    // Capture Location (Default coordinates provided if not sent by frontend)
+    const lat = req.body.lat !== undefined ? parseFloat(req.body.lat) : 17.3850;
+    const lng = req.body.lng !== undefined ? parseFloat(req.body.lng) : 78.4867;
 
     const newRequest = new Request({
       hospitalId: hospital._id,
@@ -74,7 +78,11 @@ router.post(['/', '/requests', '/request'], async (req, res) => {
       patientName: req.body.patientName || 'Emergency Patient',
       patientReason: req.body.patientReason || 'Urgent Requirement', 
       doctorRefNo: req.body.doctorRefNo || '',
-      status: 'pending' // Matches Mongoose Model Enum perfectly
+      status: 'pending',
+      location: {
+        type: 'Point',
+        coordinates: [lng, lat] // GeoJSON array strictly requires [longitude, latitude]
+      }
     });
 
     await newRequest.save();
