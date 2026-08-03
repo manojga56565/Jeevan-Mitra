@@ -14,8 +14,24 @@ const RequestSchema = new mongoose.Schema({
   status:             { type: String, enum: ['pending','accepted','completed','cancelled','expired'], default: 'pending' },
   acceptedBy:         { type: mongoose.Schema.Types.ObjectId, ref: 'Donor' },
   pointsEarned:       { type: Number, default: 0 },
-  expiresAt:          { type: Date, default: () => new Date(Date.now() + 2*60*60*1000) }, 
+  expiresAt:          { type: Date, default: () => new Date(Date.now() + 2*60*60*1000) },
+
+  // ═══ GeoJSON Location Field for Google Maps Radius Search ═══
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // Stored strictly as [longitude, latitude]
+      default: [78.4867, 17.3850] // Default fallback coordinates
+    }
+  }
 }, { timestamps: true });
+
+// Enable 2dsphere index required for geospatial queries ($geoWithin / $centerSphere)
+RequestSchema.index({ location: '2dsphere' });
 
 RequestSchema.pre('save', function(next) {
   if (!this.pointsEarned) {
