@@ -131,5 +131,97 @@ router.get(['/', '/requests', '/request'], async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+// ═══════════════════════════════════════════════
+// COMPLETE DONATION (Hospital)
+// ═══════════════════════════════════════════════
+router.patch('/complete/:id', async (req, res) => {
 
+    try {
+
+        const request = await Request.findById(req.params.id);
+
+        if (!request) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Blood request not found."
+            });
+
+        }
+
+        if (request.status !== "accepted") {
+
+            return res.status(400).json({
+                success: false,
+                message: "This request has not been accepted yet."
+            });
+
+        }
+
+        const donor = await Donor.findById(request.acceptedBy);
+
+        if (!donor) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Donor not found."
+            });
+
+        }
+
+        // Complete Request
+
+        request.status = "completed";
+
+        request.completedAt = new Date();
+
+        await request.save();
+
+        // Start 60-Day Cooldown
+
+        const cooldownDate = new Date();
+
+        cooldownDate.setDate(cooldownDate.getDate() + 60);
+
+        donor.lastDonationDate = new Date();
+
+        donor.nextEligibleDate = cooldownDate;
+
+        donor.cooldownUntil = cooldownDate;
+
+        donor.totalDonations += 1;
+
+        donor.points += request.pointsEarned || 10;
+
+        await donor.save();
+
+        return res.json({
+
+            success: true,
+
+            message: "Donation completed successfully.",
+
+            donor,
+
+            request
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+});
 module.exports = router;
