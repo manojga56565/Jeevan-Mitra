@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,29 +20,36 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // ========================================================
 // 🚨 EMERGENCY INTERCEPTOR FOR YOUR LIVE PRESENTATION
+// Issues a REAL signed JWT so every route after login
+// (which uses adminAuth middleware) actually accepts it.
 // ========================================================
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     // Direct string match validation to bypass any router/DB token bugs instantly
     if (email === 'admin@jeevanmitra.in' && password === 'admin@JM2026') {
+      const token = jwt.sign(
+        { email, role: 'admin' },
+        process.env.JWT_SECRET || 'secret',   // must match middleware/auth.js exactly
+        { expiresIn: '7d' }
+      );
       return res.status(200).json({
         success: true,
         message: "Welcome back, Administrator!",
-        token: "JM_EMERGENCY_PRESENTATION_TOKEN_2026",
+        token,
         user: { email: "admin@jeevanmitra.in", role: "admin" }
       });
     } else {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid Admin Credentials" 
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Admin Credentials"
       });
     }
   } catch (error) {
-    return res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    return res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 });
@@ -64,9 +72,9 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 // 🛡️ JSON FALLBACK FOR FRONTEND 404 MISMATCHES
 // ========================================================
 app.use((req, res) => {
-  res.status(404).json({ 
-    success: false, 
-    message: `The URL ${req.originalUrl} was not found on this backend. Check your frontend API call mappings!` 
+  res.status(404).json({
+    success: false,
+    message: `The URL ${req.originalUrl} was not found on this backend. Check your frontend API call mappings!`
   });
 });
 

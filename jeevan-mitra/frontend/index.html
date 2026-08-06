@@ -65,6 +65,19 @@ body{
 }
 
 /* ════════════════════════════════════════
+   SMALL PHONE (≤ 359px)
+   Tighter spacing/type so nothing wraps oddly
+════════════════════════════════════════ */
+@media(max-width:359px){
+  .ob-card{padding:24px 16px}
+  .ob-brand{font-size:22px}
+  .landing-stats{gap:6px;padding:18px 12px 4px}
+  .landing-stats>div{padding:10px 4px}
+  .landing-section{padding-left:12px!important;padding-right:12px!important}
+  .btn{font-size:13px;padding:12px}
+}
+
+/* ════════════════════════════════════════
    TABLET (600px – 899px)
    Centered card, no sidebar
 ════════════════════════════════════════ */
@@ -104,6 +117,8 @@ body{
   }
 
   .screen{padding-bottom:70px;}
+  .landing-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .landing-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 }
 
 /* ════════════════════════════════════════
@@ -214,6 +229,20 @@ body{
   .qr-overlay.active{
     padding-left:280px;
   }
+
+  .landing-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .landing-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+}
+
+/* ════════════════════════════════════════
+   LARGE DESKTOP (≥ 1280px)
+   Wider shell, roomier dashboards
+════════════════════════════════════════ */
+@media(min-width:1280px){
+  #app-shell{ max-width:1440px; }
+  .landing-grid-4{grid-template-columns:repeat(4,1fr)}
+  .landing-grid-2{grid-template-columns:repeat(2,1fr)}
+  .landing-stats{max-width:900px;margin:0 auto;padding:24px 20px 4px}
 }
 .screen{display:none;min-height:100vh;flex-direction:column}
 .screen.active{display:flex}
@@ -234,6 +263,9 @@ body{
 /* ONBOARDING */
 #onboarding{background:linear-gradient(145deg,#FFEBEE,#FCE4EC 60%,#FFF8F0);padding:32px 20px;align-items:center;justify-content:center}
 .ob-card{background:var(--white);border-radius:24px;padding:32px 24px;width:100%;box-shadow:var(--shadow);text-align:center}
+.landing-grid-4{display:flex;flex-direction:column;gap:10px}
+.landing-grid-2{display:flex;flex-direction:column;gap:10px}
+.landing-section{max-width:100%}
 .ob-logo{font-size:48px;margin-bottom:6px}
 .ob-brand{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--red)}
 .ob-tel{font-size:13px;color:var(--slate);margin-top:2px}
@@ -290,7 +322,8 @@ body{
 
 /* TOAST */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:11px 20px;border-radius:50px;font-size:13px;font-weight:600;z-index:9999;animation:slideUp 0.3s ease;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.2);color:#fff;background:var(--dark)}
-.toast.success{background:var(--green)}.toast.error{background:var(--red)}.toast.info{background:var(--blue)}
+.toast.success{background:var(--green)}.toast.error{background:var(--red)}.toast.info{background:var(--blue)}.toast.warning{background:var(--gold);color:#1A1A2E}.toast.emergency{background:var(--red);animation:slideUp 0.3s ease,pulseToast 0.8s ease infinite}
+@keyframes pulseToast{0%,100%{box-shadow:0 8px 24px rgba(211,47,47,0.35)}50%{box-shadow:0 8px 32px rgba(211,47,47,0.7)}}
 
 /* NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--white);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -3px 16px rgba(0,0,0,0.06)}
@@ -334,13 +367,13 @@ body{
 /* REQUEST CARDS */
 .req-card{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);border-left:4px solid var(--red)}
 .req-card.urgent{border-left-color:#FF5722;background:#FFF5F3}
-.req-card.critical{border-left-color:#B71C1C;background:#FFEBEE;animation:pulse-border 1.5s infinite}
+.req-card.emergency{border-left-color:#B71C1C;background:#FFEBEE;animation:pulse-border 1.5s infinite}
 .req-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
 .blood-badge{background:var(--red);color:#fff;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;padding:5px 10px;border-radius:8px}
 .urg-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;text-transform:uppercase}
 .urg-badge.normal{background:#E8F5E9;color:#2E7D32}
 .urg-badge.urgent{background:#FFF3E0;color:#E65100}
-.urg-badge.critical{background:#FFEBEE;color:#B71C1C}
+.urg-badge.emergency{background:#FFEBEE;color:#B71C1C}
 .req-hosp{font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px}
 .req-details{font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
 .btn-accept{width:100%;padding:11px;border-radius:10px;background:var(--red);color:#fff;border:none;font-weight:700;font-size:13px;cursor:pointer;margin-top:10px;transition:all 0.2s;font-family:'DM Sans',sans-serif}
@@ -384,7 +417,7 @@ body{
 .urg-btn{flex:1;padding:11px 4px;border-radius:8px;border:2px solid var(--border);background:var(--white);font-size:11px;font-weight:800;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--dark);font-family:'DM Sans',sans-serif}
 .urg-btn.normal.sel{border-color:#43A047;background:#E8F5E9;color:#2E7D32}
 .urg-btn.urgent.sel{border-color:#FB8C00;background:#FFF3E0;color:#E65100}
-.urg-btn.critical.sel{border-color:var(--red);background:var(--red-light);color:#B71C1C}
+.urg-btn.emergency.sel{border-color:var(--red);background:var(--red-light);color:#B71C1C}
 
 /* ADMIN */
 .a-header{background:linear-gradient(135deg,#1A237E,#283593);padding:48px 18px 24px}
@@ -559,9 +592,9 @@ body{
   </div>
 </section>
 
-<!-- ONBOARDING -->
+<!-- ONBOARDING / LANDING -->
 <section class="screen" id="onboarding">
-  <div class="ob-card" style="margin:auto 20px">
+  <div class="ob-card" style="margin:20px 20px 0;">
     <div class="ob-logo">🩸</div>
     <div class="ob-brand">Jeevan Mitra</div>
     <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
@@ -571,6 +604,77 @@ body{
     <div class="divider">or</div>
     <div class="link-text" onclick="showScreen('quick-login')">Already have an account? <span>Quick Login →</span></div>
     <div style="margin-top:14px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="showScreen('admin-login')">🔐 Admin Access</span></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="landing-stats" style="display:flex;gap:10px;padding:24px 20px 4px;">
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">33</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">10K+</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">500+</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">25K+</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Lives Saved</div></div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="landing-section" style="padding:22px 20px 4px;">
+    <div class="sec-title" style="margin-bottom:8px;">❤️ About Jeevan Mitra</div>
+    <p style="font-size:13px;color:var(--slate);line-height:1.6;">Jeevan Mitra is Telangana's real-time blood donation network, matching willing donors with hospitals in urgent need. We use intelligent blood-group matching, GPS navigation, and QR-verified donations to make every drop count — safely and quickly.</p>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="landing-section" style="padding:22px 20px 4px;">
+    <div class="sec-title" style="margin-bottom:10px;">⚙️ How It Works</div>
+    <div class="landing-grid-4">
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">🏥</div><div><div style="font-weight:700;font-size:13px;">Hospital posts a request</div><div style="font-size:11px;color:var(--muted);">Blood group, units, and urgency are shared instantly.</div></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">🎯</div><div><div style="font-weight:700;font-size:13px;">Eligible donors matched</div><div style="font-size:11px;color:var(--muted);">We match by blood group, location, and cooldown status.</div></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">🧭</div><div><div style="font-weight:700;font-size:13px;">Donor accepts & navigates</div><div style="font-size:11px;color:var(--muted);">Google Maps opens automatically with directions.</div></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">✅</div><div><div style="font-weight:700;font-size:13px;">QR verified & rewarded</div><div style="font-size:11px;color:var(--muted);">Hospital scans QR, confirms donation, points added.</div></div></div>
+    </div>
+  </div>
+
+  <!-- BLOOD COMPATIBILITY -->
+  <div class="landing-section" style="padding:22px 20px 4px;">
+    <div class="sec-title" style="margin-bottom:10px;">🩸 Blood Compatibility Guide</div>
+    <div style="background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);overflow-x:auto;">
+      <table style="width:100%;font-size:11px;border-collapse:collapse;">
+        <tr style="color:var(--muted);font-weight:700;"><td style="padding:5px;">Group</td><td style="padding:5px;">Can Donate To</td><td style="padding:5px;">Can Receive From</td></tr>
+        <tr><td style="padding:5px;font-weight:700;">O-</td><td style="padding:5px;">All groups</td><td style="padding:5px;">O-</td></tr>
+        <tr><td style="padding:5px;font-weight:700;">O+</td><td style="padding:5px;">O+,A+,B+,AB+</td><td style="padding:5px;">O+,O-</td></tr>
+        <tr><td style="padding:5px;font-weight:700;">A+</td><td style="padding:5px;">A+,AB+</td><td style="padding:5px;">A+,A-,O+,O-</td></tr>
+        <tr><td style="padding:5px;font-weight:700;">B+</td><td style="padding:5px;">B+,AB+</td><td style="padding:5px;">B+,B-,O+,O-</td></tr>
+        <tr><td style="padding:5px;font-weight:700;">AB+</td><td style="padding:5px;">AB+ only</td><td style="padding:5px;">All groups</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="landing-section" style="padding:22px 20px 4px;">
+    <div class="sec-title" style="margin-bottom:10px;">💬 What People Say</div>
+    <div class="landing-grid-2">
+      <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);"><div style="font-size:13px;color:var(--slate);font-style:italic;">"I got a request notification and reached the hospital in 20 minutes. The app made it effortless."</div><div style="font-size:11px;font-weight:700;margin-top:8px;color:var(--red);">— Ravi K., Donor, Hyderabad</div></div>
+      <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);"><div style="font-size:13px;color:var(--slate);font-style:italic;">"Jeevan Mitra cut our emergency response time drastically during a critical case."</div><div style="font-size:11px;font-weight:700;margin-top:8px;color:var(--red);">— Dr. Lakshmi, Government Hospital</div></div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="landing-section" style="padding:22px 20px 4px;">
+    <div class="sec-title" style="margin-bottom:10px;">❓ Frequently Asked Questions</div>
+    <div id="faq-list" class="landing-grid-2" style="align-items:start;"></div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="landing-section" style="padding:22px 20px 4px;">
+    <div class="sec-title" style="margin-bottom:8px;">📞 Contact Us</div>
+    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);font-size:12px;color:var(--slate);line-height:1.8;">
+      ✉️ support@jeevanmitra.in<br/>
+      📱 +91 40-1234-5678<br/>
+      📍 Hyderabad, Telangana, India
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="padding:24px 20px 30px;text-align:center;">
+    <div style="font-size:12px;color:var(--muted);">© 2026 Jeevan Mitra · జీవన్ మిత్ర</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px;">Made with ❤️ for Telangana</div>
   </div>
 </section>
 
@@ -587,9 +691,24 @@ body{
   </div>
   <div class="grp"><label class="lbl">Date of Birth / పుట్టిన తేదీ</label><input class="inp" id="d-dob" type="date" max="" placeholder="DD/MM/YYYY"/></div>
   <div class="grp"><label class="lbl">Email (Optional)</label><input class="inp" id="d-email" type="email" placeholder="your@email.com"/></div>
-  <div class="grp"><label class="lbl">District / జిల్లా</label><select class="sel" id="d-dist" onchange="loadMandals('d-dist','d-mandal')"><option value="">Select District</option></select></div>
-  <div class="grp"><label class="lbl">Mandal / మండలం</label><select class="sel" id="d-mandal" onchange="loadVillages('d-mandal','d-village','d-dist')"><option value="">Select Mandal</option></select></div>
-  <div class="grp"><label class="lbl">Village / గ్రామం</label><select class="sel" id="d-village"><option value="">Select Village</option></select></div>
+  <div class="grp"><label class="lbl">Profile Photo (Optional)</label>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div id="d-photo-preview" style="width:56px;height:56px;border-radius:50%;background:var(--red-light);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;">🫀</div>
+      <label class="btn" style="flex:1;background:#F5F5F5;color:var(--dark);text-align:center;cursor:pointer;padding:11px;border-radius:10px;font-size:13px;font-weight:700;">Choose Photo<input type="file" accept="image/*" id="d-photo" style="display:none" onchange="previewPhoto(this,'d-photo-preview')"/></label>
+    </div>
+  </div>
+  <div class="grp"><label class="lbl">District / జిల్లా</label><select class="sel" id="d-dist"><option value="">Select District</option></select></div>
+  <div class="grp"><label class="lbl">Home Town / స్వగ్రామం</label><input class="inp" id="d-hometown" type="text" placeholder="Your native place"/></div>
+  <div class="grp"><label class="lbl">Living Town / ప్రస్తుత నివాసం</label><input class="inp" id="d-livingtown" type="text" placeholder="Where you currently live"/></div>
+  <div class="grp"><label class="lbl">Weight (kg) / బరువు</label><input class="inp" id="d-weight" type="number" placeholder="e.g. 60" min="45" max="200"/></div>
+  <div class="grp"><label class="lbl">Gender / లింగం</label>
+    <div style="display:flex;gap:8px;">
+      <button class="blood-btn" id="d-gender-m" onclick="selGender('m')" style="flex:1;padding:11px;">♂ Male</button>
+      <button class="blood-btn" id="d-gender-f" onclick="selGender('f')" style="flex:1;padding:11px;">♀ Female</button>
+      <button class="blood-btn" id="d-gender-o" onclick="selGender('o')" style="flex:1;padding:11px;">⚧ Other</button>
+    </div>
+  </div>
+  <div class="grp"><label class="lbl">Emergency Contact / అత్యవసర సంప్రదింపు</label><input class="inp" id="d-emergency" type="tel" placeholder="Alternate contact number" maxlength="10"/></div>
   <div class="grp"><label class="lbl">Blood Group / రక్త గ్రూప్</label>
     <div class="blood-grid">
       <button class="blood-btn" onclick="selBlood(this,'d')">A+</button><button class="blood-btn" onclick="selBlood(this,'d')">A-</button>
@@ -616,9 +735,27 @@ body{
   <div class="grp"><label class="lbl">Password / పాస్‌వర్డ్</label>
     <div class="pw-wrap"><input class="inp" id="h-pass" type="password" placeholder="Enter password"/><button class="pw-eye" onclick="togglePw('h-pass')">👁</button></div>
   </div>
-  <div style="text-align:right;margin-bottom:16px;"><span style="font-size:12px;color:var(--red);cursor:pointer;font-weight:700;" onclick="showToast('Contact admin@jeevanmitra.in','info')">Forgot Password?</span></div>
+  <div style="text-align:right;margin-bottom:16px;"><span style="font-size:12px;color:var(--red);cursor:pointer;font-weight:700;" onclick="openForgotPw('hospital')">Forgot Password?</span></div>
   <button class="btn btn-blue" onclick="hospitalLogin()">🏥 Login / లాగిన్</button>
   <div class="link-text" style="text-align:center;margin-top:16px;">New hospital? <span onclick="showToast('Contact admin@jeevanmitra.in to register','info')">Contact Admin →</span></div>
+</section>
+
+<!-- FORGOT PASSWORD -->
+<section class="screen form-screen" id="forgot-password">
+  <div class="form-hdr">
+    <button class="back-btn" onclick="showScreen(fpRole==='hospital'?'hospital-login':'admin-login')">←</button>
+    <div><div class="form-title">Reset Password</div><div class="form-sub">We'll send you a reset code</div></div>
+  </div>
+  <div id="fp-step1">
+    <div class="grp"><label class="lbl">Registered Email or Phone</label><input class="inp" id="fp-identifier" type="text" placeholder="email@example.com or 9XXXXXXXXX"/></div>
+    <button class="btn btn-red" onclick="sendForgotPwOTP()" style="margin-top:16px;">Send Reset Code →</button>
+  </div>
+  <div id="fp-step2" style="display:none;">
+    <div class="grp"><label class="lbl">Reset Code</label><input class="inp" id="fp-code" type="text" placeholder="Enter the code you received" maxlength="6"/></div>
+    <div class="grp"><label class="lbl">New Password</label><div class="pw-wrap"><input class="inp" id="fp-newpass" type="password" placeholder="At least 6 characters"/><button class="pw-eye" onclick="togglePw('fp-newpass')">👁</button></div></div>
+    <div class="grp"><label class="lbl">Confirm New Password</label><div class="pw-wrap"><input class="inp" id="fp-confirmpass" type="password" placeholder="Re-enter new password"/><button class="pw-eye" onclick="togglePw('fp-confirmpass')">👁</button></div></div>
+    <button class="btn btn-red" onclick="submitResetPw()" style="margin-top:16px;">✅ Reset Password</button>
+  </div>
 </section>
 
 <!-- QUICK LOGIN -->
@@ -636,6 +773,7 @@ body{
   <div class="grp"><label class="lbl">Phone Number</label>
     <div class="phone-row"><div class="cc">🇮🇳 +91</div><input class="inp" id="ql-phone" type="tel" placeholder="9XXXXXXXXX" maxlength="10" style="flex:1"/></div>
   </div>
+  <div class="terms-row"><input type="checkbox" id="ql-remember" checked/><label for="ql-remember">Remember me on this device</label></div>
   <button class="btn btn-red" onclick="quickLoginOTP()" style="margin-top:16px;">Send OTP →</button>
 </section>
 
@@ -673,6 +811,7 @@ body{
   <div class="grp"><label class="lbl">Password</label>
     <div class="pw-wrap"><input class="inp" id="adm-pass" type="password" placeholder="Admin password"/><button class="pw-eye" onclick="togglePw('adm-pass')">👁</button></div>
   </div>
+  <div style="text-align:right;margin-bottom:8px;"><span style="font-size:12px;color:var(--red);cursor:pointer;font-weight:700;" onclick="openForgotPw('admin')">Forgot Password?</span></div>
   <button class="btn btn-dark" onclick="adminLogin()" style="margin-top:16px;">🔐 Login to Admin Panel</button>
 </section>
 
@@ -809,7 +948,7 @@ body{
         <button class="blood-btn" onclick="selBlood(this,'ed')">O+</button><button class="blood-btn" onclick="selBlood(this,'ed')">O-</button>
       </div>
     </div>
-    <div class="grp"><label class="lbl">Date of Birth</label><input class="inp" id="ed-dob" type="date"/></div>
+    <div class="grp"><label class="lbl">Age</label><input class="inp" id="ed-age" type="number" min="18" max="65"/></div>
     <div class="grp"><label class="lbl">Availability</label>
       <select class="sel" id="ed-avail"><option value="true">Available</option><option value="false">Unavailable</option></select>
     </div>
@@ -833,7 +972,21 @@ body{
     </div>
     <input type="hidden" id="eh-hosp-id"/>
     <button class="btn btn-blue" onclick="saveEditHosp()" style="margin-top:8px;">💾 Save Changes</button>
+    <div style="text-align:center;margin:8px 0;"><span style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;" onclick="closeModal('edit-hosp-modal');openChangePw()">🔒 Change Password</span></div>
     <button class="btn btn-outline" onclick="closeModal('edit-hosp-modal')" style="margin-top:6px;">Cancel</button>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="change-pw-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔒 Change Password</div>
+    <div class="grp"><label class="lbl">Current Password</label><div class="pw-wrap"><input class="inp" id="cpw-old" type="password" placeholder="Current password"/><button class="pw-eye" onclick="togglePw('cpw-old')">👁</button></div></div>
+    <div class="grp"><label class="lbl">New Password</label><div class="pw-wrap"><input class="inp" id="cpw-new" type="password" placeholder="At least 6 characters"/><button class="pw-eye" onclick="togglePw('cpw-new')">👁</button></div></div>
+    <div class="grp"><label class="lbl">Confirm New Password</label><div class="pw-wrap"><input class="inp" id="cpw-confirm" type="password" placeholder="Re-enter new password"/><button class="pw-eye" onclick="togglePw('cpw-confirm')">👁</button></div></div>
+    <button class="btn btn-blue" onclick="submitSelfChangePw()" style="margin-top:8px;">💾 Update Password</button>
+    <button class="btn btn-outline" onclick="closeModal('change-pw-modal')" style="margin-top:6px;">Cancel</button>
   </div>
 </div>
 
@@ -846,6 +999,7 @@ body{
     <div class="grp"><label class="lbl">City</label><input class="inp" id="dep-city" type="text"/></div>
     <div class="grp"><label class="lbl">Date of Birth / పుట్టిన తేదీ</label><input class="inp" id="dep-dob" type="date"/></div>
     <div class="grp"><label class="lbl">Email</label><input class="inp" id="dep-email" type="email"/></div>
+    <div style="text-align:right;margin-bottom:8px;"><span style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;" onclick="closeModal('donor-edit-modal');openChangePw()">🔒 Change Password</span></div>
     <button class="btn btn-red" onclick="saveDonorProfile()" style="margin-top:8px;">💾 Save Profile</button>
     <button class="btn btn-outline" onclick="closeModal('donor-edit-modal')" style="margin-top:6px;">Cancel</button>
   </div>
@@ -890,6 +1044,7 @@ body{
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">👤 Create Admin Account</div>
+    <div class="grp"><label class="lbl">Admin Name</label><input class="inp" id="ca-name" type="text" placeholder="Full name"/></div>
     <div class="grp"><label class="lbl">Admin Email</label><input class="inp" id="ca-email" type="email" placeholder="newadmin@jeevanmitra.in"/></div>
     <div class="grp"><label class="lbl">Password</label>
       <div class="pw-wrap"><input class="inp" id="ca-pass" type="password" placeholder="Set admin password"/><button class="pw-eye" onclick="togglePw('ca-pass')">👁</button></div>
@@ -1005,9 +1160,9 @@ const TIPS=[
 ];
 
 // ═══ STATE ═══
-const API = 'https://jeevan-mitra-1vot.onrender.com/api';
-let socket, currentUser, currentRole, otpCtx, selBloodD, selBloodH, selBloodReq, selBloodEd, allAdminH = [], allAdminD = [], confirmCallback = null;
-
+const API='https://jeevan-mitra-1vot.onrender.com/api';
+let socket,currentUser,currentRole,otpCtx,selBloodD,selBloodH,selBloodReq,selBloodEd,pendingReq,otpTimer,qlRole='donor',selUrg='normal',selDGender=null,fpRole='hospital',fpIdentifier='';
+let allAdminH=[],allAdminD=[],confirmCallback=null;
 
 // ═══ INIT ═══
 window.addEventListener('DOMContentLoaded',()=>{
@@ -1018,9 +1173,32 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Confirm dialog OK button
   document.getElementById('conf-ok').onclick=function(){if(confirmCallback){confirmCallback();closeConfirm()}};
   populateDistricts();
+  renderFAQ();
   autoLogin();
-  setTimeout(()=>showScreen('onboarding'),2000);
+  setTimeout(()=>{if(!sessionRestored)showScreen('onboarding')},2000);
 });
+const FAQ_DATA=[
+  {q:'Who can donate blood?',a:'Any healthy person aged 18–65, weighing at least 45kg, can register as a donor.'},
+  {q:'How often can I donate?',a:'A 60-day cooldown is enforced after every donation to protect donor health.'},
+  {q:'Is my data safe?',a:'Yes. Your contact details are only shared with the hospital once you accept a request.'},
+  {q:'How do I know a request is genuine?',a:'All requests come from hospitals verified and approved by Jeevan Mitra admins.'},
+  {q:'Do I get rewarded for donating?',a:'Yes — every verified donation earns reward points and moves you up the leaderboard.'}
+];
+function renderFAQ(){
+  const el=document.getElementById('faq-list');if(!el)return;
+  el.innerHTML=FAQ_DATA.map((f,i)=>`
+    <div style="background:#fff;border-radius:12px;box-shadow:var(--shadow-sm);overflow:hidden;">
+      <div onclick="toggleFAQ(${i})" style="padding:13px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:700;font-size:13px;">${f.q}<span id="faq-ico-${i}" style="transition:transform .2s;">⌄</span></div>
+      <div id="faq-a-${i}" style="max-height:0;overflow:hidden;transition:max-height .25s ease;"><div style="padding:0 14px 13px;font-size:12px;color:var(--slate);line-height:1.6;">${f.a}</div></div>
+    </div>`).join('');
+}
+function toggleFAQ(i){
+  const a=document.getElementById(`faq-a-${i}`),ico=document.getElementById(`faq-ico-${i}`);
+  const open=a.style.maxHeight&&a.style.maxHeight!=='0px';
+  document.querySelectorAll('[id^="faq-a-"]').forEach(x=>x.style.maxHeight='0px');
+  document.querySelectorAll('[id^="faq-ico-"]').forEach(x=>x.style.transform='rotate(0deg)');
+  if(!open){a.style.maxHeight=a.scrollHeight+'px';ico.style.transform='rotate(180deg)'}
+}
 
 function populateDistricts(){
   const dists=Object.keys(TG).sort();
@@ -1046,16 +1224,32 @@ function loadVillages(mId,vId,dId){
   if(d&&m&&TG[d]&&TG[d][m])TG[d][m].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;vs.appendChild(o)});
 }
 
-function autoLogin(){
-  const t=localStorage.getItem('jm_token'),r=localStorage.getItem('jm_role'),u=localStorage.getItem('jm_user');
-  if(t&&r&&u){
-    currentUser=JSON.parse(u);currentRole=r;
-    setTimeout(()=>{
-      if(r==='donor')initDonor();
-      else if(r==='hospital')initHospital();
-      else if(r==='admin')initAdmin();
-    },2200);
+let silentAuthCheck=false,sessionRestored=false;
+async function autoLogin(){
+  const t=getAuthItem('jm_token'),r=getAuthItem('jm_role'),u=getAuthItem('jm_user');
+  if(!t||!r||!u)return;
+  if(isTokenExpired(t)){localStorage.clear();sessionStorage.clear();return}
+  // Validate the token BEFORE navigating anywhere. This avoids the old bug where
+  // the app jumped to the dashboard immediately, then yanked the user back to
+  // onboarding with a "Session expired" toast several seconds later — often
+  // right as they'd clicked something else (e.g. Admin Access), making it look
+  // like that click had caused the error.
+  const validateEp={donor:'/donors/feed',hospital:'/hospitals/requests/mine',admin:'/admin/hospitals'}[r];
+  try{
+    const res=await fetch(`${API}${validateEp}`,{headers:{'Authorization':`Bearer ${t}`}});
+    if(res.status===401){localStorage.clear();sessionStorage.clear();return}
+    // Any other response (200, or a transient 5xx) — proceed; if something is
+    // still wrong, the screen's own loader will show a real error + retry button.
+  }catch(networkErr){
+    // Likely a cold-start / offline blip. Don't wipe a possibly-valid token —
+    // just skip auto-restoring this time; the user can log in manually or reload.
+    return;
   }
+  currentUser=JSON.parse(u);currentRole=r;
+  sessionRestored=true;
+  if(r==='donor')initDonor();
+  else if(r==='hospital')initHospital();
+  else if(r==='admin')initAdmin();
 }
 
 // ═══ NAVIGATION ═══
@@ -1067,21 +1261,110 @@ function showScreen(id){
   window.scrollTo(0,0);
 }
 function selBlood(btn,ctx){btn.parentElement.querySelectorAll('.blood-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');if(ctx==='d')selBloodD=btn.textContent;else if(ctx==='h')selBloodH=btn.textContent;else if(ctx==='ed')selBloodEd=btn.textContent;else selBloodReq=btn.textContent}
+function selGender(g){selDGender=g;['m','f','o'].forEach(x=>document.getElementById(`d-gender-${x}`).classList.toggle('sel',x===g))}
+function previewPhoto(input,previewId){
+  const file=input.files[0];if(!file)return;
+  if(file.size>2*1024*1024)return showToast('Photo must be under 2MB','error');
+  const reader=new FileReader();
+  reader.onload=e=>{document.getElementById(previewId).innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;"/>`};
+  reader.readAsDataURL(file);
+}
+function openChangePw(){document.getElementById('cpw-old').value='';document.getElementById('cpw-new').value='';document.getElementById('cpw-confirm').value='';document.getElementById('change-pw-modal').classList.add('active')}
+async function submitSelfChangePw(){
+  const oldPw=document.getElementById('cpw-old').value;
+  const newPw=document.getElementById('cpw-new').value;
+  const confirm=document.getElementById('cpw-confirm').value;
+  if(!oldPw||!newPw)return showToast('Fill all fields','error');
+  if(newPw.length<6)return showToast('New password must be 6+ characters','error');
+  if(newPw!==confirm)return showToast('Passwords do not match','error');
+  if(currentRole!=='donor')return showToast('Password change isn\'t available for this account type yet','warning');
+  try{
+    await api('/donors/change-password','PUT',{password:newPw});
+    showToast('Password updated successfully ✅','success');
+    closeModal('change-pw-modal');
+  }catch(e){showToast(e.message,'error')}
+}
+function openForgotPw(role){
+  fpRole=role;
+  document.getElementById('fp-step1').style.display='block';
+  document.getElementById('fp-step2').style.display='none';
+  document.getElementById('fp-identifier').value='';
+  showScreen('forgot-password');
+}
+async function sendForgotPwOTP(){
+  const identifier=document.getElementById('fp-identifier').value.trim();
+  if(!identifier)return showToast('Enter your registered email or phone','error');
+  try{
+    await api('/auth/forgot-password','POST',{identifier,role:fpRole});
+    fpIdentifier=identifier;
+    document.getElementById('fp-step1').style.display='none';
+    document.getElementById('fp-step2').style.display='block';
+    showToast('Reset code sent!','success');
+  }catch(e){showToast(e.message,'error')}
+}
+async function submitResetPw(){
+  const code=document.getElementById('fp-code').value.trim();
+  const newPw=document.getElementById('fp-newpass').value;
+  const confirm=document.getElementById('fp-confirmpass').value;
+  if(!code||!newPw)return showToast('Fill all fields','error');
+  if(newPw.length<6)return showToast('Password must be 6+ characters','error');
+  if(newPw!==confirm)return showToast('Passwords do not match','error');
+  try{
+    await api('/auth/reset-password','POST',{identifier:fpIdentifier,code,newPassword:newPw,role:fpRole});
+    showToast('Password reset! Please log in.','success');
+    setTimeout(()=>showScreen(fpRole==='hospital'?'hospital-login':'admin-login'),1200);
+  }catch(e){showToast(e.message,'error')}
+}
 function selRole(r){qlRole=r;document.getElementById('ql-donor').classList.toggle('sel',r==='donor');document.getElementById('ql-hospital').classList.toggle('sel',r==='hospital')}
 function togglePw(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password'}
 function closeModal(id){document.getElementById(id).classList.remove('active')}
 
 // ═══ API ═══
+const AUTH_ENDPOINTS=['/auth/donor/send-otp','/auth/donor/verify-otp','/hospitals/login','/admin/login','/auth/forgot-password','/auth/reset-password'];
 async function api(ep,method='GET',body=null){
   const h={'Content-Type':'application/json'};
-  const t=localStorage.getItem('jm_token');
+  const t=getAuthItem('jm_token');
   if(t)h['Authorization']=`Bearer ${t}`;
   const o={method,headers:h};
   if(body)o.body=JSON.stringify(body);
   const r=await fetch(`${API}${ep}`,o);
+  if(r.status===401){
+    // A 401 on a login/OTP/signup endpoint means "wrong credentials", not
+    // "your session expired" — there was no session to expire yet. Don't wipe
+    // storage or bounce the screen; just surface the real error to the caller.
+    if(AUTH_ENDPOINTS.includes(ep)){
+      let msg='Invalid credentials';
+      try{const d=await r.json();msg=d.message||msg}catch(e){}
+      throw new Error(msg);
+    }
+    localStorage.clear();sessionStorage.clear();currentUser=null;currentRole=null;
+    showScreen('onboarding');
+    if(!silentAuthCheck)showToast('Session expired — please log in again','warning');
+    throw new Error('Session expired');
+  }
   const d=await r.json();
   if(!r.ok)throw new Error(d.message||'Server error');
   return d;
+}
+function isTokenExpired(t){
+  try{const p=JSON.parse(atob(t.split('.')[1]));return p.exp&&Date.now()>=p.exp*1000}catch(e){return false}
+}
+function loadErrorHtml(e,retryFn){
+  console.error('Data load failed:',e);
+  const msg=e&&e.message?e.message:'Unknown error';
+  const isNetwork=msg==='Failed to fetch'||msg.includes('NetworkError')||msg.includes('fetch');
+  const reason=isNetwork?'Server unreachable (it may be waking up — Render free tier can take up to 60s on first request). Try again in a moment.':msg;
+  return `<div class="card" style="text-align:center;color:var(--muted);padding:20px;">
+    <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
+    <div style="font-weight:700;color:var(--dark);margin-bottom:4px;">Could not load</div>
+    <div style="font-size:12px;margin-bottom:12px;">${reason}</div>
+    ${retryFn?`<button class="btn btn-outline" style="padding:8px 16px;font-size:12px;" onclick="${retryFn}">🔄 Retry</button>`:''}
+  </div>`;
+}
+function checkSession(){
+  const t=getAuthItem('jm_token');
+  if(t&&isTokenExpired(t)){localStorage.clear();sessionStorage.clear();currentUser=null;currentRole=null;return false}
+  return !!t;
 }
 
 // ═══ OTP ═══
@@ -1111,11 +1394,16 @@ async function donorSendOTP(){
   const phone=document.getElementById('d-phone').value.trim();
   const dob=document.getElementById('d-dob').value;
   const dist=document.getElementById('d-dist').value;
-  const mandal=document.getElementById('d-mandal').value;
-  const village=document.getElementById('d-village').value;
+  const homeTown=document.getElementById('d-hometown').value.trim();
+  const livingTown=document.getElementById('d-livingtown').value.trim();
+  const weight=document.getElementById('d-weight').value;
+  const emergency=document.getElementById('d-emergency').value.trim();
   const terms=document.getElementById('d-terms').checked;
   if(!name||!phone||!dob||!dist||!selBloodD)return showToast('Please fill all required fields','error');
   if(phone.length!==10)return showToast('Enter valid 10-digit phone','error');
+  if(!homeTown||!livingTown)return showToast('Please enter Home Town and Living Town','error');
+  if(!weight||weight<45)return showToast('Weight must be at least 45kg to donate','error');
+  if(!selDGender)return showToast('Please select gender','error');
   // Age check — must be 18+
   const today=new Date();const bd=new Date(dob);
   let age=today.getFullYear()-bd.getFullYear();
@@ -1125,8 +1413,9 @@ async function donorSendOTP(){
   if(age>65)return showToast('Age must be under 65 years','error');
   if(!terms)return showToast('Please accept Terms & Conditions','error');
   try{
-    const city=village?`${village}, ${mandal}, ${dist}`:mandal?`${mandal}, ${dist}`:dist;
-    const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,fullName:name,city,bloodGroup:selBloodD,dob,age});
+    const city=`${livingTown}, ${dist}`;
+    const photo=document.getElementById('d-photo-preview').querySelector('img')?.src||null;
+    const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,name:name,city,homeTown,livingTown,district:dist,bloodGroup:selBloodD,dob,age,weight:Number(weight),gender:selDGender,emergencyContact:emergency,photo});
     otpCtx='donor';
     document.getElementById('otp-sub').textContent=`OTP sent to +91${phone}`;
     document.getElementById('otp-back').onclick=()=>showScreen('donor-register');
@@ -1141,7 +1430,7 @@ async function quickLoginOTP(){
   const phone=document.getElementById('ql-phone').value.trim();
   if(phone.length!==10)return showToast('Enter valid 10-digit phone','error');
   try{
-    const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,fullName:'User',city:'Hyderabad'});
+    const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,name:'User',city:'Hyderabad'});
     otpCtx=qlRole;
     document.getElementById('otp-sub').textContent=`OTP sent to +91${phone}`;
     document.getElementById('otp-back').onclick=()=>showScreen('quick-login');
@@ -1152,6 +1441,8 @@ async function quickLoginOTP(){
   }catch(e){showToast(e.message,'error')}
 }
 
+function authStorage(){return document.getElementById('ql-remember')?.checked===false?sessionStorage:localStorage}
+function getAuthItem(k){return localStorage.getItem(k)||sessionStorage.getItem(k)}
 async function verifyOTP(){
   const otp=getOTP();
   if(otp.length<6)return showToast('Enter complete 6-digit OTP','error');
@@ -1160,9 +1451,10 @@ async function verifyOTP(){
     if(otpCtx==='donor'){
       phone=document.getElementById('d-phone').value.trim()||document.getElementById('ql-phone').value.trim();
       data=await api('/auth/donor/verify-otp','POST',{phone:`+91${phone}`,otp});
-      localStorage.setItem('jm_token',data.token);
-      localStorage.setItem('jm_role','donor');
-      localStorage.setItem('jm_user',JSON.stringify(data.donor));
+      const store=authStorage();
+      store.setItem('jm_token',data.token);
+      store.setItem('jm_role','donor');
+      store.setItem('jm_user',JSON.stringify(data.donor));
       currentUser=data.donor;currentRole='donor';
       if(otpTimer)clearInterval(otpTimer);
       showToast('Welcome to Jeevan Mitra! 🎉','success');
@@ -1195,7 +1487,7 @@ async function adminLogin(){
   const pass=document.getElementById('adm-pass').value.trim();
   if(!email||!pass)return showToast('Enter email and password','error');
   try{
-    const data=await api('/auth/login','POST',{email,password:pass});
+    const data=await api('/admin/login','POST',{email,password:pass});
     localStorage.setItem('jm_token',data.token);
     localStorage.setItem('jm_role','admin');
     localStorage.setItem('jm_user',JSON.stringify({email}));
@@ -1207,25 +1499,41 @@ async function adminLogin(){
 }
 
 // ═══ DONOR DASHBOARD ═══
-function initDonor(){
+async function initDonor(){
   showScreen('donor-home');
-  document.getElementById('dh-name').textContent=currentUser?.fullName||'Donor';
+  document.getElementById('dh-name').textContent=currentUser?.name||'Donor';
   document.getElementById('dh-loc').textContent=`📍 ${currentUser?.city||'Telangana'}`;
   document.getElementById('dh-blood').textContent=`🩸 ${currentUser?.bloodGroup||'A+'}`;
   document.getElementById('dh-pts').textContent=`⭐ ${currentUser?.points||0} pts`;
-  document.getElementById('dh-don').textContent=`💉 ${currentUser?.donationCount||0} donations`;
+  document.getElementById('dh-don').textContent=`💉 ${currentUser?.totalDonations||0} donations`;
   renderDonorHome();
   connectSocket('donor');
+  // Refresh from the server — currentUser is only as fresh as the last login,
+  // so cooldown/points/donation count set by a hospital completing a donation
+  // elsewhere would never show up without this.
+  refreshDonorProfile();
 }
 
 function dTab(tab,btn){
   document.querySelectorAll('#donor-nav .nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  if(tab==='home')renderDonorHome();
+  if(tab==='home'){renderDonorHome();refreshDonorProfile();}
   else if(tab==='requests')renderRequests();
   else if(tab==='history')renderDHistory();
   else if(tab==='leaderboard')renderLeaderboard();
   else if(tab==='profile')renderDProfile();
+}
+async function refreshDonorProfile(){
+  try{
+    const res=await api('/donors/profile');
+    if(res.donor){
+      currentUser={...currentUser,...res.donor};
+      localStorage.setItem('jm_user',JSON.stringify(currentUser));
+      document.getElementById('dh-pts').textContent=`⭐ ${currentUser.points||0} pts`;
+      document.getElementById('dh-don').textContent=`💉 ${currentUser.totalDonations||0} donations`;
+      renderDonorHome();
+    }
+  }catch(e){}
 }
 
 function renderDonorHome(){
@@ -1241,7 +1549,7 @@ function renderDonorHome(){
     <div class="card" onclick="dTab('history',document.querySelectorAll('#donor-nav .nav-btn')[2])" style="cursor:pointer;text-align:center;padding:16px 10px;background:linear-gradient(135deg,#FFEBEE,#FFF);">
       <div style="font-size:28px;margin-bottom:4px;">📋</div>
       <div style="font-weight:700;font-size:12px;color:var(--red);">Donation History</div>
-      <div style="font-size:10px;color:var(--muted);margin-top:2px;">${currentUser?.donationCount||0} donations</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">${currentUser?.totalDonations||0} donations</div>
     </div>
     <div class="card" onclick="dTab('leaderboard',document.querySelectorAll('#donor-nav .nav-btn')[3])" style="cursor:pointer;text-align:center;padding:16px 10px;background:linear-gradient(135deg,#FFF8E1,#FFF);">
       <div style="font-size:28px;margin-bottom:4px;">🏆</div>
@@ -1256,11 +1564,12 @@ function renderDonorHome(){
 
 async function loadReqsPreview(){
   try{
-    const d=await api('donors/requests/pending');
+    const d=await api('/donors/feed');
     const c=document.getElementById('home-reqs');
-    if(!d.requests?.length){c.innerHTML=`<div class="empty"><div class="empty-ico">✅</div><div class="empty-title">No requests nearby</div><div class="empty-sub">All good! Check back later</div></div>`;return}
-    c.innerHTML=d.requests.map(r=>reqCard(r)).join('');
-  }catch(e){document.getElementById('home-reqs').innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
+    const cards=(d.requests||[]).map(r=>reqCard(r)).filter(Boolean);
+    if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico">✅</div><div class="empty-title">No requests nearby</div><div class="empty-sub">All good! Check back later</div></div>`;return}
+    c.innerHTML=cards.join('');
+  }catch(e){document.getElementById('home-reqs').innerHTML=loadErrorHtml(e,'loadReqsPreview()')}
 }
 
 function renderRequests(){
@@ -1268,7 +1577,7 @@ function renderRequests(){
     <div class="sec-title" style="margin-top:4px;">🩸 Blood Requests</div>
     <div class="chip-row">
       <div class="chip active" onclick="filterReqs('all',this)">All</div>
-      <div class="chip" onclick="filterReqs('critical',this)">🔴 Critical</div>
+      <div class="chip" onclick="filterReqs('emergency',this)">🔴 Critical</div>
       <div class="chip" onclick="filterReqs('urgent',this)">🟠 Urgent</div>
       <div class="chip" onclick="filterReqs('normal',this)">🟢 Normal</div>
     </div>
@@ -1278,34 +1587,46 @@ function renderRequests(){
 
 async function loadAllReqs(filter){
   try{
-    const d=await api('/requests/pending');
+    const d=await api('/donors/feed');
     let reqs=d.requests||d||[];
     if(filter!=='all')reqs=reqs.filter(r=>r.urgency===filter);
     const c=document.getElementById('req-list');
-    if(!reqs.length){c.innerHTML=`<div class="empty"><div class="empty-ico">✅</div><div class="empty-title">No requests found</div></div>`;return}
-    c.innerHTML=reqs.map(r=>reqCard(r)).join('');
-  }catch(e){document.getElementById('req-list').innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
+    const cards=reqs.map(r=>reqCard(r)).filter(Boolean);
+    if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico">✅</div><div class="empty-title">No requests found</div></div>`;return}
+    c.innerHTML=cards.join('');
+  }catch(e){document.getElementById('req-list').innerHTML=loadErrorHtml(e,`loadAllReqs('${filter}')`)}
 }
 
 function filterReqs(filter,btn){btn.closest('.chip-row').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));btn.classList.add('active');loadAllReqs(filter)}
 
-function reqCard(r){return`<div class="req-card ${r.urgency||'normal'}"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div></div><div class="req-hosp">🏥 ${r.hospital?.name||r.hospital?.hospitalName||'Hospital'}</div><div class="req-details"><span>📍 ${r.hospital?.city||'Hyderabad'}</span><span>🩸 ${r.units||1} unit(s)</span><span>⏰ ${ago(r.createdAt)}</span></div>${r.notes?`<div style="font-size:11px;color:var(--slate);margin-top:5px;">📝 ${r.notes}</div>`:''}<button class="btn-accept" onclick='showAccept(${JSON.stringify(r).replace(/"/g,"&quot;")})'>Accept / అంగీకరించు</button></div>`}
+function reqCard(r){
+  const need=r.quantity||r.units||1;
+  const got=r.acceptedCount||r.accepted||0;
+  const full=got>=need;
+  const inCool=currentUser?.cooldownUntil&&new Date(currentUser.cooldownUntil)>new Date();
+  if(full)return'';
+  const exp=expiresIn(r.expiresAt);
+  return`<div class="req-card ${r.urgency||'normal'}"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div></div><div class="req-hosp">🏥 ${r.hospital?.hospitalName||r.hospital?.name||'Hospital'}</div><div class="req-details"><span>📍 ${r.hospital?.address||r.hospital?.city||'Hyderabad'}</span><span>🩸 ${got}/${need} accepted</span><span>⏰ ${ago(r.createdAt)}</span></div>${exp?`<div style="font-size:11px;font-weight:700;margin-top:4px;color:${exp.urgent?'var(--red)':'var(--muted)'};">⏳ ${exp.text}</div>`:''}${r.patientName?`<div style="font-size:11px;color:var(--slate);margin-top:3px;">👤 Patient: ${r.patientName}</div>`:''}${r.doctorRefNo?`<div style="font-size:11px;color:var(--slate);">🩺 Dr. Ref: ${r.doctorRefNo}</div>`:''}${r.patientReason?`<div style="font-size:11px;color:var(--slate);margin-top:3px;">📝 ${r.patientReason}</div>`:''}<button class="btn-accept" ${inCool?'disabled style="opacity:.5;cursor:not-allowed;"':''} onclick='showAccept(${JSON.stringify(r).replace(/"/g,"&quot;")})'>${inCool?'On Cooldown':'Accept / అంగీకరించు'}</button></div>`}
 
 function showAccept(req){
   pendingReq=req;
-  document.getElementById('accept-details').innerHTML=`<div class="card" style="margin:10px 0;"><div style="display:flex;gap:12px;align-items:center;"><div class="blood-badge" style="font-size:20px;padding:8px 14px;">${req.bloodGroup||'A+'}</div><div><div style="font-weight:700;font-size:14px;">${req.hospital?.hospitalName||'Hospital'}</div><div style="font-size:12px;color:var(--muted);">📍 ${req.hospital?.city||'Hyderabad'}</div><div style="font-size:11px;color:var(--slate);margin-top:3px;">Units: ${req.units||1} · Points: +${urgPts(req.urgency)}</div></div></div>${req.notes?`<div style="margin-top:8px;font-size:12px;color:var(--slate);">📝 ${req.notes}</div>`:''}</div><div style="font-size:12px;color:var(--muted);">Hospital will receive your contact after acceptance.</div>`;
+  const exp=expiresIn(req.expiresAt);
+  document.getElementById('accept-details').innerHTML=`<div class="card" style="margin:10px 0;"><div style="display:flex;gap:12px;align-items:center;"><div class="blood-badge" style="font-size:20px;padding:8px 14px;">${req.bloodGroup||'A+'}</div><div><div style="font-weight:700;font-size:14px;">${req.hospital?.hospitalName||'Hospital'}</div><div style="font-size:12px;color:var(--muted);">📍 ${req.hospital?.city||'Hyderabad'}</div><div style="font-size:11px;color:var(--slate);margin-top:3px;">Units: ${req.quantity||1} · Points: +${urgPts(req.urgency)}${exp?` · <span style="color:${exp.urgent?'var(--red)':'inherit'};">${exp.text}</span>`:''}</div></div></div>${req.patientReason?`<div style="margin-top:8px;font-size:12px;color:var(--slate);">📝 ${req.patientReason}</div>`:''}</div><div style="font-size:12px;color:var(--muted);">Hospital will receive your contact after acceptance.</div>`;
   document.getElementById('accept-modal').classList.add('active');
 }
 
 async function confirmAccept(){
   if(!pendingReq)return;
   try{
-    await api(`/requests/${pendingReq._id}/accept`,'PUT');
+    const res=await api(`/donors/accept/${pendingReq._id}`,'PATCH');
     closeModal('accept-modal');
     showToast('Request accepted! Hospital will contact you 💪','success');
     loadAllReqs('all');
-    // Show map after short delay
-    setTimeout(()=>showRouteMap(pendingReq),600);
+    loadReqsPreview();
+    // Auto-open Google Maps navigation returned by backend
+    const mapsUrl=res?.googleMapsUrl||res?.navigationUrl||res?.request?.googleMapsUrl;
+    if(mapsUrl)window.open(mapsUrl,'_blank');
+    else setTimeout(()=>showRouteMap(pendingReq),600);
   }
   catch(e){showToast(e.message,'error')}
 }
@@ -1412,8 +1733,8 @@ function renderDProfile(){
   const age=calcAge(u.dob);
   document.getElementById('donor-body').innerHTML=`
     <div class="prof-hdr" style="margin:-14px -14px 14px;">
-      <div class="prof-av">${(u.fullName||'D')[0]}</div>
-      <div class="prof-name">${u.fullName||'Donor'}</div>
+      <div class="prof-av">${(u.name||'D')[0]}</div>
+      <div class="prof-name">${u.name||'Donor'}</div>
       <div class="prof-badge">🩸 ${u.bloodGroup||'A+'} · ${tier.name}</div>
     </div>
     <div class="qr-box" onclick="openQRModal()" style="cursor:pointer;">
@@ -1424,10 +1745,9 @@ function renderDProfile(){
     <div class="prof-item"><span class="prof-lbl">📱 Phone</span><span class="prof-val">${u.phone||'-'}</span></div>
     <div class="prof-item"><span class="prof-lbl">📍 Location</span><span class="prof-val">${u.city||'-'}</span></div>
     <div class="prof-item"><span class="prof-lbl">🩸 Blood Group</span><span class="prof-val">${u.bloodGroup||'-'}</span></div>
-    <div class="prof-item"><span class="prof-lbl">🎂 Date of Birth</span><span class="prof-val">${fmtDob(u.dob)}</span></div>
-    <div class="prof-item"><span class="prof-lbl">🎂 Age</span><span class="prof-val">${age!==null?age+' years':'-'}</span></div>
+    <div class="prof-item"><span class="prof-lbl">🎂 Age</span><span class="prof-val">${age!==null?age+' years':(u.age?u.age+' years':'-')}</span></div>
     <div class="prof-item"><span class="prof-lbl">⭐ Points</span><span class="prof-val">${u.points||0}</span></div>
-    <div class="prof-item"><span class="prof-lbl">💉 Donations</span><span class="prof-val">${u.donationCount||0}</span></div>
+    <div class="prof-item"><span class="prof-lbl">💉 Donations</span><span class="prof-val">${u.totalDonations||0}</span></div>
     <div style="margin-top:14px;">
       <button class="btn btn-outline" onclick="openQRModal()">📱 View Full QR Code</button>
       <button class="btn btn-outline" onclick="openDonorEdit()" style="margin-top:8px;">✏️ Edit Profile</button>
@@ -1469,23 +1789,26 @@ function renderHospHome(){
 
 async function loadHospReqs(preview=false){
   try{
-    const d=await api('/hospitals/requests/mine');
+    const d=await api('/hospitals/requests');
     const reqs=d.requests||[];
     document.getElementById('hh-total').textContent=d.stats?.total||reqs.length;
     document.getElementById('hh-open').textContent=d.stats?.pending||reqs.filter(r=>r.status==='pending').length;
-    document.getElementById('hh-done').textContent=d.stats?.fulfilled||reqs.filter(r=>r.status==='fulfilled').length;
+    document.getElementById('hh-done').textContent=d.stats?.completed||reqs.filter(r=>r.status==='completed').length;
     const cid=preview?'hosp-recent':'hosp-req-list';
     const c=document.getElementById(cid);
     if(!c)return;
     const list=preview?reqs.slice(0,3):reqs;
     if(!list.length){c.innerHTML=`<div class="empty"><div class="empty-ico">📋</div><div class="empty-title">No requests yet</div><div class="empty-sub">Create your first blood request</div></div>`;return}
     c.innerHTML=list.map(r=>hospReqCard(r)).join('');
-  }catch(e){const c=document.getElementById(preview?'hosp-recent':'hosp-req-list');if(c)c.innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
+  }catch(e){const c=document.getElementById(preview?'hosp-recent':'hosp-req-list');if(c)c.innerHTML=loadErrorHtml(e,`loadHospReqs(${preview})`)}
 }
 
 function hospReqCard(r){
-  const sc={open:'#43A047',accepted:'#FB8C00',fulfilled:'#78909C'};
-  return`<div class="req-card ${r.urgency||'normal'}" style="margin-bottom:10px;"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div style="display:flex;gap:5px;"><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div><div style="font-size:10px;font-weight:800;color:${sc[r.status]||'#43A047'};background:#F5F5F5;padding:2px 7px;border-radius:10px;">${r.status||'open'}</div></div></div><div class="req-details"><span>🩸 ${r.units||1} unit(s)</span><span>⏰ ${ago(r.createdAt)}</span>${r.patientName?`<span>👤 ${r.patientName}</span>`:''}</div>${r.donor?`<div style="margin-top:7px;padding:7px;background:var(--red-light);border-radius:7px;font-size:12px;"><strong>Donor:</strong> ${r.donor.fullName} · ${r.donor.phone}</div>`:''} ${r.status==='accepted'?`<button class="btn-accept" style="background:var(--green);" onclick="fulfill('${r._id}')">✅ Mark Fulfilled</button>`:''}</div>`;
+  const sc={pending:'#43A047',open:'#43A047',accepted:'#FB8C00',fulfilled:'#78909C',completed:'#78909C'};
+  const need=r.quantity||r.units||1;
+  const got=r.acceptedCount||r.accepted||0;
+  const exp=expiresIn(r.expiresAt);
+  return`<div class="req-card ${r.urgency||'normal'}" style="margin-bottom:10px;"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div style="display:flex;gap:5px;"><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div><div style="font-size:10px;font-weight:800;color:${sc[r.status]||'#43A047'};background:#F5F5F5;padding:2px 7px;border-radius:10px;">${r.status||'pending'}</div></div></div><div class="req-details"><span>🩸 ${got}/${need} accepted</span><span>⏰ ${ago(r.createdAt)}</span>${r.patientName?`<span>👤 ${r.patientName}</span>`:''}</div>${exp&&r.status==='pending'?`<div style="font-size:11px;font-weight:700;margin-top:4px;color:${exp.urgent?'var(--red)':'var(--muted)'};">⏳ ${exp.text}</div>`:''}${r.donor?`<div style="margin-top:7px;padding:7px;background:var(--red-light);border-radius:7px;font-size:12px;"><strong>Donor:</strong> ${r.donor.name} · ${r.donor.phone}</div>`:''}${r.navigationUrl?`<button class="btn btn-outline" style="margin-top:7px;padding:9px;font-size:12px;" onclick="window.open('${r.navigationUrl}','_blank')">🧭 View Donor Route on Maps</button>`:''} ${r.status==='accepted'?`<button class="btn-accept" style="background:var(--green);" onclick="fulfill('${r._id}')">✅ Verify &amp; Complete Donation</button>`:''}</div>`;
 }
 
 function renderHospReqs(){
@@ -1498,7 +1821,7 @@ function renderNewReq(){
     <div class="sec-title" style="margin-top:4px;">➕ New Blood Request</div>
     <div class="grp"><label class="lbl">Blood Group Required</label><div class="blood-grid"><button class="blood-btn" onclick="selBlood(this,'req')">A+</button><button class="blood-btn" onclick="selBlood(this,'req')">A-</button><button class="blood-btn" onclick="selBlood(this,'req')">B+</button><button class="blood-btn" onclick="selBlood(this,'req')">B-</button><button class="blood-btn" onclick="selBlood(this,'req')">AB+</button><button class="blood-btn" onclick="selBlood(this,'req')">AB-</button><button class="blood-btn" onclick="selBlood(this,'req')">O+</button><button class="blood-btn" onclick="selBlood(this,'req')">O-</button></div></div>
     <div class="grp"><label class="lbl">Units Required</label><select class="sel" id="req-units"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
-    <div class="grp"><label class="lbl">Urgency Level</label><div class="urg-row"><button class="urg-btn normal sel" onclick="selUrgency(this,'normal')">🟢 Normal</button><button class="urg-btn urgent" onclick="selUrgency(this,'urgent')">🟠 Urgent</button><button class="urg-btn critical" onclick="selUrgency(this,'critical')">🔴 Critical</button></div></div>
+    <div class="grp"><label class="lbl">Urgency Level</label><div class="urg-row"><button class="urg-btn normal sel" onclick="selUrgency(this,'normal')">🟢 Normal</button><button class="urg-btn urgent" onclick="selUrgency(this,'urgent')">🟠 Urgent</button><button class="urg-btn emergency" onclick="selUrgency(this,'emergency')">🔴 Critical</button></div></div>
     <div class="grp"><label class="lbl">Patient Name (Optional)</label><input class="inp" id="req-patient" type="text" placeholder="Patient name"/></div>
     <div class="grp"><label class="lbl">Doctor Ref No. (Optional)</label><input class="inp" id="req-doctor" type="text" placeholder="Doctor reference"/></div>
     <div class="grp"><label class="lbl">Notes</label><input class="inp" id="req-notes" type="text" placeholder="Special requirements..."/></div>
@@ -1510,16 +1833,30 @@ function selUrgency(btn,u){selUrg=u;document.querySelectorAll('.urg-btn').forEac
 async function postReq() {
   if (!selBloodReq) return showToast('Select blood group', 'error');
   try {
-    // FIXED: Changed '/requests' to '/hospitals/requests'
+    // Capture the hospital's real location so the donor's Google Maps
+    // navigation points to the actual place, not the backend's hardcoded
+    // Hyderabad default coordinates.
+    let lat, lng;
+    try{
+      const pos=await new Promise((res,rej)=>{
+        if(!navigator.geolocation)return rej();
+        navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000});
+      });
+      lat=pos.coords.latitude;lng=pos.coords.longitude;
+    }catch(geoErr){
+      showToast('Location unavailable — request will use default map location. Enable location access for accurate donor navigation.','warning');
+    }
+
     await api('/hospitals/requests', 'POST', {
       bloodGroup: selBloodReq,
       quantity: parseInt(document.getElementById('req-units').value),
       urgency: selUrg,
       patientName: document.getElementById('req-patient').value,
       doctorRefNo: document.getElementById('req-doctor').value,
-      patientReason: document.getElementById('req-notes').value
+      patientReason: document.getElementById('req-notes').value,
+      ...(lat!==undefined&&{lat,lng})
     });
-    
+
     showToast('Request posted! Notifying donors 🚨', 'success');
     setTimeout(() => renderHospHome(), 1500);
   } catch (e) {
@@ -1528,7 +1865,7 @@ async function postReq() {
   }
 }
 async function fulfill(id){
-  try{await api(`/requests/${id}/fulfill`,'PUT');showToast('Marked as fulfilled! 🎉','success');loadHospReqs(false)}
+  try{await api(`/hospital/complete/${id}`,'PATCH');showToast('Donation completed — cooldown & reward points applied! 🎉','success');loadHospReqs(false)}
   catch(e){showToast(e.message,'error')}
 }
 
@@ -1548,7 +1885,7 @@ async function lookupDonor(){
   try{
     const d=await api(`/hospitals/phone/+91${ph}`);
     const dn=d.donor;
-    document.getElementById('donor-result').innerHTML=`<div class="card" style="margin-top:12px;"><div style="display:flex;gap:12px;align-items:center;"><div class="prof-av" style="width:46px;height:46px;font-size:18px;">${(dn.fullName||'D')[0]}</div><div style="flex:1"><div style="font-weight:700;">${dn.fullName}</div><div style="font-size:12px;color:var(--muted);">📍 ${dn.city} · ${dn.phone}</div></div><div class="blood-badge">${dn.bloodGroup}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;"><div style="background:var(--red-light);border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:900;font-size:18px;color:var(--red);">${dn.points||0}</div><div style="font-size:11px;color:var(--muted);">Points</div></div><div style="background:#E8F5E9;border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:900;font-size:18px;color:var(--green);">${dn.donationCount||0}</div><div style="font-size:11px;color:var(--muted);">Donations</div></div></div></div>`;
+    document.getElementById('donor-result').innerHTML=`<div class="card" style="margin-top:12px;"><div style="display:flex;gap:12px;align-items:center;"><div class="prof-av" style="width:46px;height:46px;font-size:18px;">${(dn.name||'D')[0]}</div><div style="flex:1"><div style="font-weight:700;">${dn.name}</div><div style="font-size:12px;color:var(--muted);">📍 ${dn.city} · ${dn.phone}</div></div><div class="blood-badge">${dn.bloodGroup}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;"><div style="background:var(--red-light);border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:900;font-size:18px;color:var(--red);">${dn.points||0}</div><div style="font-size:11px;color:var(--muted);">Points</div></div><div style="background:#E8F5E9;border-radius:8px;padding:10px;text-align:center;"><div style="font-weight:900;font-size:18px;color:var(--green);">${dn.totalDonations||0}</div><div style="font-size:11px;color:var(--muted);">Donations</div></div></div></div>`;
   }catch(e){showToast('Donor not found','error')}
 }
 
@@ -1570,7 +1907,6 @@ function renderHospProfile(){
 function initAdmin(){
   showScreen('admin-home');
   aTab('dash',document.querySelector('#adm-nav .nav-btn'));
-  loadAdminStats();
 }
 
 function aTab(tab,btn){
@@ -1585,7 +1921,7 @@ function aTab(tab,btn){
 
 async function loadAdminStats(){
   try{
-    const[h,d,r]=await Promise.all([api('/admin/hospitals'),api('/admin/donors'),api('/requests/pending')]);
+    const[h,d,r]=await Promise.all([api('/admin/hospitals'),api('/admin/donors'),api('/admin/requests')]);
     document.getElementById('as-h').textContent=h.hospitals?.length||0;
     document.getElementById('as-d').textContent=d.donors?.length||0;
     document.getElementById('as-r').textContent=r.requests?.length||0;
@@ -1607,11 +1943,11 @@ function renderAdminDash(){
 
 async function loadDashStats(){
   try{
-    const[h,d,r]=await Promise.all([api('/admin/hospitals'),api('/admin/donors'),api('/requests/pending')]);
+    const[h,d,r]=await Promise.all([api('/admin/hospitals'),api('/admin/donors'),api('/admin/requests')]);
     document.getElementById('ds-h').textContent=h.hospitals?.length||0;
     document.getElementById('ds-d').textContent=d.donors?.length||0;
     document.getElementById('ds-r').textContent=r.requests?.length||0;
-    document.getElementById('ds-f').textContent=r.requests?.filter(x=>x.status==='fulfilled').length||0;
+    document.getElementById('ds-f').textContent=r.requests?.filter(x=>x.status==='completed').length||0;
     document.getElementById('as-h').textContent=h.hospitals?.length||0;
     document.getElementById('as-d').textContent=d.donors?.length||0;
     document.getElementById('as-r').textContent=r.requests?.length||0;
@@ -1628,7 +1964,7 @@ async function renderAdminHosps(){
     <div class="search-box"><span>🔍</span><input placeholder="Search hospital..." oninput="filterAdminH(this.value)"/></div>
     <div id="adm-h-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
   try{const d=await api('/admin/hospitals');renderHList(d.hospitals||[])}
-  catch(e){document.getElementById('adm-h-list').innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
+  catch(e){document.getElementById('adm-h-list').innerHTML=loadErrorHtml(e,'renderAdminHosps()')}
 }
 
 function renderHList(hosps){
@@ -1659,18 +1995,23 @@ function renderAddHosp(){renderAddHospInline()}
 
 async function addHosp(){
   const name=document.getElementById('new-h-name').value.trim()||document.getElementById('new-h-sel').value;
+  const regNo=document.getElementById('new-h-regno').value.trim();
+  const address=document.getElementById('new-h-address').value.trim();
   const dist=document.getElementById('new-h-dist').value;
   const mandal=document.getElementById('new-h-mandal').value;
   const village=document.getElementById('new-h-village').value;
+  const pincode=document.getElementById('new-h-pincode').value.trim();
+  const contactPerson=document.getElementById('new-h-contact').value.trim();
+  const designation=document.getElementById('new-h-designation').value.trim();
   const email=document.getElementById('new-h-email').value.trim();
   const phone=document.getElementById('new-h-phone').value.trim();
   const pass=document.getElementById('new-h-pass').value.trim();
-  const type=document.getElementById('new-h-type').value;
-  if(!name||!dist||!email||!phone||!pass)return showToast('Fill all required fields','error');
+  const license=document.getElementById('new-h-license').value.trim();
+  if(!name||!regNo||!address||!dist||!pincode||!contactPerson||!email||!phone||!pass)return showToast('Fill all required (*) fields','error');
   const city=village?`${village}, ${mandal}, ${dist}`:mandal?`${mandal}, ${dist}`:dist;
   try{
-    await api('/admin/hospitals/add','POST',{hospitalName:name,city,email,phone:`+91${phone}`,password:pass,type});
-    showToast(`"${name}" added successfully! ✅`,'success');
+    await api('/admin/hospitals/add','POST',{hospitalName:name,registrationNumber:regNo,address,city,pincode,contactPerson,designation,email,phone:`+91${phone}`,password:pass,licenseDocument:license});
+    showToast(`"${name}" added — awaiting verification ✅`,'success');
     setTimeout(()=>aTab('hospitals',document.querySelectorAll('#adm-nav .nav-btn')[1]),1500);
   }catch(e){showToast(e.message,'error')}
 }
@@ -1685,7 +2026,7 @@ async function renderAdminDonors(){
     <div class="chip-row"><div class="chip active" onclick="filterDBlood('all',this)">All</div><div class="chip" onclick="filterDBlood('A+',this)">A+</div><div class="chip" onclick="filterDBlood('B+',this)">B+</div><div class="chip" onclick="filterDBlood('O+',this)">O+</div><div class="chip" onclick="filterDBlood('AB+',this)">AB+</div></div>
     <div id="adm-d-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
   try{const d=await api('/admin/donors');renderDList(d.donors||[])}
-  catch(e){document.getElementById('adm-d-list').innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
+  catch(e){document.getElementById('adm-d-list').innerHTML=loadErrorHtml(e,'renderAdminDonors()')}
 }
 
 function renderDList(donors){
@@ -1694,26 +2035,26 @@ function renderDList(donors){
   if(!donors.length){c.innerHTML=`<div class="empty"><div class="empty-ico">🫀</div><div class="empty-title">No donors yet</div></div>`;return}
   c.innerHTML=donors.map(d=>`<div class="card" style="margin-bottom:8px;">
     <div style="display:flex;gap:10px;align-items:center;">
-      <div class="prof-av" style="width:40px;height:40px;font-size:16px;flex-shrink:0;">${(d.fullName||'D')[0]}</div>
+      <div class="prof-av" style="width:40px;height:40px;font-size:16px;flex-shrink:0;">${(d.name||'D')[0]}</div>
       <div style="flex:1;">
-        <div style="font-weight:700;font-size:13px;">${d.fullName||'-'}</div>
+        <div style="font-weight:700;font-size:13px;">${d.name||'-'}</div>
         <div style="font-size:11px;color:var(--muted);">📍 ${d.city||'-'} · ${d.phone||'-'}</div>
-        <div style="font-size:11px;color:var(--muted);">🎂 ${fmtDob(d.dob)}${d.dob?' ('+calcAge(d.dob)+' yrs)':''} · ⭐ ${d.points||0} pts · 💉 ${d.donationCount||0} donations</div>
+        <div style="font-size:11px;color:var(--muted);">🎂 ${d.age?d.age+' yrs':'-'} · ⭐ ${d.points||0} pts · 💉 ${d.totalDonations||0} donations</div>
       </div>
       <div class="blood-badge" style="font-size:13px;padding:4px 8px;">${d.bloodGroup||'?'}</div>
     </div>
     <div class="act-row">
       <button class="act-btn act-edit" onclick='openEditDonor(${JSON.stringify(d).replace(/'/g,"&#39;")})'>✏️ Edit</button>
-      <button class="act-btn act-reset" onclick="openResetPw('donor','${d._id}','${d.fullName}')">🔑 Reset PW</button>
+      <button class="act-btn act-reset" onclick="openResetPw('donor','${d._id}','${d.name}')">🔑 Reset PW</button>
       <button class="act-btn act-toggle" onclick="toggleDonor('${d._id}','${d.isActive!==false}')">
         ${d.isActive===false?'🟢 Activate':'🔴 Deactivate'}
       </button>
-      <button class="act-btn act-del" onclick="deleteDonor('${d._id}','${d.fullName}')">🗑 Delete</button>
+      <button class="act-btn act-del" onclick="deleteDonor('${d._id}','${d.name}')">🗑 Delete</button>
     </div>
   </div>`).join('');
 }
 
-function filterAdminD(q){renderDList(allAdminD.filter(d=>d.fullName?.toLowerCase().includes(q.toLowerCase())||d.phone?.includes(q)||d.city?.toLowerCase().includes(q.toLowerCase())))}
+function filterAdminD(q){renderDList(allAdminD.filter(d=>d.name?.toLowerCase().includes(q.toLowerCase())||d.phone?.includes(q)||d.city?.toLowerCase().includes(q.toLowerCase())))}
 function filterDBlood(b,btn){
   btn.closest('.chip-row').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
@@ -1813,14 +2154,20 @@ function renderAddHospInline(){
       <div class="sec-title" style="margin:0;">➕ Add New Hospital</div>
     </div>
     <div class="grp"><label class="lbl">Select from List</label><select class="sel" id="new-h-sel"><option value="">Choose hospital</option>${HOSPITALS.map(h=>`<option value="${h.name}">${h.name} (${h.type})</option>`).join('')}</select></div>
-    <div class="grp"><label class="lbl">Or Type Name</label><input class="inp" id="new-h-name" type="text" placeholder="Custom hospital name"/></div>
-    <div class="grp"><label class="lbl">District</label><select class="sel" id="new-h-dist" onchange="loadMandals('new-h-dist','new-h-mandal')"><option value="">Select District</option>${dists.map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
+    <div class="grp"><label class="lbl">Or Type Name *</label><input class="inp" id="new-h-name" type="text" placeholder="Custom hospital name"/></div>
+    <div class="grp"><label class="lbl">Registration Number *</label><input class="inp" id="new-h-regno" type="text" placeholder="Hospital registration number"/></div>
+    <div class="grp"><label class="lbl">Address *</label><input class="inp" id="new-h-address" type="text" placeholder="Full street address"/></div>
+    <div class="grp"><label class="lbl">District *</label><select class="sel" id="new-h-dist" onchange="loadMandals('new-h-dist','new-h-mandal')"><option value="">Select District</option>${dists.map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
     <div class="grp"><label class="lbl">Mandal</label><select class="sel" id="new-h-mandal" onchange="loadVillages('new-h-mandal','new-h-village','new-h-dist')"><option value="">Select Mandal</option></select></div>
     <div class="grp"><label class="lbl">Village</label><select class="sel" id="new-h-village"><option value="">Select Village</option></select></div>
-    <div class="grp"><label class="lbl">Hospital Email</label><input class="inp" id="new-h-email" type="email" placeholder="hospital@gmail.com"/></div>
-    <div class="grp"><label class="lbl">Phone</label><div class="phone-row"><div class="cc">🇮🇳 +91</div><input class="inp" id="new-h-phone" type="tel" placeholder="9XXXXXXXXX" maxlength="10" style="flex:1"/></div></div>
-    <div class="grp"><label class="lbl">Set Password</label><div class="pw-wrap"><input class="inp" id="new-h-pass" type="password" placeholder="Set login password"/><button class="pw-eye" onclick="togglePw('new-h-pass')">👁</button></div></div>
-    <div class="grp"><label class="lbl">Type</label><select class="sel" id="new-h-type"><option>Government</option><option>Private</option><option>Trust</option></select></div>
+    <div class="grp"><label class="lbl">Pincode *</label><input class="inp" id="new-h-pincode" type="text" placeholder="6-digit pincode" maxlength="6"/></div>
+    <div class="grp"><label class="lbl">Contact Person *</label><input class="inp" id="new-h-contact" type="text" placeholder="Name of primary contact"/></div>
+    <div class="grp"><label class="lbl">Designation</label><input class="inp" id="new-h-designation" type="text" placeholder="e.g. Medical Superintendent"/></div>
+    <div class="grp"><label class="lbl">Hospital Email *</label><input class="inp" id="new-h-email" type="email" placeholder="hospital@gmail.com"/></div>
+    <div class="grp"><label class="lbl">Phone *</label><div class="phone-row"><div class="cc">🇮🇳 +91</div><input class="inp" id="new-h-phone" type="tel" placeholder="9XXXXXXXXX" maxlength="10" style="flex:1"/></div></div>
+    <div class="grp"><label class="lbl">Set Password *</label><div class="pw-wrap"><input class="inp" id="new-h-pass" type="password" placeholder="Set login password"/><button class="pw-eye" onclick="togglePw('new-h-pass')">👁</button></div></div>
+    <div class="grp"><label class="lbl">License Document (Optional)</label><input class="inp" id="new-h-license" type="text" placeholder="License doc URL / reference"/></div>
+    <div class="info-box">ℹ️ New hospitals are added with <strong>isVerified: false</strong> until you approve them from the Hospitals tab.</div>
     <button class="btn btn-red" onclick="addHosp()" style="margin-top:8px;">✅ Add Hospital</button>`;
 }
 
@@ -1830,24 +2177,7 @@ function openEditHosp(h){
   document.getElementById('eh-phone').value=h.phone||'';
   document.getElementById('eh-city').value=h.city||'';
   document.getElementById('eh-email').value=h.email||'';
-  document.getElementById('eh-type').value=h.type||'Government';
   document.getElementById('edit-hosp-modal').classList.add('active');
-}
-
-async function saveEditHosp(){
-  const id=document.getElementById('eh-hosp-id').value;
-  const body={
-    hospitalName:document.getElementById('eh-name').value.trim(),
-    phone:document.getElementById('eh-phone').value.trim(),
-    city:document.getElementById('eh-city').value.trim(),
-    email:document.getElementById('eh-email').value.trim(),
-    type:document.getElementById('eh-type').value
-  };
-  try{
-    await api(`/admin/hospitals/${id}`,'PUT',body);
-    closeModal('edit-hosp-modal');showToast('Hospital updated ✅','success');
-    renderAdminHosps();
-  }catch(e){showToast(e.message,'error')}
 }
 
 function deleteHosp(id,name){
@@ -1860,11 +2190,11 @@ function deleteHosp(id,name){
 // ═══ ADMIN — DONOR ACTIONS ═══
 function openEditDonor(d){
   document.getElementById('ed-donor-id').value=d._id;
-  document.getElementById('ed-name').value=d.fullName||'';
+  document.getElementById('ed-name').value=d.name||'';
   document.getElementById('ed-phone').value=d.phone||'';
   document.getElementById('ed-city').value=d.city||'';
-  document.getElementById('ed-dob').value=d.dob?d.dob.substring(0,10):'';
-  document.getElementById('ed-avail').value=d.isAvailable!==false?'true':'false';
+  document.getElementById('ed-age').value=d.age||'';
+  document.getElementById('ed-avail').value=d.availabilityStatus!=='not available'?'true':'false';
   selBloodEd=d.bloodGroup||'';
   document.querySelectorAll('#edit-donor-modal .blood-btn').forEach(b=>{b.classList.remove('sel');if(b.textContent===selBloodEd)b.classList.add('sel')});
   document.getElementById('edit-donor-modal').classList.add('active');
@@ -1872,14 +2202,14 @@ function openEditDonor(d){
 
 async function saveEditDonor(){
   const id=document.getElementById('ed-donor-id').value;
-  const dob=document.getElementById('ed-dob').value;
+  const age=document.getElementById('ed-age').value;
   const body={
-    fullName:document.getElementById('ed-name').value.trim(),
+    name:document.getElementById('ed-name').value.trim(),
     phone:document.getElementById('ed-phone').value.trim(),
     city:document.getElementById('ed-city').value.trim(),
     bloodGroup:selBloodEd,
-    isAvailable:document.getElementById('ed-avail').value==='true',
-    ...(dob&&{dob})
+    availabilityStatus:document.getElementById('ed-avail').value==='true'?'available':'not available',
+    ...(age&&{age:Number(age)})
   };
   try{
     await api(`/admin/donors/${id}`,'PUT',body);
@@ -1940,15 +2270,15 @@ async function renderAdminRequests(){
       <div class="chip active" onclick="filterAdminReqs('all',this)">All</div>
       <div class="chip" onclick="filterAdminReqs('pending',this)">🟡 Pending</div>
       <div class="chip" onclick="filterAdminReqs('accepted',this)">🟠 Accepted</div>
-      <div class="chip" onclick="filterAdminReqs('fulfilled',this)">🟢 Fulfilled</div>
+      <div class="chip" onclick="filterAdminReqs('completed',this)">🟢 Fulfilled</div>
       <div class="chip" onclick="filterAdminReqs('cancelled',this)">🔴 Cancelled</div>
     </div>
     <div id="adm-req-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
   try{
-    const d=await api('/admin/request');
+    const d=await api('/admin/requests');
     window._allAdminReqs=d.requests||[];
     renderAdminReqList(window._allAdminReqs);
-  }catch(e){document.getElementById('adm-req-list').innerHTML=`<div class="card" style="text-align:center;color:var(--muted);">Could not load</div>`}
+  }catch(e){document.getElementById('adm-req-list').innerHTML=loadErrorHtml(e,'renderAdminRequests()')}
 }
 
 function renderAdminReqList(reqs){
@@ -2028,14 +2358,15 @@ function saveSettings(){
 
 // ═══ ADMIN — CREATE ADMIN ═══
 async function createAdmin(){
+  const name=document.getElementById('ca-name').value.trim();
   const email=document.getElementById('ca-email').value.trim();
   const pass=document.getElementById('ca-pass').value.trim();
-  if(!email||!pass)return showToast('Fill all fields','error');
+  if(!name||!email||!pass)return showToast('Fill all fields','error');
   if(pass.length<6)return showToast('Password min 6 characters','error');
   try{
-    await api('/admin/create-admin','POST',{email,password:pass});
+    await api('/admin/create-admin','POST',{name,email,password:pass});
     closeModal('create-admin-modal');
-    document.getElementById('ca-email').value='';document.getElementById('ca-pass').value='';
+    document.getElementById('ca-name').value='';document.getElementById('ca-email').value='';document.getElementById('ca-pass').value='';
     showToast('Admin account created ✅','success');
   }catch(e){showToast(e.message,'error')}
 }
@@ -2043,7 +2374,7 @@ async function createAdmin(){
 // ═══ DONOR — EDIT PROFILE ═══
 function openDonorEdit(){
   const u=currentUser||{};
-  document.getElementById('dep-name').value=u.fullName||'';
+  document.getElementById('dep-name').value=u.name||'';
   document.getElementById('dep-city').value=u.city||'';
   document.getElementById('dep-email').value=u.email||'';
   document.getElementById('dep-dob').value=u.dob?u.dob.substring(0,10):'';
@@ -2066,8 +2397,8 @@ async function saveDonorProfile(){
   };
   try{
     await api('/donors/profile','PUT',body);
-    currentUser={...currentUser,...body};localStorage.setItem('jm_user',JSON.stringify(currentUser));
-    document.getElementById('dh-name').textContent=currentUser.fullName;
+    currentUser={...currentUser,name:body.fullName,city:body.city,email:body.email};localStorage.setItem('jm_user',JSON.stringify(currentUser));
+    document.getElementById('dh-name').textContent=currentUser.name;
     document.getElementById('dh-loc').textContent=`📍 ${currentUser.city}`;
     closeModal('donor-edit-modal');showToast('Profile updated ✅','success');
     renderDProfile();
@@ -2112,8 +2443,7 @@ async function saveEditHosp(){
     hospitalName:document.getElementById('eh-name').value.trim(),
     phone:document.getElementById('eh-phone').value.trim(),
     city:document.getElementById('eh-city').value.trim(),
-    email:document.getElementById('eh-email').value.trim(),
-    type:document.getElementById('eh-type').value
+    email:document.getElementById('eh-email').value.trim()
   };
   try{
     if(isSelf){
@@ -2194,7 +2524,7 @@ function renderHistList(history){
     ${history.map((h,i)=>{
       const hosp=h.hospital?.hospitalName||h.hospitalName||'Hospital';
       const city=h.hospital?.city||h.city||'Telangana';
-      const bg=h.status==='fulfilled'?'var(--green)':'var(--muted)';
+      const bg=h.status==='completed'?'var(--green)':'var(--muted)';
       const dateStr=h.createdAt?new Date(h.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-';
       const timeStr=h.createdAt?new Date(h.createdAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):'-';
       return `<div class="hist-card">
@@ -2207,7 +2537,7 @@ function renderHistList(history){
             <div class="hist-date">📅 ${dateStr} at ${timeStr}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-            <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:${bg};color:#fff;">${h.status||'fulfilled'}</span>
+            <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:${bg};color:#fff;">${h.status||'completed'}</span>
             <span style="font-size:10px;color:var(--muted);">#${i+1}</span>
           </div>
         </div>
@@ -2274,7 +2604,7 @@ function renderLbList(donors,filter){
     html+=`<div class="card" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:2px solid var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:12px;">
       <div style="font-size:24px;">⭐</div>
       <div style="flex:1;"><div style="font-weight:700;font-size:13px;">Your Rank: #${myRank+1}</div>
-      <div style="font-size:11px;color:var(--muted);">${currentUser?.points||0} pts · ${currentUser?.donationCount||0} donations</div></div>
+      <div style="font-size:11px;color:var(--muted);">${currentUser?.points||0} pts · ${currentUser?.totalDonations||0} donations</div></div>
     </div>`;
   }
 
@@ -2285,13 +2615,13 @@ function renderLbList(donors,filter){
       if(!donor)return;
       const rank=podRanks[i];
       const isMe=donor._id===myId;
-      const val=filter==='donations'?`${donor.donationCount||0} donations`:`${donor.points||0} pts`;
+      const val=filter==='donations'?`${donor.totalDonations||0} donations`:`${donor.points||0} pts`;
       html+=`<div class="lb-pod">
         <div class="lb-pod-rank">${podEmoji[rank-1]}</div>
         <div class="lb-pod-av" style="width:${podSize[rank-1]};height:${podSize[rank-1]};background:${podColors[rank-1]};${isMe?'border-color:var(--red);':''}">
-          ${(donor.fullName||'D')[0]}
+          ${(donor.name||'D')[0]}
         </div>
-        <div class="lb-pod-name">${isMe?'You':donor.fullName?.split(' ')[0]||'-'}</div>
+        <div class="lb-pod-name">${isMe?'You':donor.name?.split(' ')[0]||'-'}</div>
         <div class="lb-pod-pts">${val}</div>
         <div class="lb-pod-bar" style="height:${podHeight[rank-1]};background:${podColors[rank-1]};opacity:0.3;"></div>
       </div>`;
@@ -2303,13 +2633,13 @@ function renderLbList(donors,filter){
   html+=`<div style="margin-top:4px;">`;
   donors.forEach((d,i)=>{
     const isMe=d._id===myId;
-    const val=filter==='donations'?`${d.donationCount||0} donations`:`${d.points||0} pts`;
+    const val=filter==='donations'?`${d.totalDonations||0} donations`:`${d.points||0} pts`;
     const medalColor=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--muted)';
     html+=`<div class="lb-row ${isMe?'lb-you':''}">
       <div class="lb-rank-num" style="color:${medalColor};">#${i+1}</div>
-      <div class="lb-av" style="background:${isMe?'var(--gold)':'var(--red)'};">${(d.fullName||'D')[0]}</div>
+      <div class="lb-av" style="background:${isMe?'var(--gold)':'var(--red)'};">${(d.name||'D')[0]}</div>
       <div style="flex:1;">
-        <div class="lb-name">${isMe?'⭐ You':d.fullName||'-'}</div>
+        <div class="lb-name">${isMe?'⭐ You':d.name||'-'}</div>
         <div class="lb-info">📍 ${d.city||'-'} · 🩸 ${d.bloodGroup||'-'}</div>
       </div>
       <div class="lb-pts-badge">${val}</div>
@@ -2330,7 +2660,7 @@ function generateQR(containerId,size){
   // QR data — donor ID + blood group + name (what hospital scans)
   const qrData=JSON.stringify({
     id:u._id||u.qrCode||'JM-DONOR-'+Date.now(),
-    name:u.fullName||'Donor',
+    name:u.name||'Donor',
     blood:u.bloodGroup||'A+',
     phone:u.phone||'',
     city:u.city||'',
@@ -2352,8 +2682,8 @@ function generateQR(containerId,size){
 
 function openQRModal(){
   const u=currentUser||{};
-  document.getElementById('qr-donor-name').textContent=u.fullName||'Donor';
-  document.getElementById('qr-donor-info').textContent=`🩸 ${u.bloodGroup||'A+'} · 📍 ${u.city||'Telangana'} · 💉 ${u.donationCount||0} donations`;
+  document.getElementById('qr-donor-name').textContent=u.name||'Donor';
+  document.getElementById('qr-donor-info').textContent=`🩸 ${u.bloodGroup||'A+'} · 📍 ${u.city||'Telangana'} · 💉 ${u.totalDonations||0} donations`;
   document.getElementById('qr-render').innerHTML='';
   document.getElementById('qr-overlay').classList.add('active');
   setTimeout(()=>generateQR('qr-render',200),150);
@@ -2363,7 +2693,7 @@ function downloadQR(){
   const canvas=document.querySelector('#qr-render canvas');
   if(!canvas)return showToast('QR not ready yet','error');
   const link=document.createElement('a');
-  link.download=`JeevanMitra-QR-${(currentUser?.fullName||'donor').replace(/\s+/g,'-')}.png`;
+  link.download=`JeevanMitra-QR-${(currentUser?.name||'donor').replace(/\s+/g,'-')}.png`;
   link.href=canvas.toDataURL('image/png');
   link.click();
   showToast('QR Code downloaded! 📥','success');
@@ -2371,7 +2701,7 @@ function downloadQR(){
 
 function connectSocket(role){
   try{
-    socket=io(API,{auth:{token:localStorage.getItem('jm_token')}});
+    socket=io(API,{auth:{token:getAuthItem('jm_token')}});
     socket.on('connect',()=>{if(currentUser?.city)socket.emit('join_city',currentUser.city)});
     socket.on('new_blood_request',req=>{if(role==='donor')showToast(`🚨 New ${req.urgency} request for ${req.bloodGroup}!`,'error')});
     socket.on('request_accepted',()=>{if(role==='hospital')showToast('✅ Donor accepted your request!','success')});
@@ -2386,14 +2716,25 @@ function getTier(p){
   if(p>=1000)return{name:'Silver',ico:'🥈',next:2500};
   return{name:'Bronze',ico:'🥉',next:1000};
 }
-function urgPts(u){return u==='critical'?200:u==='urgent'?150:100}
+function urgPts(u){return u==='emergency'?30:u==='urgent'?20:10}
 function ago(date){if(!date)return'Just now';const d=Date.now()-new Date(date);const m=Math.floor(d/60000);if(m<60)return`${m}m ago`;const h=Math.floor(m/60);if(h<24)return`${h}h ago`;return`${Math.floor(h/24)}d ago`}
-function logout(){localStorage.clear();currentUser=null;currentRole=null;showScreen('onboarding');showToast('Logged out','info')}
-function showToast(msg,type=''){
+function expiresIn(date){
+  if(!date)return null;
+  const diff=new Date(date)-Date.now();
+  if(diff<=0)return{text:'Expired',urgent:true};
+  const mins=Math.floor(diff/60000);
+  if(mins<60)return{text:`Expires in ${mins}m`,urgent:mins<30};
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return{text:`Expires in ${hrs}h ${mins%60}m`,urgent:hrs<2};
+  return{text:`Expires in ${Math.floor(hrs/24)}d ${hrs%24}h`,urgent:false};
+}
+function logout(){localStorage.clear();sessionStorage.clear();currentUser=null;currentRole=null;showScreen('onboarding');showToast('Logged out','info')}
+function showToast(msg,type='',duration=3500){
   const existing=document.querySelector('.toast');if(existing)existing.remove();
-  const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;
+  const icons={success:'✅ ',error:'❌ ',warning:'⚠️ ',emergency:'🚨 ',info:'ℹ️ '};
+  const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=`${icons[type]||''}${msg}`;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3500);
+  setTimeout(()=>t.remove(),duration);
 }
 </script>
 </div><!-- /app-content -->
