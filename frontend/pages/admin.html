@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — Jeevan Mitra</title>
+<link rel="stylesheet" href="../assets/css/tokens.css"/>
+<link rel="stylesheet" href="../assets/css/components.css"/>
+<link rel="stylesheet" href="../assets/css/app-shell.css"/>
+<style>
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:26px}
+  @media(min-width:640px){.stat-grid{grid-template-columns:repeat(5,1fr)}}
+  .stat-box{background:#fff;border:1px solid var(--border);border-radius:var(--r-md);padding:16px}
+  .stat-box .n{font-family:var(--font-display);font-size:24px;font-weight:700}
+  .stat-box .l{font-size:11px;color:var(--slate);font-weight:700;margin-top:2px}
+
+  .tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab{padding:10px 4px;font-size:13.5px;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;margin-right:22px;cursor:pointer;white-space:nowrap}
+  .tab.active{color:var(--red);border-color:var(--red)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  table.data-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .data-table th{text-align:left;padding:10px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;border-bottom:1px solid var(--border)}
+  .data-table td{padding:10px;border-bottom:1px solid var(--border)}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:var(--r-md)}
+  .table-wrap table{min-width:600px}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+  <div class="app-main">
+    <div id="navbar-root"></div>
+    <div class="app-content">
+
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="hospitals" onclick="switchTab('hospitals',this)">Hospitals</div>
+        <div class="tab" data-tab="donors" onclick="switchTab('donors',this)">Donors</div>
+        <div class="tab" data-tab="requests" onclick="switchTab('requests',this)">Requests</div>
+        <div class="tab" data-tab="broadcast" onclick="switchTab('broadcast',this)">Broadcast</div>
+        <div class="tab" data-tab="logs" onclick="switchTab('logs',this)">Audit logs</div>
+      </div>
+
+      <div class="tab-panel active" id="panel-hospitals">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+          <button class="btn btn-primary btn-sm" onclick="openModal('add-hospital-modal')">+ Add hospital</button>
+        </div>
+        <div class="table-wrap"><table class="data-table" id="hospitals-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-donors">
+        <div class="table-wrap"><table class="data-table" id="donors-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-requests">
+        <div class="table-wrap"><table class="data-table" id="requests-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-broadcast">
+        <div class="card" style="max-width:480px;">
+          <div class="field"><label class="field-label">Send to</label>
+            <select class="select-input" id="bc-target">
+              <option value="all">Everyone</option>
+              <option value="donors">Donors only</option>
+              <option value="hospitals">Hospitals only</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Message</label><input class="field-input" id="bc-message" placeholder="Announcement text"/></div>
+          <button class="btn btn-primary btn-block" onclick="sendBroadcast()">Send broadcast</button>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-logs">
+        <div class="table-wrap"><table class="data-table" id="logs-table"></table></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD HOSPITAL MODAL -->
+<div class="modal-overlay" id="add-hospital-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add hospital</div>
+    <div class="modal-sub">Added with pending verification status.</div>
+    <div class="field"><label class="field-label">Hospital name *</label><input class="field-input" id="nh-name"/></div>
+    <div class="field"><label class="field-label">Registration number *</label><input class="field-input" id="nh-regno"/></div>
+    <div class="field"><label class="field-label">Address *</label><input class="field-input" id="nh-address"/></div>
+    <div class="field" style="display:flex;gap:12px;">
+      <div style="flex:1"><label class="field-label">City *</label><input class="field-input" id="nh-city"/></div>
+      <div style="flex:1"><label class="field-label">Pincode *</label><input class="field-input" id="nh-pincode" maxlength="6"/></div>
+    </div>
+    <div class="field"><label class="field-label">Contact person *</label><input class="field-input" id="nh-contact"/></div>
+    <div class="field"><label class="field-label">Email *</label><input class="field-input" id="nh-email" type="email"/></div>
+    <div class="field"><label class="field-label">Phone *</label><input class="field-input" id="nh-phone" type="tel"/></div>
+    <div class="field"><label class="field-label">Set password *</label><input class="field-input" id="nh-pass" type="password"/></div>
+    <button class="btn btn-primary btn-block" onclick="addHospital()">Add hospital</button>
+  </div>
+</div>
+
+<!-- CREATE ADMIN MODAL -->
+<div class="modal-overlay" id="create-admin-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Create admin account</div>
+    <div class="field"><label class="field-label">Name</label><input class="field-input" id="ca-name"/></div>
+    <div class="field"><label class="field-label">Email</label><input class="field-input" id="ca-email" type="email"/></div>
+    <div class="field"><label class="field-label">Password</label><input class="field-input" id="ca-pass" type="password"/></div>
+    <button class="btn btn-dark btn-block" onclick="createAdminAccount()">Create account</button>
+  </div>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../components/toast.js"></script>
+<script src="../components/modal.js"></script>
+<script src="../components/navbar.js"></script>
+<script src="../components/sidebar.js"></script>
+<script>
+function switchTab(name, tabEl){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if(name==='hospitals') loadHospitals();
+  if(name==='donors') loadDonors();
+  if(name==='requests') loadRequests();
+  if(name==='logs') loadLogs();
+}
+
+async function loadStats(){
+  try{
+    const res = await api('/admin/stats');
+    const s = res.stats;
+    document.getElementById('stat-grid').innerHTML = `
+      <div class="stat-box"><div class="n">${s.donors}</div><div class="l">DONORS</div></div>
+      <div class="stat-box"><div class="n">${s.activeHospitals}</div><div class="l">VERIFIED HOSPITALS</div></div>
+      <div class="stat-box"><div class="n">${s.pendingHospitals}</div><div class="l">PENDING</div></div>
+      <div class="stat-box"><div class="n">${s.requests}</div><div class="l">TOTAL REQUESTS</div></div>
+      <div class="stat-box"><div class="n">${s.completed}</div><div class="l">COMPLETED</div></div>`;
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+async function loadHospitals(){
+  const table = document.getElementById('hospitals-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/hospitals');
+    const rows = (res.hospitals||[]).map(h => `
+      <tr>
+        <td><strong>${h.hospitalName}</strong><br/><span style="color:var(--muted);font-size:11.5px;">${h.email}</span></td>
+        <td>${h.city}</td>
+        <td><span class="badge ${h.isVerified?'badge-green':'badge-amber'}">${h.isVerified?'Verified':'Pending'}</span></td>
+        <td><span class="badge ${h.isActive?'badge-green':'badge-slate'}">${h.isActive?'Active':'Suspended'}</span></td>
+        <td class="row-actions">
+          ${!h.isVerified?`<button class="btn btn-primary btn-sm" onclick="verifyHospital('${h._id}','approve')">Approve</button><button class="btn btn-outline btn-sm" onclick="verifyHospital('${h._id}','reject')">Reject</button>`:''}
+          ${h.isVerified?`<button class="btn btn-outline btn-sm" onclick="toggleHospital('${h._id}')">${h.isActive?'Suspend':'Activate'}</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="deleteHospitalRow('${h._id}','${h.hospitalName}')">Delete</button>
+        </td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>Hospital</th><th>City</th><th>Verification</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No hospitals yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+
+async function verifyHospital(id, action){
+  try{ await api(`/admin/hospitals/${id}/verify`, 'PUT', { action }); showToast(`Hospital ${action}d`, 'success'); loadHospitals(); loadStats(); }
+  catch(e){ showToast(e.message, 'error'); }
+}
+async function toggleHospital(id){
+  try{ const res = await api(`/admin/hospitals/${id}/toggle`, 'PUT'); showToast(`Hospital ${res.isActive?'activated':'suspended'}`,'success'); loadHospitals(); }
+  catch(e){ showToast(e.message, 'error'); }
+}
+function deleteHospitalRow(id, name){
+  confirmDialog({ icon:'🗑', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+    onConfirm: async ()=>{ try{ await api(`/admin/hospitals/${id}`,'DELETE'); showToast('Deleted','success'); loadHospitals(); loadStats(); }catch(e){ showToast(e.message,'error'); } }
+  });
+}
+async function addHospital(){
+  const body = {
+    hospitalName: document.getElementById('nh-name').value.trim(),
+    registrationNumber: document.getElementById('nh-regno').value.trim(),
+    address: document.getElementById('nh-address').value.trim(),
+    city: document.getElementById('nh-city').value.trim(),
+    pincode: document.getElementById('nh-pincode').value.trim(),
+    contactPerson: document.getElementById('nh-contact').value.trim(),
+    email: document.getElementById('nh-email').value.trim(),
+    phone: document.getElementById('nh-phone').value.trim(),
+    password: document.getElementById('nh-pass').value.trim()
+  };
+  if(Object.values(body).some(v=>!v)) return showToast('Fill all required fields', 'error');
+  try{ await api('/admin/hospitals/add','POST',body); closeModal('add-hospital-modal'); showToast('Hospital added — pending verification','success'); loadHospitals(); loadStats(); }
+  catch(e){ showToast(e.message,'error'); }
+}
+
+async function loadDonors(){
+  const table = document.getElementById('donors-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/donors');
+    const rows = (res.donors||[]).map(d => `
+      <tr>
+        <td><strong>${d.name}</strong><br/><span style="color:var(--muted);font-size:11.5px;">${d.phone}</span></td>
+        <td>${d.bloodGroup}</td>
+        <td>${d.city}</td>
+        <td>${d.points||0} pts</td>
+        <td><span class="badge ${d.isActive?'badge-green':'badge-slate'}">${d.isActive?'Active':'Suspended'}</span></td>
+        <td class="row-actions">
+          <button class="btn btn-outline btn-sm" onclick="toggleDonorRow('${d._id}')">${d.isActive?'Suspend':'Activate'}</button>
+          <button class="btn btn-outline btn-sm" onclick="deleteDonorRow('${d._id}','${d.name}')">Delete</button>
+        </td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>Donor</th><th>Group</th><th>City</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);">No donors yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+async function toggleDonorRow(id){
+  try{ const res = await api(`/admin/donors/${id}/toggle`,'PUT'); showToast(`Donor ${res.isActive?'activated':'suspended'}`,'success'); loadDonors(); }
+  catch(e){ showToast(e.message,'error'); }
+}
+function deleteDonorRow(id, name){
+  confirmDialog({ icon:'🗑', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+    onConfirm: async ()=>{ try{ await api(`/admin/donors/${id}`,'DELETE'); showToast('Deleted','success'); loadDonors(); loadStats(); }catch(e){ showToast(e.message,'error'); } }
+  });
+}
+
+async function loadRequests(){
+  const table = document.getElementById('requests-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/requests');
+    const rows = (res.requests||[]).map(r => `
+      <tr>
+        <td><strong>${r.bloodGroup}</strong> · ${r.quantity} unit(s)</td>
+        <td>${r.hospitalId?.hospitalName||r.hospitalName}</td>
+        <td><span class="badge badge-slate">${r.status}</span></td>
+        <td>${r.urgency}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="deleteRequestRow('${r._id}')">Delete</button></td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>Request</th><th>Hospital</th><th>Status</th><th>Urgency</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No requests yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+function deleteRequestRow(id){
+  confirmDialog({ icon:'🗑', title:'Delete request?', message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+    onConfirm: async ()=>{ try{ await api(`/admin/requests/${id}`,'DELETE'); showToast('Deleted','success'); loadRequests(); loadStats(); }catch(e){ showToast(e.message,'error'); } }
+  });
+}
+
+async function sendBroadcast(){
+  const target = document.getElementById('bc-target').value;
+  const message = document.getElementById('bc-message').value.trim();
+  if(!message) return showToast('Enter a message', 'error');
+  try{ await api('/admin/broadcast','POST',{target,message}); showToast('Broadcast sent','success'); document.getElementById('bc-message').value=''; }
+  catch(e){ showToast(e.message,'error'); }
+}
+
+async function loadLogs(){
+  const table = document.getElementById('logs-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/logs');
+    const rows = (res.logs||[]).map(l => `
+      <tr>
+        <td>${new Date(l.createdAt).toLocaleString()}</td>
+        <td>${l.adminEmail}</td>
+        <td>${l.action}</td>
+        <td>${l.details||''}</td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead><tbody>${rows||'<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);">No activity yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+
+async function createAdminAccount(){
+  const body = { name:document.getElementById('ca-name').value.trim(), email:document.getElementById('ca-email').value.trim(), password:document.getElementById('ca-pass').value.trim() };
+  if(!body.name||!body.email||!body.password) return showToast('Fill all fields','error');
+  try{ await api('/admin/create-admin','POST',body); closeModal('create-admin-modal'); showToast('Admin account created','success'); }
+  catch(e){ showToast(e.message,'error'); }
+}
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('admin');
+  if(!user) return;
+
+  renderSidebar('sidebar-root', 'admin', 'admin');
+  renderNavbar('navbar-root', { variant:'app', title:'Admin', user });
+
+  loadStats();
+  loadHospitals();
+});
+</script>
+</body>
+</html>

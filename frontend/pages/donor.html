@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — Jeevan Mitra</title>
+<link rel="stylesheet" href="../assets/css/tokens.css"/>
+<link rel="stylesheet" href="../assets/css/components.css"/>
+<link rel="stylesheet" href="../assets/css/app-shell.css"/>
+<style>
+  .profile-hero{background:var(--ink);color:#fff;border-radius:var(--r-lg);padding:26px 22px;margin-bottom:20px;position:relative;overflow:hidden}
+  .profile-hero-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .profile-hero .name{font-family:var(--font-display);font-size:22px;font-weight:700}
+  .profile-hero .loc{font-size:13px;color:rgba(255,255,255,0.6);margin-top:2px}
+  .profile-hero .blood{background:var(--red);border-radius:var(--r-sm);padding:8px 14px;font-family:var(--font-display);font-weight:700;font-size:16px}
+  .profile-hero-stats{display:flex;gap:22px;margin-top:20px}
+  .profile-hero-stats .n{font-family:var(--font-display);font-size:22px;font-weight:700}
+  .profile-hero-stats .l{font-size:11px;color:rgba(255,255,255,0.55);font-weight:600}
+
+  .cooldown-card{background:var(--amber-soft);border:1px solid #F0D8A8;border-radius:var(--r-md);padding:16px 18px;margin-bottom:20px;display:none}
+  .cooldown-card.show{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+  .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .section-head h2{font-family:var(--font-display);font-size:18px;font-weight:700}
+
+  .req-card{border:1px solid var(--border);border-radius:var(--r-md);padding:16px;margin-bottom:12px;background:#fff}
+  .req-card.emergency{border-color:var(--red);background:var(--red-soft)}
+  .req-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+  .req-hospital{font-weight:700;font-size:14.5px;margin-bottom:2px}
+  .req-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--slate);margin-bottom:8px}
+  .req-expiry{font-size:11.5px;font-weight:700;color:var(--slate);margin-bottom:10px}
+  .req-expiry.urgent{color:var(--red)}
+  .req-actions{display:flex;gap:8px;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+  <div class="app-main">
+    <div id="navbar-root"></div>
+    <div class="app-content">
+
+      <div class="profile-hero">
+        <div class="profile-hero-top">
+          <div>
+            <div class="name" id="p-name">—</div>
+            <div class="loc" id="p-loc">—</div>
+          </div>
+          <div class="blood" id="p-blood">—</div>
+        </div>
+        <div class="profile-hero-stats">
+          <div><div class="n" id="p-points">0</div><div class="l">POINTS</div></div>
+          <div><div class="n" id="p-donations">0</div><div class="l">DONATIONS</div></div>
+          <div><div class="n" id="p-tier">Bronze</div><div class="l">TIER</div></div>
+        </div>
+      </div>
+
+      <div class="cooldown-card" id="cooldown-card">
+        <div>
+          <div style="font-weight:700;font-size:14px;">Cooldown active</div>
+          <div style="font-size:12.5px;color:var(--ink-soft);" id="cooldown-text">—</div>
+        </div>
+        <div style="font-size:24px;">🩹</div>
+      </div>
+
+      <div class="section-head">
+        <h2>Nearby requests</h2>
+        <button class="btn btn-ghost btn-sm" onclick="loadFeed()">Refresh</button>
+      </div>
+      <div id="feed-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ACCEPT CONFIRMATION MODAL -->
+<div class="modal-overlay" id="accept-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Confirm acceptance</div>
+    <div class="modal-sub">The hospital will receive your contact details once you accept.</div>
+    <div id="accept-details" class="card" style="margin-bottom:16px;"></div>
+    <button class="btn btn-primary btn-block" onclick="confirmAccept()">Accept & get directions</button>
+    <button class="btn btn-ghost btn-block" onclick="closeModal('accept-modal')" style="margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../components/toast.js"></script>
+<script src="../components/modal.js"></script>
+<script src="../components/navbar.js"></script>
+<script src="../components/sidebar.js"></script>
+<script>
+let pendingRequest = null;
+
+function tierIcon(points){
+  if(points >= 1000) return 'Platinum';
+  if(points >= 500) return 'Gold';
+  if(points >= 200) return 'Silver';
+  return 'Bronze';
+}
+
+function renderProfile(donor, cooldownInfo){
+  document.getElementById('p-name').textContent = donor.name;
+  document.getElementById('p-loc').textContent = donor.city;
+  document.getElementById('p-blood').textContent = donor.bloodGroup;
+  document.getElementById('p-points').textContent = donor.points || 0;
+  document.getElementById('p-donations').textContent = donor.totalDonations || 0;
+  document.getElementById('p-tier').textContent = tierIcon(donor.points || 0);
+
+  const cooldownCard = document.getElementById('cooldown-card');
+  if(cooldownInfo && !cooldownInfo.eligible){
+    cooldownCard.classList.add('show');
+    document.getElementById('cooldown-text').textContent =
+      `${cooldownInfo.remainingDays} day(s) remaining · eligible ${new Date(cooldownInfo.cooldownUntil).toDateString()}`;
+  } else {
+    cooldownCard.classList.remove('show');
+  }
+}
+
+function expiresLabel(expiresAt){
+  const diff = new Date(expiresAt) - Date.now();
+  if(diff <= 0) return { text:'Expired', urgent:true };
+  const hrs = Math.floor(diff/3600000);
+  const mins = Math.floor((diff%3600000)/60000);
+  if(hrs < 1) return { text:`Expires in ${mins}m`, urgent:true };
+  return { text:`Expires in ${hrs}h ${mins}m`, urgent: hrs < 2 };
+}
+
+function requestCard(r){
+  const need = r.quantity || 1;
+  const got = (r.acceptedDonors||[]).filter(a=>a.status!=='no_show').length;
+  const exp = expiresLabel(r.expiresAt);
+  return `
+    <div class="req-card ${r.urgency}">
+      <div class="req-top">
+        <div>
+          <div class="req-hospital">${r.hospitalName}</div>
+          <span class="badge badge-red">${r.bloodGroup}</span>
+          ${r.urgency==='emergency'?'<span class="badge badge-red" style="margin-left:6px;">Emergency</span>':''}
+        </div>
+        <div class="blood-chip">${r.bloodGroup}</div>
+      </div>
+      <div class="req-meta">
+        <span>📍 ${r.hospitalCity}</span>
+        <span>🩸 ${got}/${need} accepted</span>
+      </div>
+      <div class="req-expiry ${exp.urgent?'urgent':''}">⏳ ${exp.text}</div>
+      ${r.patientReason?`<div style="font-size:12.5px;color:var(--slate);margin-bottom:8px;">${r.patientReason}</div>`:''}
+      <div class="req-actions">
+        ${r.mapsLink?`<button class="btn btn-outline btn-sm" onclick="window.open('${r.mapsLink}','_blank')">View on map</button>`:''}
+        <button class="btn btn-primary btn-sm" onclick='openAccept(${JSON.stringify(r).replace(/'/g,"&apos;")})'>Accept</button>
+      </div>
+    </div>`;
+}
+
+async function loadFeed(){
+  const list = document.getElementById('feed-list');
+  list.innerHTML = `<div class="skeleton" style="height:120px;margin-bottom:12px;"></div><div class="skeleton" style="height:120px;"></div>`;
+  try{
+    const res = await api('/donors/feed');
+    const requests = res.requests || [];
+    if(!requests.length){
+      list.innerHTML = `<div class="empty-state"><div class="icon">✅</div><div class="title">No requests nearby</div><div class="sub">Check back later, or refresh.</div></div>`;
+      return;
+    }
+    list.innerHTML = requests.map(requestCard).join('');
+  }catch(e){
+    list.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div class="title">Could not load requests</div><div class="sub">${e.message}</div></div><button class="btn btn-outline btn-block" onclick="loadFeed()">Retry</button>`;
+  }
+}
+
+function openAccept(req){
+  pendingRequest = req;
+  document.getElementById('accept-details').innerHTML = `
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="blood-chip">${req.bloodGroup}</div>
+      <div>
+        <div style="font-weight:700;">${req.hospitalName}</div>
+        <div style="font-size:12.5px;color:var(--slate);">${req.hospitalCity}</div>
+      </div>
+    </div>`;
+  openModal('accept-modal');
+}
+
+async function confirmAccept(){
+  if(!pendingRequest) return;
+  try{
+    const res = await api(`/donors/accept/${pendingRequest._id}`, 'PATCH');
+    closeModal('accept-modal');
+    showToast('Request accepted! Opening directions...', 'success');
+    loadFeed();
+    if(res.googleMapsUrl) window.open(res.googleMapsUrl, '_blank');
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('donor');
+  if(!user) return;
+
+  renderSidebar('sidebar-root', 'donor', 'donor');
+  renderNavbar('navbar-root', { variant:'app', title:'Home', user });
+
+  try{
+    const profileRes = await api('/donors/profile');
+    renderProfile(profileRes.donor, profileRes);
+  }catch(e){ /* requireAuth already validated the token; a transient failure here just leaves cached header blank */ }
+
+  loadFeed();
+});
+</script>
+</body>
+</html>

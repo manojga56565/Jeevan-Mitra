@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Leaderboard — Jeevan Mitra</title>
+<link rel="stylesheet" href="../assets/css/tokens.css"/>
+<link rel="stylesheet" href="../assets/css/components.css"/>
+<link rel="stylesheet" href="../assets/css/app-shell.css"/>
+<style>
+  .rank-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:8px;background:#fff}
+  .rank-item.me{border-color:var(--red);background:var(--red-soft)}
+  .rank-num{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--muted);width:28px;flex-shrink:0}
+  .rank-item:nth-child(1) .rank-num{color:#D4A017}
+  .rank-item:nth-child(2) .rank-num{color:#9CA3AF}
+  .rank-item:nth-child(3) .rank-num{color:#B08D57}
+  .rank-name{font-weight:700;font-size:14.5px}
+  .rank-meta{font-size:12px;color:var(--slate)}
+  .rank-points{margin-left:auto;font-family:var(--font-display);font-weight:700;color:var(--red)}
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+  <div class="app-main">
+    <div id="navbar-root"></div>
+    <div class="app-content">
+      <h2 style="font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:20px;">Leaderboard</h2>
+      <div id="lb-list"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../components/toast.js"></script>
+<script src="../components/modal.js"></script>
+<script src="../components/navbar.js"></script>
+<script src="../components/sidebar.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('donor');
+  if(!user) return;
+  renderSidebar('sidebar-root', 'donor', 'leaderboard');
+  renderNavbar('navbar-root', { variant:'app', title:'Leaderboard', user });
+
+  const list = document.getElementById('lb-list');
+  try{
+    const res = await api('/donors/leaderboard');
+    const board = res.leaderboard || [];
+    if(!board.length){ list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><div class="title">No rankings yet</div></div>`; return; }
+    list.innerHTML = board.map((d,i)=>`
+      <div class="rank-item ${d._id===user._id||d._id===user.id?'me':''}">
+        <div class="rank-num">${i+1}</div>
+        <div class="blood-chip" style="width:36px;height:36px;font-size:11px;">${d.bloodGroup}</div>
+        <div>
+          <div class="rank-name">${d.name}</div>
+          <div class="rank-meta">${d.city} · ${d.totalDonations||0} donations</div>
+        </div>
+        <div class="rank-points">${d.points||0}</div>
+      </div>`).join('');
+  }catch(e){
+    list.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div class="title">Could not load leaderboard</div><div class="sub">${e.message}</div></div>`;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hospital Dashboard — Jeevan Mitra</title>
+<link rel="stylesheet" href="../assets/css/tokens.css"/>
+<link rel="stylesheet" href="../assets/css/components.css"/>
+<link rel="stylesheet" href="../assets/css/app-shell.css"/>
+<style>
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+  @media(min-width:640px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+  .stat-box{background:#fff;border:1px solid var(--border);border-radius:var(--r-md);padding:18px}
+  .stat-box .n{font-family:var(--font-display);font-size:26px;font-weight:700}
+  .stat-box .l{font-size:11.5px;color:var(--slate);font-weight:700;margin-top:2px}
+
+  .tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+  .tab{padding:10px 4px;font-size:13.5px;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;margin-right:18px;cursor:pointer}
+  .tab.active{color:var(--red);border-color:var(--red)}
+
+  .req-card{border:1px solid var(--border);border-radius:var(--r-md);padding:16px;margin-bottom:12px;background:#fff}
+  .req-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+  .req-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+  <div class="app-main">
+    <div id="navbar-root"></div>
+    <div class="app-content">
+
+      <div class="stat-grid">
+        <div class="stat-box"><div class="n" id="s-total">0</div><div class="l">TOTAL REQUESTS</div></div>
+        <div class="stat-box"><div class="n" id="s-pending">0</div><div class="l">PENDING</div></div>
+        <div class="stat-box"><div class="n" id="s-accepted">0</div><div class="l">ACCEPTED</div></div>
+        <div class="stat-box"><div class="n" id="s-completed">0</div><div class="l">COMPLETED</div></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div class="tabs">
+          <div class="tab active" data-status="all" onclick="filterRequests('all',this)">All</div>
+          <div class="tab" data-status="pending" onclick="filterRequests('pending',this)">Pending</div>
+          <div class="tab" data-status="accepted" onclick="filterRequests('accepted',this)">Accepted</div>
+          <div class="tab" data-status="completed" onclick="filterRequests('completed',this)">Completed</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('new-request-modal')">+ New request</button>
+      </div>
+
+      <div id="req-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- NEW REQUEST MODAL -->
+<div class="modal-overlay" id="new-request-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New blood request</div>
+    <div class="modal-sub">Eligible donors nearby will be notified immediately.</div>
+
+    <div class="field"><label class="field-label">Blood group</label>
+      <div class="chip-group" id="nr-blood"></div>
+    </div>
+    <div class="field"><label class="field-label">Urgency</label>
+      <div class="chip-group" id="nr-urgency">
+        <button type="button" class="chip selected" data-u="normal" onclick="selectUrgency('normal',this)">Normal</button>
+        <button type="button" class="chip" data-u="urgent" onclick="selectUrgency('urgent',this)">Urgent</button>
+        <button type="button" class="chip" data-u="emergency" onclick="selectUrgency('emergency',this)">Emergency</button>
+      </div>
+    </div>
+    <div class="field" style="display:flex;gap:12px;">
+      <div style="flex:1"><label class="field-label">Units needed</label><input class="field-input" id="nr-quantity" type="number" min="1" max="10" value="1"/></div>
+      <div style="flex:1"><label class="field-label">Expires in</label>
+        <select class="select-input" id="nr-expiry">
+          <option value="6">6 hours</option><option value="12">12 hours</option><option value="24" selected>24 hours</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label class="field-label">Patient name (optional)</label><input class="field-input" id="nr-patient"/></div>
+    <div class="field"><label class="field-label">Doctor reference (optional)</label><input class="field-input" id="nr-doctor"/></div>
+    <div class="field"><label class="field-label">Reason / notes</label><input class="field-input" id="nr-reason"/></div>
+
+    <button class="btn btn-primary btn-block" onclick="submitRequest()">Post request</button>
+  </div>
+</div>
+
+<!-- QR SCAN / COMPLETE MODAL -->
+<div class="modal-overlay" id="complete-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Verify & complete donation</div>
+    <div class="modal-sub">Paste the code from the donor's QR, or enter their ID manually.</div>
+    <div class="field"><label class="field-label">Donor QR token</label><input class="field-input" id="qr-token" placeholder="Paste scanned token"/></div>
+    <button class="btn btn-outline btn-block" onclick="scanQR()">Look up donor</button>
+    <div id="qr-result" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../components/toast.js"></script>
+<script src="../components/modal.js"></script>
+<script src="../components/navbar.js"></script>
+<script src="../components/sidebar.js"></script>
+<script>
+let selectedBlood = null, selectedUrgency = 'normal', allRequests = [], activeRequestForComplete = null, scannedDonor = null;
+
+function renderBloodChips(){
+  const groups = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
+  document.getElementById('nr-blood').innerHTML = groups.map(g =>
+    `<button type="button" class="chip" data-g="${g}" onclick="selectBlood('${g}',this)">${g}</button>`).join('');
+}
+function selectBlood(g, btn){ selectedBlood=g; document.querySelectorAll('#nr-blood .chip').forEach(c=>c.classList.remove('selected')); btn.classList.add('selected'); }
+function selectUrgency(u, btn){ selectedUrgency=u; document.querySelectorAll('#nr-urgency .chip').forEach(c=>c.classList.remove('selected')); btn.classList.add('selected'); }
+
+async function loadStats(){
+  try{
+    const res = await api('/hospitals/requests');
+    allRequests = res.requests || [];
+    document.getElementById('s-total').textContent = allRequests.length;
+    document.getElementById('s-pending').textContent = allRequests.filter(r=>r.status==='pending').length;
+    document.getElementById('s-accepted').textContent = allRequests.filter(r=>r.status==='accepted').length;
+    document.getElementById('s-completed').textContent = allRequests.filter(r=>r.status==='completed').length;
+    renderRequests('all');
+  }catch(e){
+    document.getElementById('req-list').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div class="title">Could not load requests</div><div class="sub">${e.message}</div></div>`;
+  }
+}
+
+function filterRequests(status, tabEl){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderRequests(status);
+}
+
+function requestCard(r){
+  const need = r.quantity||1;
+  const got = (r.acceptedDonors||[]).filter(a=>a.status!=='no_show').length;
+  const statusColor = { pending:'badge-slate', accepted:'badge-amber', completed:'badge-green', cancelled:'badge-slate', expired:'badge-slate' }[r.status]||'badge-slate';
+  const acceptedList = (r.acceptedDonors||[]).filter(a=>a.status==='accepted');
+  return `
+    <div class="req-card">
+      <div class="req-top">
+        <div>
+          <span class="blood-chip" style="width:34px;height:34px;font-size:12px;display:inline-flex;">${r.bloodGroup}</span>
+          <span class="badge ${statusColor}" style="margin-left:8px;">${r.status}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">${got}/${need} filled</div>
+      </div>
+      ${r.patientName?`<div style="font-size:13px;color:var(--slate);">Patient: ${r.patientName}</div>`:''}
+      ${acceptedList.length?`<div style="margin-top:8px;padding:10px;background:var(--paper-dim);border-radius:var(--r-sm);font-size:12.5px;">
+        ${acceptedList.map(a=>`Donor accepted · ${new Date(a.acceptedAt).toLocaleTimeString()}`).join('<br/>')}
+      </div>`:''}
+      <div class="req-actions">
+        ${r.status!=='completed'&&r.status!=='cancelled'?`<button class="btn btn-outline btn-sm" onclick="deleteRequest('${r._id}')">Delete</button>`:''}
+        ${r.status==='accepted'?`<button class="btn btn-primary btn-sm" onclick="openCompleteFlow('${r._id}')">Verify & complete</button>`:''}
+      </div>
+    </div>`;
+}
+
+function renderRequests(status){
+  const list = status==='all' ? allRequests : allRequests.filter(r=>r.status===status);
+  const el = document.getElementById('req-list');
+  if(!list.length){ el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><div class="title">No requests here</div></div>`; return; }
+  el.innerHTML = list.map(requestCard).join('');
+}
+
+async function submitRequest(){
+  if(!selectedBlood) return showToast('Select a blood group', 'error');
+  const quantity = parseInt(document.getElementById('nr-quantity').value)||1;
+
+  let lat, lng;
+  try{
+    const pos = await new Promise((res,rej)=>{
+      if(!navigator.geolocation) return rej();
+      navigator.geolocation.getCurrentPosition(res, rej, { timeout:5000 });
+    });
+    lat = pos.coords.latitude; lng = pos.coords.longitude;
+  }catch(e){ showToast('Location unavailable — using default map location', 'warning'); }
+
+  try{
+    await api('/hospitals/requests', 'POST', {
+      bloodGroup: selectedBlood,
+      urgency: selectedUrgency,
+      quantity,
+      expiryHours: parseInt(document.getElementById('nr-expiry').value),
+      patientName: document.getElementById('nr-patient').value,
+      doctorRefNo: document.getElementById('nr-doctor').value,
+      patientReason: document.getElementById('nr-reason').value,
+      ...(lat!==undefined && { lat, lng })
+    });
+    closeModal('new-request-modal');
+    showToast('Request posted — donors are being notified', 'success');
+    loadStats();
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+async function deleteRequest(id){
+  confirmDialog({
+    icon:'🗑', title:'Delete request?', message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+    onConfirm: async ()=>{
+      try{ await api(`/hospitals/requests/${id}`, 'DELETE'); showToast('Request deleted','success'); loadStats(); }
+      catch(e){ showToast(e.message,'error'); }
+    }
+  });
+}
+
+function openCompleteFlow(requestId){
+  activeRequestForComplete = requestId;
+  scannedDonor = null;
+  document.getElementById('qr-token').value = '';
+  document.getElementById('qr-result').innerHTML = '';
+  openModal('complete-modal');
+}
+
+async function scanQR(){
+  const token = document.getElementById('qr-token').value.trim();
+  if(!token) return showToast('Paste the donor QR token', 'error');
+  try{
+    const res = await api('/hospitals/scan-qr', 'POST', { qrToken: token });
+    scannedDonor = res.donor;
+    document.getElementById('qr-result').innerHTML = `
+      <div class="card">
+        <div style="font-weight:700;font-size:15px;">${res.donor.name}</div>
+        <div style="font-size:13px;color:var(--slate);margin:4px 0 10px;">${res.donor.bloodGroup} · ${res.donor.phone}</div>
+        <div class="badge ${res.eligible?'badge-green':'badge-red'}">${res.eligible?'Eligible to donate':'In cooldown'}</div>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="finalizeCompletion()" ${!res.eligible?'disabled':''}>✅ Confirm donation complete</button>
+      </div>`;
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+async function finalizeCompletion(){
+  if(!scannedDonor || !activeRequestForComplete) return;
+  try{
+    await api(`/hospitals/requests/${activeRequestForComplete}/complete`, 'PATCH', { donorId: scannedDonor._id });
+    closeModal('complete-modal');
+    showToast('Donation completed — cooldown & points applied', 'success');
+    loadStats();
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('hospital');
+  if(!user) return;
+
+  renderSidebar('sidebar-root', 'hospital', 'hospital');
+  renderNavbar('navbar-root', { variant:'app', title:'Dashboard', user });
+  renderBloodChips();
+  loadStats();
+});
+</script>
+</body>
+</html>
