@@ -2,10 +2,12 @@
    Single source of truth for talking to the backend. Update API_BASE for
    your deployment.
 */
-const API_BASE = window.API_BASE_URL || 'https://jeevan-mitra-1vot.onrender.com/api';
+const API_BASE = (window.API_BASE_URL && window.API_BASE_URL.trim()) || 'http://localhost:5000/api';
+
 const AUTH_ENDPOINTS = [
   '/auth/donor/send-otp', '/auth/donor/verify-otp',
-  '/auth/hospital/login', '/auth/admin/login'
+  '/auth/hospital/login', '/auth/admin/login',
+  '/auth/forgot-password', '/auth/reset-password'
 ];
 
 function getToken(){ return localStorage.getItem('jm_token') || sessionStorage.getItem('jm_token'); }

@@ -16,6 +16,13 @@ exports.updateProfile = asyncHandler(async (req, res) => {
   success(res, { donor }, 'Profile updated successfully');
 });
 
+exports.uploadPhoto = asyncHandler(async (req, res) => {
+  if (!req.file) throw Object.assign(new Error('No photo uploaded'), { statusCode: 400 });
+  const profilePhotoUrl = `/uploads/donors/${req.file.filename}`;
+  const donor = await donorService.updateProfile(req.user.id, { profilePhotoUrl });
+  success(res, { donor, profilePhotoUrl }, 'Photo uploaded successfully');
+});
+
 exports.changePassword = asyncHandler(async (req, res) => {
   await donorService.changePassword(req.user.id, req.body.password);
   success(res, {}, 'Password updated successfully');

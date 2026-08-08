@@ -39,6 +39,42 @@ const DonorSchema = new mongoose.Schema({
         max: 65
     },
 
+    dateOfBirth: {
+        type: Date,
+        default: null
+    },
+
+    gender: {
+        type: String,
+        enum: ['male', 'female', 'other', ''],
+        default: ''
+    },
+
+    district: {
+        type: String,
+        default: ''
+    },
+
+    homeTown: {
+        type: String,
+        default: ''
+    },
+
+    livingTown: {
+        type: String,
+        default: ''
+    },
+
+    emergencyContact: {
+        type: String,
+        default: ''
+    },
+
+    profilePhotoUrl: {
+        type: String,
+        default: ''
+    },
+
     weight: {
         type: Number,
         required: true,

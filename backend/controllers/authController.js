@@ -21,3 +21,13 @@ exports.adminLogin = asyncHandler(async (req, res) => {
   const result = await authService.adminLogin(req.body);
   success(res, result, 'Welcome back, Administrator!');
 });
+
+exports.forgotPassword = asyncHandler(async (req, res) => {
+  const result = await authService.sendPasswordResetCode(req.body);
+  success(res, result, 'Reset code sent');
+});
+
+exports.resetPassword = asyncHandler(async (req, res) => {
+  await authService.resetPassword(req.body);
+  success(res, {}, 'Password reset successfully');
+});

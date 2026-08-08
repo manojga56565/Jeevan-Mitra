@@ -10,19 +10,33 @@ const logger = require('../utils/logger');
 // would move to Redis for a real multi-instance production deployment.
 const otpStore = {};
 
+// Separate in-memory store for password-reset codes (hospital/admin), same
+// mock-code pattern as donor OTP since there's no real email/SMS provider yet.
+const resetStore = {};
+
+function calcAgeFromDOB(dob) {
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const diff = Date.now() - d.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+}
+
 function generateToken(payload, expiresIn = '30d') {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
 }
 
 // ═══ DONOR — MOCK OTP (MSG91 disabled — always returns the OTP in the
 // response so the frontend can show it directly, no real SMS sent) ═══
-async function sendDonorOTP({ phone, name, city, bloodGroup, age, weight, homeTown, livingTown, gender, emergencyContact }) {
+async function sendDonorOTP({ phone, name, city, bloodGroup, age, weight, homeTown, livingTown, gender, emergencyContact, dateOfBirth, district, profilePhotoUrl }) {
   if (!phone) throw Object.assign(new Error('Phone is required'), { statusCode: 400 });
+
+  const resolvedAge = age || (dateOfBirth ? calcAgeFromDOB(dateOfBirth) : undefined);
 
   const otp = generateOTP();
   otpStore[phone] = {
     otp,
-    name, city, bloodGroup, age, weight, homeTown, livingTown, gender, emergencyContact,
+    name, city, bloodGroup, age: resolvedAge, weight, homeTown, livingTown, gender, emergencyContact,
+    dateOfBirth, district, profilePhotoUrl,
     expires: getExpiryTimestamp()
   };
 
@@ -49,6 +63,13 @@ async function verifyDonorOTP({ phone, otp }) {
       bloodGroup: record.bloodGroup || 'O+',
       age: record.age || 18,
       weight: record.weight || 50,
+      dateOfBirth: record.dateOfBirth || null,
+      gender: record.gender || '',
+      district: record.district || '',
+      homeTown: record.homeTown || '',
+      livingTown: record.livingTown || '',
+      emergencyContact: record.emergencyContact || '',
+      profilePhotoUrl: record.profilePhotoUrl || '',
       // Donors authenticate via OTP only, but the schema requires a
       // password — each gets a random one they will never need.
       password: crypto.randomBytes(16).toString('hex'),
@@ -115,4 +136,50 @@ async function adminLogin({ email, password }) {
   throw Object.assign(new Error('Invalid admin credentials'), { statusCode: 401 });
 }
 
-module.exports = { generateToken, sendDonorOTP, verifyDonorOTP, hospitalLogin, adminLogin };
+// ═══ FORGOT / RESET PASSWORD — hospital or admin, mock code (no real email
+// provider yet, so the code is returned directly like the donor mock OTP) ═══
+async function sendPasswordResetCode({ role, identifier }) {
+  if (!role || !identifier) throw Object.assign(new Error('Role and identifier are required'), { statusCode: 400 });
+  if (!['hospital', 'admin'].includes(role)) throw Object.assign(new Error('Invalid role'), { statusCode: 400 });
+
+  const Model = role === 'hospital' ? Hospital : Admin;
+  const account = await Model.findOne({ email: identifier.toLowerCase() });
+  if (!account) throw Object.assign(new Error('No account found with that email'), { statusCode: 404 });
+
+  const code = generateOTP();
+  resetStore[`${role}:${identifier.toLowerCase()}`] = { code, expires: getExpiryTimestamp() };
+
+  logger.info(`[MOCK RESET CODE] ${role}:${identifier} -> ${code}`);
+  return { code }; // returned directly since there's no real email/SMS provider right now
+}
+
+async function resetPassword({ role, identifier, code, newPassword }) {
+  if (!role || !identifier || !code || !newPassword) {
+    throw Object.assign(new Error('Role, identifier, code, and new password are required'), { statusCode: 400 });
+  }
+  if (newPassword.length < 6) throw Object.assign(new Error('Password must be at least 6 characters'), { statusCode: 400 });
+
+  const key = `${role}:${identifier.toLowerCase()}`;
+  const record = resetStore[key];
+  if (!record) throw Object.assign(new Error('Reset code expired or not requested'), { statusCode: 400 });
+  if (record.code !== code) throw Object.assign(new Error('Invalid reset code'), { statusCode: 400 });
+  if (isExpired(record.expires)) {
+    delete resetStore[key];
+    throw Object.assign(new Error('Reset code expired'), { statusCode: 400 });
+  }
+
+  const Model = role === 'hospital' ? Hospital : Admin;
+  const account = await Model.findOne({ email: identifier.toLowerCase() });
+  if (!account) throw Object.assign(new Error('Account not found'), { statusCode: 404 });
+
+  account.password = newPassword; // pre-save hook hashes it
+  await account.save();
+  delete resetStore[key];
+
+  return true;
+}
+
+module.exports = {
+  generateToken, sendDonorOTP, verifyDonorOTP, hospitalLogin, adminLogin,
+  sendPasswordResetCode, resetPassword
+};

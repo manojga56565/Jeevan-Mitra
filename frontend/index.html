@@ -87,6 +87,40 @@
   #splash .logo{font-size:48px;animation:heartbeat 1.4s ease infinite}
   @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.1)}60%{transform:scale(1)}}
   #splash .brand{font-family:var(--font-display);color:#fff;font-size:22px;font-weight:700}
+
+  /* ═══ BLUEPRINT ADDITIONS — richer registration + quick login + reset ═══ */
+  .steps-indicator{display:flex;gap:6px;margin-bottom:24px}
+  .steps-indicator .step-dot{flex:1;height:4px;border-radius:99px;background:var(--border)}
+  .steps-indicator .step-dot.done{background:var(--red)}
+
+  .phone-row{display:flex;gap:8px}
+  .phone-row .cc{display:flex;align-items:center;padding:0 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--paper-dim);font-size:14px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+  .phone-row .field-input{flex:1}
+
+  .row-2{display:flex;gap:12px}
+  .row-2>*{flex:1}
+
+  .photo-picker{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .photo-preview{width:52px;height:52px;border-radius:50%;background:var(--red-soft);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0}
+  .photo-preview img{width:100%;height:100%;object-fit:cover}
+  .photo-upload-btn{flex:1;text-align:center;cursor:pointer;font-size:13px;font-weight:700}
+  .photo-upload-btn input{display:none}
+
+  .info-box{background:var(--blue-soft);color:var(--blue);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:18px}
+
+  .terms-row{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--slate);margin:16px 0}
+  .terms-row input{margin-top:2px}
+  .terms-row span{color:var(--red);font-weight:700}
+
+  .otp-hint{background:var(--amber-soft);color:#8A5A12;border-radius:var(--r-sm);padding:10px 14px;font-size:13px;font-weight:700;margin-bottom:16px;text-align:center}
+
+  .fp-link{text-align:right;margin:-8px 0 18px}
+  .fp-link span{font-size:12.5px;color:var(--red);font-weight:700;cursor:pointer}
+
+  .link-line{text-align:center;margin-top:18px;font-size:13px;color:var(--slate)}
+  .link-line a{color:var(--red);font-weight:700}
+
+  .admin-access-link{text-align:center;margin-top:14px;font-size:11.5px;color:var(--muted);cursor:pointer}
 </style>
 </head>
 <body>
@@ -109,6 +143,8 @@
       <button class="btn btn-primary" onclick="showScreen('donor-register')">Join as a donor</button>
       <button class="btn btn-outline" onclick="showScreen('hospital-login')">Hospital login</button>
     </div>
+    <div class="link-line">Already registered? <a href="#" onclick="showScreen('quick-login')">Quick login →</a></div>
+    <div class="admin-access-link" onclick="showScreen('admin-login')">🔐 Admin access</div>
   </div>
 
   <div class="pulse-divider">
@@ -184,19 +220,66 @@
   <div class="auth-shell">
     <div class="auth-back" onclick="showScreen('landing')">← Back</div>
     <div class="auth-title">Join as a donor</div>
-    <div class="auth-sub">Takes about a minute. We'll text you a code to verify your number.</div>
+    <div class="auth-sub">Takes about two minutes. We'll text you a code to verify your number.</div>
+    <div class="steps-indicator"><div class="step-dot done"></div><div class="step-dot"></div></div>
+
+    <div class="photo-picker">
+      <div class="photo-preview" id="d-photo-preview">🫀</div>
+      <label class="btn btn-outline btn-sm photo-upload-btn">Add photo (optional)<input type="file" accept="image/*" id="d-photo" onchange="previewDonorPhoto(this)"/></label>
+    </div>
 
     <div class="field"><label class="field-label">Full name</label><input class="field-input" id="d-name" placeholder="Your name"/></div>
-    <div class="field"><label class="field-label">Phone number</label><input class="field-input" id="d-phone" type="tel" maxlength="10" placeholder="9XXXXXXXXX"/></div>
+    <div class="field"><label class="field-label">Phone number</label>
+      <div class="phone-row"><div class="cc">🇮🇳 +91</div><input class="field-input" id="d-phone" type="tel" maxlength="10" placeholder="9XXXXXXXXX"/></div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label class="field-label">Date of birth</label><input class="field-input" id="d-dob" type="date"/></div>
+      <div class="field"><label class="field-label">Gender</label>
+        <select class="select-input" id="d-gender">
+          <option value="">Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
     <div class="field"><label class="field-label">Blood group</label>
       <div class="chip-group" id="d-blood-group"></div>
     </div>
+    <div class="field"><label class="field-label">District</label>
+      <select class="select-input" id="d-district"><option value="">Select district</option></select>
+    </div>
+    <div class="row-2">
+      <div class="field"><label class="field-label">Home town</label><input class="field-input" id="d-hometown" placeholder="Native place"/></div>
+      <div class="field"><label class="field-label">Living town</label><input class="field-input" id="d-livingtown" placeholder="Where you live now"/></div>
+    </div>
     <div class="field"><label class="field-label">City</label><input class="field-input" id="d-city" placeholder="e.g. Hyderabad"/></div>
-    <div class="field" style="display:flex;gap:12px;">
-      <div style="flex:1"><label class="field-label">Age</label><input class="field-input" id="d-age" type="number" placeholder="18-65"/></div>
-      <div style="flex:1"><label class="field-label">Weight (kg)</label><input class="field-input" id="d-weight" type="number" placeholder="45+"/></div>
+    <div class="row-2">
+      <div class="field"><label class="field-label">Age</label><input class="field-input" id="d-age" type="number" placeholder="18-65"/></div>
+      <div class="field"><label class="field-label">Weight (kg)</label><input class="field-input" id="d-weight" type="number" placeholder="45+"/></div>
+    </div>
+    <div class="field"><label class="field-label">Emergency contact (optional)</label><input class="field-input" id="d-emergency" type="tel" maxlength="10" placeholder="Alternate number"/></div>
+    <div class="field"><label class="field-label">Email (optional)</label><input class="field-input" id="d-email" type="email" placeholder="your@email.com"/></div>
+
+    <div class="terms-row">
+      <input type="checkbox" id="d-terms"/>
+      <label for="d-terms">I agree to the <span>Terms & Conditions</span> and <span>Privacy Policy</span> of Jeevan Mitra</label>
     </div>
     <button class="btn btn-primary btn-block" onclick="donorSendOTP()">Send verification code</button>
+  </div>
+</section>
+
+<!-- QUICK LOGIN — returning donor, phone + OTP only -->
+<section class="screen" id="quick-login">
+  <div class="auth-shell">
+    <div class="auth-back" onclick="showScreen('landing')">← Back</div>
+    <div class="auth-title">Quick login</div>
+    <div class="auth-sub">Enter your registered phone number and we'll send you a code.</div>
+    <div class="field"><label class="field-label">Phone number</label>
+      <div class="phone-row"><div class="cc">🇮🇳 +91</div><input class="field-input" id="ql-phone" type="tel" maxlength="10" placeholder="9XXXXXXXXX"/></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="quickLoginOTP()">Send code</button>
+    <div class="link-line">New here? <a href="#" onclick="showScreen('donor-register')">Register as a donor</a></div>
   </div>
 </section>
 
@@ -224,11 +307,13 @@
     <div class="auth-back" onclick="showScreen('landing')">← Back</div>
     <div class="auth-title">Hospital login</div>
     <div class="auth-sub">Access your dashboard to post requests and manage donations.</div>
+    <div class="info-box">ℹ️ Hospital accounts are created by admin only. New hospital? Contact admin@jeevanmitra.in</div>
     <div class="field"><label class="field-label">Email</label><input class="field-input" id="h-email" type="email" placeholder="hospital@example.com"/></div>
     <div class="field"><label class="field-label">Password</label><input class="field-input" id="h-pass" type="password" placeholder="••••••••"/></div>
+    <div class="fp-link"><span onclick="openForgotPassword('hospital')">Forgot password?</span></div>
     <button class="btn btn-primary btn-block" onclick="hospitalLogin()">Log in</button>
-    <div style="text-align:center;margin-top:18px;font-size:13px;color:var(--slate);">
-      Admin access? <a href="#" style="color:var(--red);font-weight:700;" onclick="showScreen('admin-login')">Sign in here</a>
+    <div class="link-line">
+      Admin access? <a href="#" onclick="showScreen('admin-login')">Sign in here</a>
     </div>
   </div>
 </section>
@@ -241,17 +326,51 @@
     <div class="auth-sub">Restricted — authorized personnel only.</div>
     <div class="field"><label class="field-label">Email</label><input class="field-input" id="a-email" type="email"/></div>
     <div class="field"><label class="field-label">Password</label><input class="field-input" id="a-pass" type="password"/></div>
+    <div class="fp-link"><span onclick="openForgotPassword('admin')">Forgot password?</span></div>
     <button class="btn btn-dark btn-block" onclick="adminLogin()">Log in</button>
   </div>
 </section>
 
+<!-- FORGOT PASSWORD — shared by hospital & admin -->
+<section class="screen" id="forgot-password">
+  <div class="auth-shell">
+    <div class="auth-back" id="fp-back" onclick="showScreen('hospital-login')">← Back</div>
+    <div class="auth-title">Reset password</div>
+    <div class="auth-sub">We'll send a reset code to your registered email.</div>
+
+    <div id="fp-step1">
+      <div class="field"><label class="field-label">Email</label><input class="field-input" id="fp-email" type="email" placeholder="you@example.com"/></div>
+      <button class="btn btn-primary btn-block" onclick="sendResetCode()">Send reset code</button>
+    </div>
+    <div id="fp-step2" style="display:none;">
+      <div class="otp-hint" id="fp-hint"></div>
+      <div class="field"><label class="field-label">Reset code</label><input class="field-input" id="fp-code" maxlength="6" placeholder="6-digit code"/></div>
+      <div class="field"><label class="field-label">New password</label><input class="field-input" id="fp-newpass" type="password" placeholder="At least 6 characters"/></div>
+      <div class="field"><label class="field-label">Confirm new password</label><input class="field-input" id="fp-confirmpass" type="password" placeholder="Re-enter new password"/></div>
+      <button class="btn btn-primary btn-block" onclick="submitResetPassword()">Reset password</button>
+    </div>
+  </div>
+</section>
+
+
+<script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
 <script src="components/toast.js"></script>
 <script src="components/modal.js"></script>
 <script src="components/navbar.js"></script>
 <script>
 let selectedBloodGroup = null;
-let otpContext = null; // 'donor'
+let otpContext = null; // 'donor' | 'quick'
+let selectedPhotoFile = null;
+let fpRole = 'hospital'; // 'hospital' | 'admin'
+
+const TG_DISTRICTS = [
+  'Adilabad','Bhadradri Kothagudem','Hyderabad','Jagtial','Jangaon','Jayashankar Bhupalpally',
+  'Jogulamba Gadwal','Kamareddy','Karimnagar','Khammam','Komaram Bheem Asifabad','Mahabubabad',
+  'Mahabubnagar','Mancherial','Medak','Medchal-Malkajgiri','Mulugu','Nagarkurnool','Nalgonda',
+  'Narayanpet','Nirmal','Nizamabad','Peddapalli','Rajanna Sircilla','Rangareddy','Sangareddy',
+  'Siddipet','Suryapet','Vikarabad','Wanaparthy','Warangal','Hanumakonda','Yadadri Bhuvanagiri'
+];
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -270,6 +389,23 @@ function selectBloodGroup(g, btn){
   selectedBloodGroup = g;
   document.querySelectorAll('#d-blood-group .chip').forEach(c=>c.classList.remove('selected'));
   btn.classList.add('selected');
+}
+
+function renderDistrictOptions(){
+  const sel = document.getElementById('d-district');
+  sel.innerHTML = '<option value="">Select district</option>' +
+    TG_DISTRICTS.map(d => `<option value="${d}">${d}</option>`).join('');
+}
+
+function previewDonorPhoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  selectedPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('d-photo-preview').innerHTML = `<img src="${e.target.result}" alt="Preview"/>`;
+  };
+  reader.readAsDataURL(file);
 }
 
 // FAQ accordion
@@ -299,22 +435,47 @@ function toggleFAQ(i){
 async function donorSendOTP(){
   const name = document.getElementById('d-name').value.trim();
   const phone = document.getElementById('d-phone').value.trim();
+  const dob = document.getElementById('d-dob').value;
+  const gender = document.getElementById('d-gender').value;
+  const district = document.getElementById('d-district').value;
+  const homeTown = document.getElementById('d-hometown').value.trim();
+  const livingTown = document.getElementById('d-livingtown').value.trim();
   const city = document.getElementById('d-city').value.trim();
   const age = document.getElementById('d-age').value;
   const weight = document.getElementById('d-weight').value;
+  const emergencyContact = document.getElementById('d-emergency').value.trim();
+  const email = document.getElementById('d-email').value.trim();
+  const terms = document.getElementById('d-terms').checked;
 
   if(!name||!phone||!city||!age||!weight||!selectedBloodGroup){
-    return showToast('Please fill in every field', 'error');
+    return showToast('Please fill in every required field', 'error');
   }
   if(phone.length !== 10) return showToast('Enter a valid 10-digit phone number', 'error');
+  if(!terms) return showToast('Please accept the Terms & Privacy Policy', 'error');
 
   try{
-    const res = await api('/auth/donor/send-otp', 'POST', { phone, name, city, bloodGroup: selectedBloodGroup, age: Number(age), weight: Number(weight) });
+    const res = await api('/auth/donor/send-otp', 'POST', {
+      phone, name, city, bloodGroup: selectedBloodGroup, age: Number(age), weight: Number(weight),
+      dateOfBirth: dob || undefined, gender, district, homeTown, livingTown, emergencyContact, email
+    });
     otpContext = 'donor';
     document.getElementById('otp-sub').textContent = `Code sent to ${phone}`;
     showScreen('otp-verify');
     document.querySelector('.otp-box').focus();
     if(res.otp) showToast(`Mock OTP: ${res.otp}`, 'info', 8000); // MSG91 disabled — OTP shown directly
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+async function quickLoginOTP(){
+  const phone = document.getElementById('ql-phone').value.trim();
+  if(phone.length !== 10) return showToast('Enter a valid 10-digit phone number', 'error');
+  try{
+    const res = await api('/auth/donor/send-otp', 'POST', { phone });
+    otpContext = 'quick';
+    document.getElementById('otp-sub').textContent = `Code sent to ${phone}`;
+    showScreen('otp-verify');
+    document.querySelector('.otp-box').focus();
+    if(res.otp) showToast(`Mock OTP: ${res.otp}`, 'info', 8000);
   }catch(e){ showToast(e.message, 'error'); }
 }
 
@@ -325,11 +486,26 @@ function getOTPValue(){
 async function verifyOTP(){
   const otp = getOTPValue();
   if(otp.length !== 6) return showToast('Enter the complete 6-digit code', 'error');
-  const phone = document.getElementById('d-phone').value.trim();
+  const phone = (otpContext === 'quick'
+    ? document.getElementById('ql-phone').value.trim()
+    : document.getElementById('d-phone').value.trim());
 
   try{
     const res = await api('/auth/donor/verify-otp', 'POST', { phone, otp });
     setSession(res.token, 'donor', res.donor, true);
+
+    if(selectedPhotoFile){
+      try{
+        const form = new FormData();
+        form.append('photo', selectedPhotoFile);
+        await fetch(`${API_BASE}/donors/photo`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${res.token}` },
+          body: form
+        });
+      }catch(photoErr){ /* non-fatal — profile photo can be added later from the profile page */ }
+    }
+
     showToast('Welcome to Jeevan Mitra!', 'success');
     window.location.href = 'pages/donor.html';
   }catch(e){ showToast(e.message, 'error'); }
@@ -359,6 +535,44 @@ async function adminLogin(){
   }catch(e){ showToast(e.message, 'error'); }
 }
 
+// ═══ FORGOT / RESET PASSWORD (hospital & admin) ═══
+function openForgotPassword(role){
+  fpRole = role;
+  document.getElementById('fp-back').setAttribute('onclick', `showScreen('${role}-login')`);
+  document.getElementById('fp-step1').style.display = '';
+  document.getElementById('fp-step2').style.display = 'none';
+  document.getElementById('fp-email').value = '';
+  showScreen('forgot-password');
+}
+
+async function sendResetCode(){
+  const identifier = document.getElementById('fp-email').value.trim();
+  if(!identifier) return showToast('Enter your registered email', 'error');
+  try{
+    const res = await api('/auth/forgot-password', 'POST', { role: fpRole, identifier });
+    document.getElementById('fp-step1').style.display = 'none';
+    document.getElementById('fp-step2').style.display = '';
+    const hint = document.getElementById('fp-hint');
+    if(res.code){ hint.textContent = `Mock reset code: ${res.code}`; hint.style.display = ''; } // no real email provider yet
+    else hint.style.display = 'none';
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+async function submitResetPassword(){
+  const identifier = document.getElementById('fp-email').value.trim();
+  const code = document.getElementById('fp-code').value.trim();
+  const newPassword = document.getElementById('fp-newpass').value;
+  const confirmPassword = document.getElementById('fp-confirmpass').value;
+  if(!code||!newPassword||!confirmPassword) return showToast('Fill in every field', 'error');
+  if(newPassword.length < 6) return showToast('Password must be at least 6 characters', 'error');
+  if(newPassword !== confirmPassword) return showToast('Passwords do not match', 'error');
+  try{
+    await api('/auth/reset-password', 'POST', { role: fpRole, identifier, code, newPassword });
+    showToast('Password reset — please log in', 'success');
+    showScreen(fpRole === 'hospital' ? 'hospital-login' : 'admin-login');
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
 // OTP box auto-advance
 document.addEventListener('input', (e)=>{
   if(e.target.classList.contains('otp-box')){
@@ -372,6 +586,7 @@ document.addEventListener('input', (e)=>{
 window.addEventListener('DOMContentLoaded', async ()=>{
   renderNavbar('navbar-root', { variant:'public' });
   renderBloodChips();
+  renderDistrictOptions();
   renderFAQ();
 
   // If already logged in with a valid session, skip straight to the right dashboard

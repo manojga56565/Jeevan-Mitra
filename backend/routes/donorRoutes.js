@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const donorController = require('../controllers/donorController');
 const { auth } = require('../middleware/auth');
+const { uploadDonorPhoto } = require('../middleware/upload');
 
 // Feed is public-readable in the sense that a logged-in donor sees it, but still requires auth
 router.get('/feed', auth('donor'), donorController.getFeed);
@@ -9,6 +10,7 @@ router.patch('/accept/:id', auth('donor'), donorController.acceptRequest);
 
 router.get('/profile', auth('donor'), donorController.getProfile);
 router.put('/profile', auth('donor'), donorController.updateProfile);
+router.post('/photo', auth('donor'), uploadDonorPhoto.single('photo'), donorController.uploadPhoto);
 router.put('/change-password', auth('donor'), donorController.changePassword);
 router.put('/availability', auth('donor'), donorController.toggleAvailability);
 router.put('/deactivate', auth('donor'), donorController.deactivate);
