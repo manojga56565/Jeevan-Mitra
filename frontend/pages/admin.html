@@ -48,13 +48,15 @@
       </div>
 
       <div class="tab-panel active" id="panel-hospitals">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <input class="field-input" id="hosp-search" placeholder="Search hospitals…" style="max-width:280px;" oninput="renderHospitalsTable()"/>
           <button class="btn btn-primary btn-sm" onclick="openModal('add-hospital-modal')">+ Add hospital</button>
         </div>
         <div class="table-wrap"><table class="data-table" id="hospitals-table"></table></div>
       </div>
 
       <div class="tab-panel" id="panel-donors">
+        <input class="field-input" id="donor-search" placeholder="Search donors…" style="max-width:280px;margin-bottom:12px;" oninput="renderDonorsTable()"/>
         <div class="table-wrap"><table class="data-table" id="donors-table"></table></div>
       </div>
 
@@ -117,6 +119,51 @@
   </div>
 </div>
 
+<!-- EDIT HOSPITAL MODAL -->
+<div class="modal-overlay" id="edit-hospital-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit hospital</div>
+    <input type="hidden" id="eh-id"/>
+    <div class="field"><label class="field-label">Hospital name</label><input class="field-input" id="eh-name"/></div>
+    <div class="field"><label class="field-label">City</label><input class="field-input" id="eh-city"/></div>
+    <div class="field"><label class="field-label">Address</label><input class="field-input" id="eh-address"/></div>
+    <div class="field"><label class="field-label">Contact person</label><input class="field-input" id="eh-contact"/></div>
+    <div class="field"><label class="field-label">Phone</label><input class="field-input" id="eh-phone"/></div>
+    <button class="btn btn-primary btn-block" onclick="saveHospitalEdit()">Save changes</button>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL (shared: hospital or donor) -->
+<div class="modal-overlay" id="reset-password-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Reset password</div>
+    <input type="hidden" id="rp-id"/>
+    <input type="hidden" id="rp-type"/>
+    <div class="field"><label class="field-label">New password</label><input class="field-input" id="rp-newpass" type="password" placeholder="At least 6 characters"/></div>
+    <button class="btn btn-primary btn-block" onclick="submitPasswordReset()">Reset password</button>
+  </div>
+</div>
+
+<!-- EDIT DONOR MODAL -->
+<div class="modal-overlay" id="edit-donor-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit donor</div>
+    <input type="hidden" id="ed-id"/>
+    <div class="field"><label class="field-label">Name</label><input class="field-input" id="ed-name"/></div>
+    <div class="field"><label class="field-label">City</label><input class="field-input" id="ed-city"/></div>
+    <div class="field"><label class="field-label">Blood group</label>
+      <select class="select-input" id="ed-bloodgroup">
+        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+        <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="saveDonorEdit()">Save changes</button>
+  </div>
+</div>
+
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/api.js"></script>
 <script src="../components/toast.js"></script>
@@ -124,6 +171,9 @@
 <script src="../components/navbar.js"></script>
 <script src="../components/sidebar.js"></script>
 <script>
+let allHospitals = [];
+let allDonors = [];
+
 function switchTab(name, tabEl){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -153,7 +203,15 @@ async function loadHospitals(){
   table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
   try{
     const res = await api('/admin/hospitals');
-    const rows = (res.hospitals||[]).map(h => `
+    allHospitals = res.hospitals || [];
+    renderHospitalsTable();
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+function renderHospitalsTable(){
+  const table = document.getElementById('hospitals-table');
+  const q = (document.getElementById('hosp-search')?.value || '').toLowerCase();
+  const list = allHospitals.filter(h => !q || h.hospitalName?.toLowerCase().includes(q) || h.city?.toLowerCase().includes(q) || h.email?.toLowerCase().includes(q));
+  const rows = list.map(h => `
       <tr>
         <td><strong>${h.hospitalName}</strong><br/><span style="color:var(--muted);font-size:11.5px;">${h.email}</span></td>
         <td>${h.city}</td>
@@ -162,11 +220,35 @@ async function loadHospitals(){
         <td class="row-actions">
           ${!h.isVerified?`<button class="btn btn-primary btn-sm" onclick="verifyHospital('${h._id}','approve')">Approve</button><button class="btn btn-outline btn-sm" onclick="verifyHospital('${h._id}','reject')">Reject</button>`:''}
           ${h.isVerified?`<button class="btn btn-outline btn-sm" onclick="toggleHospital('${h._id}')">${h.isActive?'Suspend':'Activate'}</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="openHospitalEdit('${h._id}')">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="openResetPassword('${h._id}','hospital')">Reset password</button>
           <button class="btn btn-outline btn-sm" onclick="deleteHospitalRow('${h._id}','${h.hospitalName}')">Delete</button>
         </td>
       </tr>`).join('');
-    table.innerHTML = `<thead><tr><th>Hospital</th><th>City</th><th>Verification</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No hospitals yet</td></tr>'}</tbody>`;
-  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+  table.innerHTML = `<thead><tr><th>Hospital</th><th>City</th><th>Verification</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No hospitals match</td></tr>'}</tbody>`;
+}
+function openHospitalEdit(id){
+  const h = allHospitals.find(x => x._id === id);
+  if(!h) return;
+  document.getElementById('eh-id').value = h._id;
+  document.getElementById('eh-name').value = h.hospitalName || '';
+  document.getElementById('eh-city').value = h.city || '';
+  document.getElementById('eh-address').value = h.address || '';
+  document.getElementById('eh-contact').value = h.contactPerson || '';
+  document.getElementById('eh-phone').value = h.phone || '';
+  openModal('edit-hospital-modal');
+}
+async function saveHospitalEdit(){
+  const id = document.getElementById('eh-id').value;
+  const body = {
+    hospitalName: document.getElementById('eh-name').value.trim(),
+    city: document.getElementById('eh-city').value.trim(),
+    address: document.getElementById('eh-address').value.trim(),
+    contactPerson: document.getElementById('eh-contact').value.trim(),
+    phone: document.getElementById('eh-phone').value.trim()
+  };
+  try{ await api(`/admin/hospitals/${id}`,'PUT',body); closeModal('edit-hospital-modal'); showToast('Hospital updated','success'); loadHospitals(); }
+  catch(e){ showToast(e.message,'error'); }
 }
 
 async function verifyHospital(id, action){
@@ -204,7 +286,15 @@ async function loadDonors(){
   table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
   try{
     const res = await api('/admin/donors');
-    const rows = (res.donors||[]).map(d => `
+    allDonors = res.donors || [];
+    renderDonorsTable();
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+function renderDonorsTable(){
+  const table = document.getElementById('donors-table');
+  const q = (document.getElementById('donor-search')?.value || '').toLowerCase();
+  const list = allDonors.filter(d => !q || d.name?.toLowerCase().includes(q) || d.phone?.includes(q) || d.bloodGroup?.toLowerCase().includes(q) || d.city?.toLowerCase().includes(q));
+  const rows = list.map(d => `
       <tr>
         <td><strong>${d.name}</strong><br/><span style="color:var(--muted);font-size:11.5px;">${d.phone}</span></td>
         <td>${d.bloodGroup}</td>
@@ -213,11 +303,56 @@ async function loadDonors(){
         <td><span class="badge ${d.isActive?'badge-green':'badge-slate'}">${d.isActive?'Active':'Suspended'}</span></td>
         <td class="row-actions">
           <button class="btn btn-outline btn-sm" onclick="toggleDonorRow('${d._id}')">${d.isActive?'Suspend':'Activate'}</button>
+          <button class="btn btn-outline btn-sm" onclick="openDonorEdit('${d._id}')">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="openResetPassword('${d._id}','donor')">Reset password</button>
+          <button class="btn btn-outline btn-sm" onclick="resetDonorCooldownRow('${d._id}')">Reset cooldown</button>
           <button class="btn btn-outline btn-sm" onclick="deleteDonorRow('${d._id}','${d.name}')">Delete</button>
         </td>
       </tr>`).join('');
-    table.innerHTML = `<thead><tr><th>Donor</th><th>Group</th><th>City</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);">No donors yet</td></tr>'}</tbody>`;
-  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+  table.innerHTML = `<thead><tr><th>Donor</th><th>Group</th><th>City</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);">No donors match</td></tr>'}</tbody>`;
+}
+function openDonorEdit(id){
+  const d = allDonors.find(x => x._id === id);
+  if(!d) return;
+  document.getElementById('ed-id').value = d._id;
+  document.getElementById('ed-name').value = d.name || '';
+  document.getElementById('ed-city').value = d.city || '';
+  document.getElementById('ed-bloodgroup').value = d.bloodGroup || 'O+';
+  openModal('edit-donor-modal');
+}
+async function saveDonorEdit(){
+  const id = document.getElementById('ed-id').value;
+  const body = {
+    name: document.getElementById('ed-name').value.trim(),
+    city: document.getElementById('ed-city').value.trim(),
+    bloodGroup: document.getElementById('ed-bloodgroup').value
+  };
+  try{ await api(`/admin/donors/${id}`,'PUT',body); closeModal('edit-donor-modal'); showToast('Donor updated','success'); loadDonors(); }
+  catch(e){ showToast(e.message,'error'); }
+}
+function resetDonorCooldownRow(id){
+  confirmDialog({ icon:'⏱', title:'Reset cooldown?', message:'This donor will immediately show as eligible to donate again.', confirmLabel:'Reset', danger:false,
+    onConfirm: async ()=>{ try{ await api(`/admin/donors/${id}/reset-cooldown`,'PUT'); showToast('Cooldown reset','success'); loadDonors(); }catch(e){ showToast(e.message,'error'); } }
+  });
+}
+
+// ═══ SHARED: reset password (hospital or donor) ═══
+function openResetPassword(id, type){
+  document.getElementById('rp-id').value = id;
+  document.getElementById('rp-type').value = type;
+  document.getElementById('rp-newpass').value = '';
+  openModal('reset-password-modal');
+}
+async function submitPasswordReset(){
+  const id = document.getElementById('rp-id').value;
+  const type = document.getElementById('rp-type').value;
+  const password = document.getElementById('rp-newpass').value;
+  if(!password || password.length < 6) return showToast('Password must be at least 6 characters', 'error');
+  try{
+    await api(`/admin/${type}s/${id}/reset-password`, 'PUT', { password });
+    closeModal('reset-password-modal');
+    showToast('Password reset successfully', 'success');
+  }catch(e){ showToast(e.message,'error'); }
 }
 async function toggleDonorRow(id){
   try{ const res = await api(`/admin/donors/${id}/toggle`,'PUT'); showToast(`Donor ${res.isActive?'activated':'suspended'}`,'success'); loadDonors(); }
