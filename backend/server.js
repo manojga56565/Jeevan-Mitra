@@ -31,6 +31,14 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/donors', require('./routes/donorRoutes'));
 app.use('/api/hospitals', require('./routes/hospitalRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/requests', require('./routes/requestsRoot'));
+// The blueprint frontend also calls /api/hospital/complete/:id (singular,
+// distinct from the plural /api/hospitals mount above) — same handler as
+// the existing /api/hospitals/requests/:requestId/complete route.
+app.patch('/api/hospital/complete/:id', require('./middleware/auth').auth('hospital'), (req, res, next) => {
+  req.params.requestId = req.params.id;
+  require('./controllers/hospitalController').completeDonation(req, res, next);
+});
 
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'Jeevan Mitra API is running' }));
 

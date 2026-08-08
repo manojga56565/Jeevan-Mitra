@@ -51,3 +51,8 @@ exports.getNotifications = asyncHandler(async (req, res) => {
   const notifications = await notificationService.listForUser('hospital', req.user.id);
   success(res, { notifications });
 });
+
+exports.lookupDonorByPhone = asyncHandler(async (req, res) => {
+  const donor = await hospitalService.lookupDonorByPhone(req.params.phone);
+  success(res, { donor });
+});

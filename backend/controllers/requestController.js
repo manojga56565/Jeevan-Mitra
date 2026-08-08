@@ -11,3 +11,8 @@ exports.adminDelete = asyncHandler(async (req, res) => {
   await requestService.adminDeleteRequest(req.params.id);
   success(res, {}, 'Request deleted');
 });
+
+exports.adminCancel = asyncHandler(async (req, res) => {
+  const request = await requestService.adminCancelRequest(req.params.id);
+  success(res, { request }, 'Request cancelled');
+});

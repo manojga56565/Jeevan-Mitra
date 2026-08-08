@@ -45,8 +45,11 @@ async function createRequest(hospitalId, data) {
     location: { type: 'Point', coordinates: [lng, lat] }
   });
 
-  hospital.totalRequests += 1;
-  await hospital.save();
+  // findByIdAndUpdate with $inc, not hospital.save() — saving the full
+  // document here would re-validate every field on the hospital's profile
+  // (contactPerson, address, etc.), which has nothing to do with posting
+  // a request and would wrongly fail if that profile is incomplete.
+  await Hospital.findByIdAndUpdate(hospital._id, { $inc: { totalRequests: 1 } });
 
   const { matchedCount } = await matchingService.matchAndNotify(request);
 
@@ -180,7 +183,13 @@ async function adminDeleteRequest(requestId) {
   return true;
 }
 
+async function adminCancelRequest(requestId) {
+  const request = await Request.findByIdAndUpdate(requestId, { $set: { status: 'cancelled' } }, { new: true });
+  if (!request) throw Object.assign(new Error('Request not found'), { statusCode: 404 });
+  return request;
+}
+
 module.exports = {
   createRequest, getDonorFeed, acceptRequest, completeDonation,
-  getHospitalRequests, deleteRequest, getAllRequests, adminDeleteRequest
+  getHospitalRequests, deleteRequest, getAllRequests, adminDeleteRequest, adminCancelRequest
 };
