@@ -84,10 +84,7 @@
   .role-toggle button{flex:1;padding:10px;border:none;background:none;border-radius:var(--r-pill);font-weight:700;font-size:13.5px;color:var(--slate)}
   .role-toggle button.active{background:var(--white);color:var(--red);box-shadow:var(--shadow-sm)}
 
-  #splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--ink);flex-direction:column;gap:16px}
-  #splash .logo{font-size:48px;animation:heartbeat 1.4s ease infinite}
-  @keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.15)}30%{transform:scale(1)}45%{transform:scale(1.1)}60%{transform:scale(1)}}
-  #splash .brand{font-family:var(--font-display);color:#fff;font-size:22px;font-weight:700}
+  #splash{display:none}
 
   /* ═══ BLUEPRINT ADDITIONS — richer registration + quick login + reset ═══ */
   .steps-indicator{display:flex;gap:6px;margin-bottom:24px}
@@ -126,14 +123,8 @@
 </head>
 <body>
 
-<!-- SPLASH -->
-<section class="screen active" id="splash">
-  <div class="logo">🩸</div>
-  <div class="brand">Jeevan Mitra</div>
-</section>
-
 <!-- LANDING -->
-<section class="screen" id="landing">
+<section class="screen active" id="landing">
   <div id="navbar-root"></div>
 
   <div class="hero">
@@ -593,10 +584,9 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   // If already logged in with a valid session, skip straight to the right dashboard
   const token = getToken(), role = getRole();
   if(token && role && !isTokenExpired(token)){
-    setTimeout(()=>{ window.location.href = `pages/${role}.html`; }, 600);
+    window.location.href = `pages/${role}.html`;
     return;
   }
-  setTimeout(()=> showScreen('landing'), 1000);
 });
 </script>
 </body>
