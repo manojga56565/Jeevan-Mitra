@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Jeevan Mitra — జీవన్ మిత్ర</title>
+<title>Jeevan Mitra — Telangana Blood Donation Network | జీవన్ మిత్ర</title>
+<meta name="description" content="Jeevan Mitra connects blood donors with hospitals across Telangana in real time — register as a donor, request blood for a patient, and track emergency response, all in one place."/>
+<meta property="og:title" content="Jeevan Mitra — Telangana Blood Donation Network"/>
+<meta property="og:description" content="Connecting blood donors with hospitals across Telangana in real time."/>
+<meta property="og:type" content="website"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -608,10 +612,10 @@ body{
 
   <!-- STATS -->
   <div class="landing-stats" style="display:flex;gap:10px;padding:24px 20px 4px;">
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">33</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">10K+</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">500+</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);">25K+</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Lives Saved</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-districts">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-donors">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-hospitals">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
+    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-lives">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Lives Saved</div></div>
   </div>
 
   <!-- ABOUT -->
@@ -1174,9 +1178,25 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('conf-ok').onclick=function(){if(confirmCallback){confirmCallback();closeConfirm()}};
   populateDistricts();
   renderFAQ();
+  loadLandingStats();
   autoLogin();
   setTimeout(()=>{if(!sessionRestored)showScreen('onboarding')},2000);
 });
+async function loadLandingStats(){
+  try{
+    const res=await fetch(`${API}/stats/public`);
+    const data=await res.json();
+    if(!data.success)return;
+    const s=data.stats;
+    document.getElementById('ls-districts').textContent=s.districts;
+    document.getElementById('ls-donors').textContent=s.donors.toLocaleString('en-IN');
+    document.getElementById('ls-hospitals').textContent=s.hospitals.toLocaleString('en-IN');
+    document.getElementById('ls-lives').textContent=s.livesSaved.toLocaleString('en-IN');
+  }catch(e){
+    // Backend unreachable (e.g. Render waking up) — leave the — placeholders
+    // rather than showing a wrong number.
+  }
+}
 const FAQ_DATA=[
   {q:'Who can donate blood?',a:'Any healthy person aged 18–65, weighing at least 45kg, can register as a donor.'},
   {q:'How often can I donate?',a:'A 60-day cooldown is enforced after every donation to protect donor health.'},

@@ -43,9 +43,19 @@
         <div class="tab active" data-tab="hospitals" onclick="switchTab('hospitals',this)">Hospitals</div>
         <div class="tab" data-tab="donors" onclick="switchTab('donors',this)">Donors</div>
         <div class="tab" data-tab="requests" onclick="switchTab('requests',this)">Requests</div>
+        <div class="tab" data-tab="donations" onclick="switchTab('donations',this)">Donations</div>
+        <div class="tab" data-tab="qr" onclick="switchTab('qr',this)">QR activity</div>
+        <div class="tab" data-tab="rewards" onclick="switchTab('rewards',this)">Rewards</div>
+        <div class="tab" data-tab="notifications" onclick="switchTab('notifications',this)">Notifications</div>
+        <div class="tab" data-tab="districts" onclick="switchTab('districts',this)">Districts</div>
+        <div class="tab" data-tab="analytics" onclick="switchTab('analytics',this)">Analytics</div>
+        <div class="tab" data-tab="reports" onclick="switchTab('reports',this)">Reports</div>
         <div class="tab" data-tab="broadcast" onclick="switchTab('broadcast',this)">Broadcast</div>
         <div class="tab" data-tab="logs" onclick="switchTab('logs',this)">Audit logs</div>
       </div>
+
+      <div style="margin-bottom:16px;"><input class="field-input" id="global-search" placeholder="🔍 Search donors, hospitals, requests…" oninput="doGlobalSearch()"/></div>
+      <div id="global-search-results"></div>
 
       <div class="tab-panel active" id="panel-hospitals">
         <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
@@ -80,6 +90,48 @@
 
       <div class="tab-panel" id="panel-logs">
         <div class="table-wrap"><table class="data-table" id="logs-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-donations">
+        <div class="stat-grid" id="donation-stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"></div>
+        <div class="table-wrap"><table class="data-table" id="donations-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-qr">
+        <p class="text-muted" style="font-size:13px;margin-bottom:14px;">Each row here is a QR-verified check-in — the same event that marks a donation completed.</p>
+        <div class="table-wrap"><table class="data-table" id="qr-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-rewards">
+        <div class="stat-grid" id="rewards-stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px;"></div>
+        <h3 style="font-family:var(--font-display);margin-bottom:10px;">Leaderboard</h3>
+        <div class="table-wrap"><table class="data-table" id="leaderboard-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-notifications">
+        <div class="table-wrap"><table class="data-table" id="notifications-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-districts">
+        <div style="display:flex;gap:10px;margin-bottom:16px;max-width:420px;">
+          <input class="field-input" id="new-district-name" placeholder="District name"/>
+          <button class="btn btn-primary btn-sm" onclick="addDistrictRow()">Add</button>
+        </div>
+        <div class="table-wrap"><table class="data-table" id="districts-table"></table></div>
+      </div>
+
+      <div class="tab-panel" id="panel-analytics">
+        <div id="analytics-content"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-reports">
+        <p class="text-muted" style="font-size:13px;margin-bottom:16px;">Download a CSV snapshot of current data.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="downloadReport('donors')">Donors CSV</button>
+          <button class="btn btn-outline" onclick="downloadReport('hospitals')">Hospitals CSV</button>
+          <button class="btn btn-outline" onclick="downloadReport('requests')">Requests CSV</button>
+          <button class="btn btn-outline" onclick="downloadReport('donations')">Donations CSV</button>
+        </div>
       </div>
 
     </div>
@@ -183,6 +235,12 @@ function switchTab(name, tabEl){
   if(name==='donors') loadDonors();
   if(name==='requests') loadRequests();
   if(name==='logs') loadLogs();
+  if(name==='donations') loadDonations();
+  if(name==='qr') loadQRActivity();
+  if(name==='rewards') loadRewards();
+  if(name==='notifications') loadNotifications();
+  if(name==='districts') loadDistricts();
+  if(name==='analytics') loadAnalytics();
 }
 
 async function loadStats(){
@@ -415,6 +473,180 @@ async function createAdminAccount(){
   if(!body.name||!body.email||!body.password) return showToast('Fill all fields','error');
   try{ await api('/admin/create-admin','POST',body); closeModal('create-admin-modal'); showToast('Admin account created','success'); }
   catch(e){ showToast(e.message,'error'); }
+}
+
+// ═══ DONATIONS ═══
+async function loadDonations(){
+  const grid = document.getElementById('donation-stat-grid');
+  const table = document.getElementById('donations-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const [statsRes, listRes] = await Promise.all([api('/admin/donations/stats'), api('/admin/donations')]);
+    const s = statsRes.stats;
+    grid.innerHTML = `
+      <div class="stat-box"><div class="n">${s.total}</div><div class="l">TOTAL</div></div>
+      <div class="stat-box"><div class="n">${s.today}</div><div class="l">TODAY</div></div>
+      <div class="stat-box"><div class="n">${s.thisMonth}</div><div class="l">THIS MONTH</div></div>`;
+    const rows = (listRes.donations||[]).map(d => `
+      <tr>
+        <td>${d.donor?.name || 'Unknown'}<br/><span style="color:var(--muted);font-size:11.5px;">${d.donor?.phone||''}</span></td>
+        <td>${d.bloodGroup}</td>
+        <td>${d.hospitalName}</td>
+        <td>${d.completedAt ? new Date(d.completedAt).toLocaleString() : '—'}</td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>Donor</th><th>Group</th><th>Hospital</th><th>Completed</th></tr></thead><tbody>${rows||'<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);">No completed donations yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+
+// ═══ QR ACTIVITY ═══
+async function loadQRActivity(){
+  const table = document.getElementById('qr-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/qr-activity');
+    const rows = (res.activity||[]).map(d => `
+      <tr>
+        <td>${d.donor?.name || 'Unknown'}</td>
+        <td>${d.bloodGroup}</td>
+        <td>${d.hospitalName}</td>
+        <td><span class="badge badge-green">Verified</span></td>
+        <td>${d.completedAt ? new Date(d.completedAt).toLocaleString() : '—'}</td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>Donor</th><th>Group</th><th>Hospital</th><th>Status</th><th>Verified at</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No QR verifications yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+
+// ═══ REWARDS ═══
+async function loadRewards(){
+  const grid = document.getElementById('rewards-stat-grid');
+  const table = document.getElementById('leaderboard-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/rewards');
+    grid.innerHTML = `
+      <div class="stat-box"><div class="n">${res.totalPointsIssued||0}</div><div class="l">POINTS ISSUED</div></div>
+      <div class="stat-box"><div class="n">${res.totalRedemptions||0}</div><div class="l">REDEMPTIONS</div></div>`;
+    const rows = (res.leaderboard||[]).map((d,i) => `
+      <tr>
+        <td>#${i+1}</td>
+        <td>${d.name}</td>
+        <td>${d.bloodGroup}</td>
+        <td>${d.city}</td>
+        <td>${d.totalDonations||0}</td>
+        <td><strong>${d.points||0}</strong></td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>Rank</th><th>Donor</th><th>Group</th><th>City</th><th>Donations</th><th>Points</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);">No donors ranked yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+
+// ═══ NOTIFICATIONS ═══
+async function loadNotifications(){
+  const table = document.getElementById('notifications-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/notifications');
+    const rows = (res.notifications||[]).map(n => `
+      <tr>
+        <td>${new Date(n.createdAt).toLocaleString()}</td>
+        <td><span class="badge badge-slate">${n.type}</span></td>
+        <td>${n.recipientType}</td>
+        <td>${n.title}</td>
+        <td>${n.isRead ? '✓ Read' : 'Unread'}</td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>When</th><th>Type</th><th>To</th><th>Title</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No notifications yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+
+// ═══ DISTRICTS ═══
+async function loadDistricts(){
+  const table = document.getElementById('districts-table');
+  table.innerHTML = `<tr><td style="padding:20px;">Loading…</td></tr>`;
+  try{
+    const res = await api('/admin/districts');
+    const rows = (res.districts||[]).map(d => `
+      <tr>
+        <td>${d.name}</td>
+        <td>${d.state}</td>
+        <td><span class="badge ${d.isActive?'badge-green':'badge-slate'}">${d.isActive?'Enabled':'Disabled'}</span></td>
+        <td class="row-actions">
+          <button class="btn btn-outline btn-sm" onclick="toggleDistrictRow('${d._id}')">${d.isActive?'Disable':'Enable'}</button>
+          <button class="btn btn-outline btn-sm" onclick="deleteDistrictRow('${d._id}','${d.name}')">Delete</button>
+        </td>
+      </tr>`).join('');
+    table.innerHTML = `<thead><tr><th>District</th><th>State</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows||'<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);">No districts added yet</td></tr>'}</tbody>`;
+  }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
+}
+async function addDistrictRow(){
+  const name = document.getElementById('new-district-name').value.trim();
+  if(!name) return showToast('Enter a district name', 'error');
+  try{ await api('/admin/districts','POST',{name}); document.getElementById('new-district-name').value=''; showToast('District added','success'); loadDistricts(); }
+  catch(e){ showToast(e.message,'error'); }
+}
+async function toggleDistrictRow(id){
+  try{ const res = await api(`/admin/districts/${id}/toggle`,'PUT'); showToast(`District ${res.isActive?'enabled':'disabled'}`,'success'); loadDistricts(); }
+  catch(e){ showToast(e.message,'error'); }
+}
+function deleteDistrictRow(id, name){
+  confirmDialog({ icon:'🗑', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+    onConfirm: async ()=>{ try{ await api(`/admin/districts/${id}`,'DELETE'); showToast('Deleted','success'); loadDistricts(); }catch(e){ showToast(e.message,'error'); } }
+  });
+}
+
+// ═══ ANALYTICS ═══
+async function loadAnalytics(){
+  const el = document.getElementById('analytics-content');
+  el.innerHTML = `<p style="padding:20px;">Loading…</p>`;
+  try{
+    const res = await api('/admin/analytics');
+    const a = res.analytics;
+    const rowsHtml = (title, data, labelKey='_id', valKey='count') => `
+      <h3 style="font-family:var(--font-display);margin:22px 0 10px;">${title}</h3>
+      ${data && data.length ? `<div class="table-wrap"><table class="data-table"><tbody>${
+        data.map(d=>`<tr><td>${d[labelKey] ?? '—'}</td><td><strong>${d[valKey]}</strong></td></tr>`).join('')
+      }</tbody></table></div>` : `<p class="text-muted" style="font-size:13px;">No data available</p>`}`;
+    el.innerHTML = [
+      rowsHtml('Donations by month', a.donationsByMonth),
+      rowsHtml('Requests by month', a.requestsByMonth),
+      rowsHtml('Blood group demand (requests)', a.bloodGroupDemand),
+      rowsHtml('Blood group supply (active donors)', a.bloodGroupSupply),
+      rowsHtml('Donors by district', a.districtDonors)
+    ].join('');
+  }catch(e){ el.innerHTML = `<p style="color:var(--red);padding:20px;">${e.message}</p>`; }
+}
+
+// ═══ REPORTS ═══
+async function downloadReport(type){
+  try{
+    const res = await fetch(`${API_BASE}/admin/reports/${type}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if(!res.ok) throw new Error('Could not generate report');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${type}-report.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){ showToast(e.message, 'error'); }
+}
+
+// ═══ GLOBAL SEARCH ═══
+let searchDebounce;
+function doGlobalSearch(){
+  clearTimeout(searchDebounce);
+  const q = document.getElementById('global-search').value.trim();
+  const box = document.getElementById('global-search-results');
+  if(q.length < 2){ box.innerHTML = ''; return; }
+  searchDebounce = setTimeout(async ()=>{
+    try{
+      const res = await api(`/admin/search?q=${encodeURIComponent(q)}`);
+      const section = (title, items, render) => items?.length ? `<div style="margin-bottom:10px;"><strong style="font-size:12px;color:var(--muted);text-transform:uppercase;">${title}</strong>${items.map(render).join('')}</div>` : '';
+      box.innerHTML = `<div class="card" style="margin-bottom:16px;">
+        ${section('Donors', res.donors, d=>`<div style="padding:6px 0;">${d.name} · ${d.bloodGroup} · ${d.phone}</div>`)}
+        ${section('Hospitals', res.hospitals, h=>`<div style="padding:6px 0;">${h.hospitalName} · ${h.city}</div>`)}
+        ${section('Requests', res.requests, r=>`<div style="padding:6px 0;">${r.bloodGroup} · ${r.hospitalName} · ${r.status}</div>`)}
+        ${(!res.donors?.length && !res.hospitals?.length && !res.requests?.length) ? '<span class="text-muted" style="font-size:13px;">No matches</span>' : ''}
+      </div>`;
+    }catch(e){ box.innerHTML = ''; }
+  }, 350);
 }
 
 window.addEventListener('DOMContentLoaded', async ()=>{
