@@ -43,10 +43,8 @@ async function changePassword(hospitalId, newPassword) {
 // actually needs, not the full donor record.
 async function lookupDonorByPhone(phone) {
   const Donor = require('../models/Donor');
-  // Donors are stored as plain 10-digit numbers, but the blueprint frontend
-  // sends "+91XXXXXXXXXX" — strip any country code / non-digits first so
-  // the two actually match.
-  const normalized = String(phone).replace(/\D/g, '').slice(-10);
+  const { normalizePhone } = require('../utils/normalizePhone');
+  const normalized = normalizePhone(phone);
   const donor = await Donor.findOne({ phone: normalized }).select('name phone city bloodGroup points totalDonations isActive');
   if (!donor) throw Object.assign(new Error('No donor found with that phone number'), { statusCode: 404 });
   return donor;

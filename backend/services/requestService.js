@@ -16,6 +16,23 @@ async function createRequest(hospitalId, data) {
   const hospital = await Hospital.findById(hospitalId);
   if (!hospital) throw Object.assign(new Error('Hospital not found'), { statusCode: 404 });
 
+  // Don't let a hospital create unlimited duplicate requests for the same
+  // patient — if there's already an open request for this exact patient
+  // reference + blood group, point them at updating that one instead.
+  if (data.patientReference) {
+    const existingActive = await Request.findOne({
+      hospitalId: hospital._id,
+      patientReference: data.patientReference,
+      bloodGroup: data.bloodGroup,
+      status: { $in: ['pending', 'accepted'] }
+    });
+    if (existingActive) {
+      throw Object.assign(new Error('Active Request Already Exists — there is already an open request for this patient and blood group. View or update it instead of creating a new one.'), {
+        statusCode: 409, code: 'ACTIVE_REQUEST_EXISTS', existingRequestId: existingActive._id
+      });
+    }
+  }
+
   const rawHours = parseInt(data.expiryHours);
   const expiryHours = (!isNaN(rawHours) && rawHours >= MIN_REQUEST_EXPIRY_HOURS && rawHours <= MAX_REQUEST_EXPIRY_HOURS)
     ? rawHours : DEFAULT_REQUEST_EXPIRY_HOURS;
@@ -36,6 +53,10 @@ async function createRequest(hospitalId, data) {
     patientAge: data.patientAge || null,
     patientGender: data.patientGender || '',
     patientReason: data.patientReason || '',
+    patientReference: data.patientReference || '',
+    department: data.department || '',
+    contactPerson: data.contactPerson || '',
+    contactNumber: data.contactNumber || '',
     doctorRefNo: data.doctorRefNo || '',
     doctorName: data.doctorName || '',
     districts: data.districts || [],

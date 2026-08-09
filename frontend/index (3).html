@@ -266,14 +266,46 @@ body{
 
 /* ONBOARDING */
 #onboarding{background:linear-gradient(145deg,#FFEBEE,#FCE4EC 60%,#FFF8F0);padding:32px 20px;align-items:center;justify-content:center}
-.ob-card{background:var(--white);border-radius:24px;padding:32px 24px;width:100%;box-shadow:var(--shadow);text-align:center}
-.landing-grid-4{display:flex;flex-direction:column;gap:10px}
+.ob-card{background:var(--white);border-radius:24px;padding:32px 24px;width:100%;box-shadow:var(--shadow);text-align:center}.landing-grid-4{display:flex;flex-direction:column;gap:10px}
 .landing-grid-2{display:flex;flex-direction:column;gap:10px}
 .landing-section{max-width:100%}
 .ob-logo{font-size:48px;margin-bottom:6px}
 .ob-brand{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--red)}
 .ob-tel{font-size:13px;color:var(--slate);margin-top:2px}
 .ob-sub{font-size:12px;color:var(--muted);margin:8px 0 24px}
+
+/* ═══ SPLIT HERO — desktop only, matches the reference design ═══ */
+.jm-logo-mark{display:inline-block}
+.hero-split{display:none}
+@media(min-width:900px){
+  .hero-split{
+    display:flex;min-height:100vh;
+  }
+  .hero-split .hero-left{
+    flex:0 0 34%;background:linear-gradient(160deg,var(--red-deep) 0%,var(--red) 100%);
+    color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:48px 32px;text-align:center;
+  }
+  .hero-split .hero-left .jm-logo-mark{width:150px;height:150px;margin-bottom:18px}
+  .hero-split .hero-left .hl-brand{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900}
+  .hero-split .hero-left .hl-tag{font-size:12px;letter-spacing:0.14em;font-weight:700;opacity:0.85;margin-top:2px}
+  .hero-split .hero-left .hl-divider{width:56px;height:2px;background:rgba(255,255,255,0.4);margin:22px auto}
+  .hero-split .hero-left .hl-headline{font-size:26px;font-weight:800;line-height:1.25;margin-bottom:22px}
+  .hero-split .hero-left .hl-pillars{display:flex;gap:28px;margin:18px 0}
+  .hero-split .hero-left .hl-pillar{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:0.06em}
+  .hero-split .hero-left .hl-pillar .ico{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .hero-split .hero-left .hl-footer-text{font-size:12px;opacity:0.85;margin-top:22px;line-height:1.6}
+  .hero-split .hero-left .hl-copyright{font-size:11px;opacity:0.55;margin-top:40px}
+  .hero-split .hero-right{
+    flex:1;background:linear-gradient(160deg,var(--red-soft) 0%,#FCE4EC 40%,var(--paper) 100%);
+    display:flex;flex-direction:column;align-items:center;padding:56px 40px;overflow-y:auto;
+  }
+  .hero-split .hero-right .ob-card{max-width:460px}
+  .hero-split .hero-right .landing-stats,
+  .hero-split .hero-right .landing-section{max-width:900px;width:100%}
+  /* On desktop the split hero replaces the old stacked mobile hero card */
+  #onboarding > .ob-card, #onboarding > .landing-stats { display:none }
+}
 
 /* BUTTONS */
 .btn{width:100%;padding:14px;border-radius:var(--r-sm);border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
@@ -598,6 +630,52 @@ body{
 
 <!-- ONBOARDING / LANDING -->
 <section class="screen" id="onboarding">
+  <div class="hero-split">
+    <div class="hero-left">
+      <svg class="jm-logo-mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="40" r="10" fill="#fff"/>
+        <circle cx="160" cy="100" r="10" fill="#fff"/>
+        <circle cx="100" cy="160" r="10" fill="#fff"/>
+        <circle cx="40" cy="100" r="10" fill="#fff"/>
+        <path d="M100,55 A45,45 0 0,1 145,100" stroke="#fff" stroke-width="4" fill="none" opacity="0.9"/>
+        <path d="M145,100 A45,45 0 0,1 100,145" stroke="#fff" stroke-width="4" fill="none" opacity="0.9"/>
+        <path d="M100,145 A45,45 0 0,1 55,100" stroke="#fff" stroke-width="4" fill="none" opacity="0.9"/>
+        <path d="M55,100 A45,45 0 0,1 100,55" stroke="#fff" stroke-width="4" fill="none" opacity="0.9"/>
+        <path d="M100,68 C80,95 68,112 68,128 a32,32 0 0,0 64,0 C132,112 120,95 100,68 Z" fill="#fff"/>
+        <polyline points="78,128 90,128 96,112 104,144 110,128 122,128" fill="none" stroke="var(--red)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="hl-brand">Jeevan Mitra</div>
+      <div class="hl-tag">BLOOD DONATION NETWORK</div>
+      <div class="hl-divider"></div>
+      <div class="hl-headline">EVERY DROP<br/>SAVES A LIFE</div>
+      <div class="hl-pillars">
+        <div class="hl-pillar"><div class="ico">🩸</div>DONATE</div>
+        <div class="hl-pillar"><div class="ico">🤝</div>CONNECT</div>
+        <div class="hl-pillar"><div class="ico">🛡️</div>SAVE LIVES</div>
+      </div>
+      <div class="hl-footer-text">Connecting donors and hospitals<br/>across Telangana in real time.</div>
+      <div class="hl-copyright">© 2026 Jeevan Mitra · All rights reserved.</div>
+    </div>
+    <div class="hero-right">
+      <div class="ob-card">
+        <div class="ob-logo">🩸</div>
+        <div class="ob-brand">Jeevan Mitra</div>
+        <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
+        <div class="ob-sub">Connecting donors & hospitals across all 33 districts</div>
+        <button class="btn btn-red" onclick="showScreen('donor-register')">🫀 Join as Donor / దాతగా చేరండి</button>
+        <button class="btn btn-outline" onclick="showScreen('hospital-login')">🏥 Hospital Login / ఆసుపత్రి లాగిన్</button>
+        <div class="divider">or</div>
+        <div class="link-text" onclick="showScreen('quick-login')">Already have an account? <span>Quick Login →</span></div>
+        <div style="margin-top:14px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="showScreen('admin-login')">🔐 Admin Access</span></div>
+      </div>
+      <div class="landing-stats" style="display:flex;gap:10px;padding:24px 0 4px;">
+        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-districts-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
+        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-donors-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
+        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-hospitals-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
+        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-lives-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Lives Saved</div></div>
+      </div>
+    </div>
+  </div>
   <div class="ob-card" style="margin:20px 20px 0;">
     <div class="ob-logo">🩸</div>
     <div class="ob-brand">Jeevan Mitra</div>
@@ -1188,15 +1266,26 @@ async function loadLandingStats(){
     const data=await res.json();
     if(!data.success)return;
     const s=data.stats;
-    document.getElementById('ls-districts').textContent=s.districts;
-    document.getElementById('ls-donors').textContent=s.donors.toLocaleString('en-IN');
-    document.getElementById('ls-hospitals').textContent=s.hospitals.toLocaleString('en-IN');
-    document.getElementById('ls-lives').textContent=s.livesSaved.toLocaleString('en-IN');
+    // Two copies of these stat boxes exist — the mobile-stacked one (always
+    // in the DOM) and the desktop split-hero one (only shown above 900px).
+    // Update both so whichever is visible always has the real number.
+    const setText=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
+    setText('ls-districts',s.districts); setText('ls-districts-d',s.districts);
+    setText('ls-donors',s.donors.toLocaleString('en-IN')); setText('ls-donors-d',s.donors.toLocaleString('en-IN'));
+    setText('ls-hospitals',s.hospitals.toLocaleString('en-IN')); setText('ls-hospitals-d',s.hospitals.toLocaleString('en-IN'));
+    setText('ls-lives',s.livesSaved.toLocaleString('en-IN')); setText('ls-lives-d',s.livesSaved.toLocaleString('en-IN'));
   }catch(e){
     // Backend unreachable (e.g. Render waking up) — leave the — placeholders
     // rather than showing a wrong number.
   }
 }
+// Keep the landing counts feeling "live" — re-check every 8s while the
+// onboarding/landing screen is what's showing, without needing sockets
+// wired up for anonymous (not-yet-logged-in) visitors.
+setInterval(()=>{
+  const onboarding=document.getElementById('onboarding');
+  if(onboarding && onboarding.classList.contains('active')) loadLandingStats();
+},8000);
 const FAQ_DATA=[
   {q:'Who can donate blood?',a:'Any healthy person aged 18–65, weighing at least 45kg, can register as a donor.'},
   {q:'How often can I donate?',a:'A 60-day cooldown is enforced after every donation to protect donor health.'},
@@ -1353,9 +1442,10 @@ async function api(ep,method='GET',body=null){
     // "your session expired" — there was no session to expire yet. Don't wipe
     // storage or bounce the screen; just surface the real error to the caller.
     if(AUTH_ENDPOINTS.includes(ep)){
-      let msg='Invalid credentials';
-      try{const d=await r.json();msg=d.message||msg}catch(e){}
-      throw new Error(msg);
+      let msg='Invalid credentials',code;
+      try{const d=await r.json();msg=d.message||msg;code=d.code}catch(e){}
+      const err=new Error(msg);err.code=code;
+      throw err;
     }
     localStorage.clear();sessionStorage.clear();currentUser=null;currentRole=null;
     showScreen('onboarding');
@@ -1363,7 +1453,7 @@ async function api(ep,method='GET',body=null){
     throw new Error('Session expired');
   }
   const d=await r.json();
-  if(!r.ok)throw new Error(d.message||'Server error');
+  if(!r.ok){const err=new Error(d.message||'Server error');err.code=d.code;throw err}
   return d;
 }
 function isTokenExpired(t){
@@ -1443,7 +1533,13 @@ async function donorSendOTP(){
     showScreen('otp-verify');startTimer();
     if(res.otp)showOTPHint(res.otp);
     else showToast('OTP sent!','success');
-  }catch(e){showToast(e.message,'error')}
+  }catch(e){
+    if(e.code==='ACCOUNT_ALREADY_EXISTS'){
+      showConfirm('👤','Account Already Exists','This mobile number is already registered. Please login instead.','Go to Login','btn-red',()=>{closeConfirm();showScreen('quick-login')});
+    }else{
+      showToast(e.message,'error');
+    }
+  }
 }
 
 async function quickLoginOTP(){
@@ -1458,7 +1554,13 @@ async function quickLoginOTP(){
     showScreen('otp-verify');startTimer();
     if(res.otp)showOTPHint(res.otp);
     else showToast('OTP sent!','success');
-  }catch(e){showToast(e.message,'error')}
+  }catch(e){
+    if(e.code==='ACCOUNT_NOT_FOUND'){
+      showConfirm('🔍','Account Not Found','We could not find a donor account with this mobile number.','Register Instead','btn-red',()=>{closeConfirm();showScreen('donor-register')});
+    }else{
+      showToast(e.message,'error');
+    }
+  }
 }
 
 function authStorage(){return document.getElementById('ql-remember')?.checked===false?sessionStorage:localStorage}
@@ -1498,7 +1600,13 @@ async function hospitalLogin(){
     currentUser=data.hospital;currentRole='hospital';
     showToast('Welcome! 🏥','success');
     initHospital();
-  }catch(e){showToast(e.message,'error')}
+  }catch(e){
+    if(e.code==='ACCOUNT_NOT_FOUND'){
+      showConfirm('🏥','Hospital Account Not Found','Please register your hospital first, or contact admin@jeevanmitra.in.','OK','btn-red',()=>closeConfirm());
+    }else{
+      showToast(e.message,'error');
+    }
+  }
 }
 
 // ═══ ADMIN LOGIN ═══
@@ -1839,13 +1947,32 @@ function renderHospReqs(){
 function renderNewReq(){
   document.getElementById('hospital-body').innerHTML=`
     <div class="sec-title" style="margin-top:4px;">➕ New Blood Request</div>
+    <div class="grp"><label class="lbl">Patient ID / Reference</label><input class="inp" id="req-ref" type="text" placeholder="Enter patient reference"/></div>
     <div class="grp"><label class="lbl">Blood Group Required</label><div class="blood-grid"><button class="blood-btn" onclick="selBlood(this,'req')">A+</button><button class="blood-btn" onclick="selBlood(this,'req')">A-</button><button class="blood-btn" onclick="selBlood(this,'req')">B+</button><button class="blood-btn" onclick="selBlood(this,'req')">B-</button><button class="blood-btn" onclick="selBlood(this,'req')">AB+</button><button class="blood-btn" onclick="selBlood(this,'req')">AB-</button><button class="blood-btn" onclick="selBlood(this,'req')">O+</button><button class="blood-btn" onclick="selBlood(this,'req')">O-</button></div></div>
     <div class="grp"><label class="lbl">Units Required</label><select class="sel" id="req-units"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
-    <div class="grp"><label class="lbl">Urgency Level</label><div class="urg-row"><button class="urg-btn normal sel" onclick="selUrgency(this,'normal')">🟢 Normal</button><button class="urg-btn urgent" onclick="selUrgency(this,'urgent')">🟠 Urgent</button><button class="urg-btn emergency" onclick="selUrgency(this,'emergency')">🔴 Critical</button></div></div>
+    <div class="grp"><label class="lbl">Urgency Level</label><div class="urg-row"><button class="urg-btn normal sel" onclick="selUrgency(this,'normal')">🟢 Normal</button><button class="urg-btn urgent" onclick="selUrgency(this,'urgent')">🟠 Urgent</button><button class="urg-btn emergency" onclick="selUrgency(this,'emergency')">🔴 Emergency</button></div></div>
+    <div class="grp"><label class="lbl">Required Date & Time</label><div style="display:flex;gap:8px;"><input class="inp" id="req-date" type="date" style="flex:1;"/><input class="inp" id="req-time" type="time" style="flex:1;"/></div></div>
+    <div class="grp"><label class="lbl">Hospital Department</label><select class="sel" id="req-dept"><option value="">Select department</option><option>Emergency</option><option>ICU</option><option>Surgery</option><option>Other</option></select></div>
+    <div class="grp"><label class="lbl">Hospital Location</label><input class="inp" id="req-hosp-location" type="text" readonly style="background:var(--paper-dim);" value="📍 Loading…"/></div>
+    <div class="grp"><label class="lbl">Contact Person</label><input class="inp" id="req-contact-person" type="text" placeholder="Hospital staff name"/></div>
+    <div class="grp"><label class="lbl">Contact Number</label><input class="inp" id="req-contact-number" type="tel" maxlength="10" placeholder="10-digit number"/></div>
     <div class="grp"><label class="lbl">Patient Name (Optional)</label><input class="inp" id="req-patient" type="text" placeholder="Patient name"/></div>
     <div class="grp"><label class="lbl">Doctor Ref No. (Optional)</label><input class="inp" id="req-doctor" type="text" placeholder="Doctor reference"/></div>
-    <div class="grp"><label class="lbl">Notes</label><input class="inp" id="req-notes" type="text" placeholder="Special requirements..."/></div>
+    <div class="grp"><label class="lbl">Reason for Request</label><select class="sel" id="req-reason"><option value="">Select reason</option><option>Surgery</option><option>Accident</option><option>Emergency</option><option>Transfusion</option><option>Other</option></select></div>
+    <div class="grp"><label class="lbl">Additional Notes</label><input class="inp" id="req-notes" type="text" placeholder="Additional information..."/></div>
+    <div class="grp"><label class="lbl">Search Radius</label><select class="sel" id="req-radius"><option value="5">5 KM</option><option value="10">10 KM</option><option value="20" selected>20 KM</option><option value="50">50 KM</option></select></div>
+    <div class="grp" style="display:flex;flex-direction:column;gap:6px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="req-push" checked/> Push Notification</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="req-sms" checked/> SMS Notification</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="req-auto-notify" checked/> Automatically notify eligible donors</label>
+    </div>
     <button class="btn btn-red" onclick="postReq()" style="margin-top:8px;">📢 Post Request / అభ్యర్థన పోస్ట్ చేయండి</button>`;
+  try{
+    const u=JSON.parse(localStorage.getItem('jm_user')||'{}');
+    document.getElementById('req-hosp-location').value = `📍 ${[u.address,u.city].filter(Boolean).join(', ') || 'Registered hospital location'}`;
+  }catch(e){
+    document.getElementById('req-hosp-location').value = '📍 Registered hospital location';
+  }
 }
 
 function selUrgency(btn,u){selUrg=u;document.querySelectorAll('.urg-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel')}
@@ -1867,21 +1994,41 @@ async function postReq() {
       showToast('Location unavailable — request will use default map location. Enable location access for accurate donor navigation.','warning');
     }
 
+    const dateVal = document.getElementById('req-date').value;
+    const timeVal = document.getElementById('req-time').value;
+    const requiredBefore = (dateVal && timeVal) ? new Date(`${dateVal}T${timeVal}`).toISOString() : null;
+
+    const reasonVal = document.getElementById('req-reason').value;
+    const notesVal = document.getElementById('req-notes').value;
+    const combinedReason = [reasonVal, notesVal].filter(Boolean).join(' — ');
+
     await api('/hospitals/requests', 'POST', {
       bloodGroup: selBloodReq,
       quantity: parseInt(document.getElementById('req-units').value),
       urgency: selUrg,
+      patientReference: document.getElementById('req-ref').value,
       patientName: document.getElementById('req-patient').value,
       doctorRefNo: document.getElementById('req-doctor').value,
-      patientReason: document.getElementById('req-notes').value,
+      patientReason: combinedReason,
+      department: document.getElementById('req-dept').value,
+      contactPerson: document.getElementById('req-contact-person').value,
+      contactNumber: document.getElementById('req-contact-number').value,
+      searchRadiusKm: parseInt(document.getElementById('req-radius').value),
+      requiredBefore,
+      notifyPush: document.getElementById('req-push').checked,
+      notifySms: document.getElementById('req-sms').checked,
+      autoNotify: document.getElementById('req-auto-notify').checked,
       ...(lat!==undefined&&{lat,lng})
     });
 
     showToast('Request posted! Notifying donors 🚨', 'success');
     setTimeout(() => renderHospHome(), 1500);
   } catch (e) {
-    // This will now show you the real reason if it fails
-    showToast(e.message, 'error');
+    if(e.code==='ACTIVE_REQUEST_EXISTS'){
+      showConfirm('⚠️','Active Request Already Exists','There is already an open request for this patient and blood group. View your existing requests instead of creating a duplicate.','View Requests','btn-red',()=>{closeConfirm();hTab('reqs',document.querySelector('#hosp-nav .nav-btn'))});
+    }else{
+      showToast(e.message, 'error');
+    }
   }
 }
 async function fulfill(id){
