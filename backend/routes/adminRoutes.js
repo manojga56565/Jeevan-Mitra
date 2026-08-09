@@ -4,11 +4,12 @@ const adminController = require('../controllers/adminController');
 const authController = require('../controllers/authController');
 const requestController = require('../controllers/requestController');
 const { auth } = require('../middleware/auth');
+const { loginLimiter } = require('../middleware/rateLimiter');
 
 // Alias matching the blueprint frontend's exact expected path — same handler
 // as POST /api/auth/admin/login. Must stay ABOVE the router.use(auth('admin'))
 // blanket protection below, or this route would require a token to log in with.
-router.post('/login', authController.adminLogin);
+router.post('/login', loginLimiter, authController.adminLogin);
 
 router.use(auth('admin')); // every route below requires a valid admin token — no bypass
 

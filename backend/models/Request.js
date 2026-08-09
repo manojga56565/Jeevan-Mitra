@@ -49,6 +49,11 @@ const RequestSchema = new mongoose.Schema({
     patientAge: { type: Number, default: null },
     patientGender: { type: String, enum: ['male', 'female', 'other', ''], default: '' },
     patientReason: { type: String, default: '' },
+    patientReference: { type: String, default: '' }, // patient ID / reference number, separate from name
+
+    department: { type: String, default: '' }, // Emergency / ICU / Surgery / Other
+    contactPerson: { type: String, default: '' }, // staff handling THIS request — may differ from the hospital account's own contact person
+    contactNumber: { type: String, default: '' },
 
     doctorRefNo: { type: String, default: '' },
     doctorName: { type: String, default: '' },

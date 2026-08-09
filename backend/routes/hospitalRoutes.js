@@ -3,11 +3,12 @@ const router = express.Router();
 const hospitalController = require('../controllers/hospitalController');
 const authController = require('../controllers/authController');
 const { auth } = require('../middleware/auth');
+const { loginLimiter } = require('../middleware/rateLimiter');
 
 // Alias matching the blueprint frontend's exact expected path — same handler
 // as POST /api/auth/hospital/login. No blanket auth middleware on this router,
 // so no reordering needed like adminRoutes.
-router.post('/login', authController.hospitalLogin);
+router.post('/login', loginLimiter, authController.hospitalLogin);
 
 router.get('/profile', auth('hospital'), hospitalController.getProfile);
 router.get('/phone/:phone', auth('hospital'), hospitalController.lookupDonorByPhone);

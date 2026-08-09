@@ -120,6 +120,21 @@ async function acceptRequest(donorId, requestId) {
   const alreadyAccepted = request.acceptedDonors.some(a => String(a.donor) === String(donorId));
   if (alreadyAccepted) throw Object.assign(new Error('You have already accepted this request'), { statusCode: 400 });
 
+  // A donor who's already committed to another still-open request shouldn't
+  // be able to accept a second one at the same time — they'd only be able
+  // to physically show up and donate to one hospital anyway.
+  const conflictingRequest = await Request.findOne({
+    _id: { $ne: requestId },
+    'acceptedDonors.donor': donorId,
+    'acceptedDonors.status': { $ne: 'completed' },
+    status: { $in: ['pending', 'accepted'] }
+  }).select('hospitalName bloodGroup');
+  if (conflictingRequest) {
+    throw Object.assign(new Error(`You already have an open commitment to ${conflictingRequest.hospitalName} (${conflictingRequest.bloodGroup}). Complete or that request must close before accepting another.`), {
+      statusCode: 409, code: 'CONFLICTING_REQUEST'
+    });
+  }
+
   const [lng, lat] = request.location.coordinates;
   const navigationUrl = mapsService.buildDirectionsLink(lat, lng);
 
