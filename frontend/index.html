@@ -282,29 +282,30 @@ body{
     display:flex;min-height:100vh;
   }
   .hero-split .hero-left{
-    flex:0 0 34%;background:linear-gradient(160deg,var(--red-deep) 0%,var(--red) 100%);
+    flex:0 0 34%;width:34%;min-width:0;max-width:34%;box-sizing:border-box;overflow:hidden;
+    background:linear-gradient(160deg,var(--red-deep) 0%,var(--red) 100%);
     color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:48px 32px;text-align:center;
+    padding:48px 24px;text-align:center;
   }
-  .hero-split .hero-left .jm-logo-mark{width:150px;height:150px;margin-bottom:18px}
-  .hero-split .hero-left .hl-brand{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900}
-  .hero-split .hero-left .hl-tag{font-size:12px;letter-spacing:0.14em;font-weight:700;opacity:0.85;margin-top:2px}
-  .hero-split .hero-left .hl-divider{width:56px;height:2px;background:rgba(255,255,255,0.4);margin:22px auto}
-  .hero-split .hero-left .hl-headline{font-size:26px;font-weight:800;line-height:1.25;margin-bottom:22px}
-  .hero-split .hero-left .hl-pillars{display:flex;gap:28px;margin:18px 0}
-  .hero-split .hero-left .hl-pillar{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:0.06em}
-  .hero-split .hero-left .hl-pillar .ico{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:18px}
-  .hero-split .hero-left .hl-footer-text{font-size:12px;opacity:0.85;margin-top:22px;line-height:1.6}
-  .hero-split .hero-left .hl-copyright{font-size:11px;opacity:0.55;margin-top:40px}
+  .hero-split .hero-left .jm-logo-mark{width:130px;height:130px;margin-bottom:16px;flex-shrink:0}
+  .hero-split .hero-left .hl-brand{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;word-break:break-word}
+  .hero-split .hero-left .hl-tag{font-size:11px;letter-spacing:0.1em;font-weight:700;opacity:0.85;margin-top:2px}
+  .hero-split .hero-left .hl-divider{width:56px;height:2px;background:rgba(255,255,255,0.4);margin:20px auto}
+  .hero-split .hero-left .hl-headline{font-size:22px;font-weight:800;line-height:1.3;margin-bottom:20px;word-break:break-word}
+  .hero-split .hero-left .hl-pillars{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap;justify-content:center}
+  .hero-split .hero-left .hl-pillar{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:0.04em}
+  .hero-split .hero-left .hl-pillar .ico{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .hero-split .hero-left .hl-footer-text{font-size:11px;opacity:0.85;margin-top:20px;line-height:1.6;max-width:220px}
+  .hero-split .hero-left .hl-copyright{font-size:10px;opacity:0.55;margin-top:32px}
   .hero-split .hero-right{
-    flex:1;background:linear-gradient(160deg,var(--red-soft) 0%,#FCE4EC 40%,var(--paper) 100%);
+    flex:1;min-width:0;background:linear-gradient(160deg,var(--red-soft) 0%,#FCE4EC 40%,var(--paper) 100%);
     display:flex;flex-direction:column;align-items:center;padding:56px 40px;overflow-y:auto;
   }
   .hero-split .hero-right .ob-card{max-width:460px}
   .hero-split .hero-right .landing-stats,
   .hero-split .hero-right .landing-section{max-width:900px;width:100%}
   /* On desktop the split hero replaces the old stacked mobile hero card */
-  #onboarding > .ob-card, #onboarding > .landing-stats { display:none }
+  .mobile-only-landing { display:none !important }
 }
 
 /* BUTTONS */
@@ -676,7 +677,7 @@ body{
       </div>
     </div>
   </div>
-  <div class="ob-card" style="margin:20px 20px 0;">
+  <div class="ob-card mobile-only-landing" style="margin:20px 20px 0;">
     <div class="ob-logo">🩸</div>
     <div class="ob-brand">Jeevan Mitra</div>
     <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
@@ -689,7 +690,7 @@ body{
   </div>
 
   <!-- STATS -->
-  <div class="landing-stats" style="display:flex;gap:10px;padding:24px 20px 4px;">
+  <div class="landing-stats mobile-only-landing" style="display:flex;gap:10px;padding:24px 20px 4px;">
     <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-districts">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
     <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-donors">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
     <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-hospitals">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
@@ -1285,7 +1286,7 @@ async function loadLandingStats(){
 setInterval(()=>{
   const onboarding=document.getElementById('onboarding');
   if(onboarding && onboarding.classList.contains('active')) loadLandingStats();
-},8000);
+},1000);
 const FAQ_DATA=[
   {q:'Who can donate blood?',a:'Any healthy person aged 18–65, weighing at least 45kg, can register as a donor.'},
   {q:'How often can I donate?',a:'A 60-day cooldown is enforced after every donation to protect donor health.'},
@@ -1500,6 +1501,8 @@ function showOTPHint(otp){
 }
 
 async function donorSendOTP(){
+  const btn=event?.target;
+  if(btn?.disabled)return; // already sending — ignore a double-click/double-tap
   const name=document.getElementById('d-name').value.trim();
   const phone=document.getElementById('d-phone').value.trim();
   const dob=document.getElementById('d-dob').value;
@@ -1522,10 +1525,12 @@ async function donorSendOTP(){
   if(age<18)return showToast('Donor must be at least 18 years old','error');
   if(age>65)return showToast('Age must be under 65 years','error');
   if(!terms)return showToast('Please accept Terms & Conditions','error');
+  if(btn)btn.disabled=true;
   try{
     const city=`${livingTown}, ${dist}`;
     const photo=document.getElementById('d-photo-preview').querySelector('img')?.src||null;
-    const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,name:name,city,homeTown,livingTown,district:dist,bloodGroup:selBloodD,dob,age,weight:Number(weight),gender:selDGender,emergencyContact:emergency,photo});
+    const genderMap={m:'male',f:'female',o:'other'};
+    const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,name:name,city,homeTown,livingTown,district:dist,bloodGroup:selBloodD,dob,age,weight:Number(weight),gender:genderMap[selDGender]||'',emergencyContact:emergency,photo});
     otpCtx='donor';
     document.getElementById('otp-sub').textContent=`OTP sent to +91${phone}`;
     document.getElementById('otp-back').onclick=()=>showScreen('donor-register');
@@ -1539,12 +1544,17 @@ async function donorSendOTP(){
     }else{
       showToast(e.message,'error');
     }
+  }finally{
+    if(btn)btn.disabled=false;
   }
 }
 
 async function quickLoginOTP(){
+  const btn=event?.target;
+  if(btn?.disabled)return; // already sending — ignore a double-click/double-tap
   const phone=document.getElementById('ql-phone').value.trim();
   if(phone.length!==10)return showToast('Enter valid 10-digit phone','error');
+  if(btn)btn.disabled=true;
   try{
     const res=await api('/auth/donor/send-otp','POST',{phone:`+91${phone}`,name:'User',city:'Hyderabad'});
     otpCtx=qlRole;
@@ -1560,6 +1570,8 @@ async function quickLoginOTP(){
     }else{
       showToast(e.message,'error');
     }
+  }finally{
+    if(btn)btn.disabled=false;
   }
 }
 

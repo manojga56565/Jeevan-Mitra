@@ -33,8 +33,8 @@ function generateToken(payload, expiresIn = '30d') {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
 }
 
-// ═══ DONOR — MOCK OTP (MSG91 disabled — always returns the OTP in the
-// response so the frontend can show it directly, no real SMS sent) ═══
+// ═══ DONOR — MOCK OTP (no SMS provider wired in — always returns the OTP
+// in the response so the frontend can show it directly, no real SMS sent) ═══
 async function sendDonorOTP({ phone, name, city, bloodGroup, age, weight, homeTown, livingTown, gender, emergencyContact, dateOfBirth, district, profilePhotoUrl }) {
   if (!phone) throw Object.assign(new Error('Phone is required'), { statusCode: 400 });
   const normalizedPhone = normalizePhone(phone);
@@ -79,7 +79,12 @@ async function verifyDonorOTP({ phone, otp }) {
   const normalizedPhone = normalizePhone(phone);
   const record = otpStore[normalizedPhone];
   if (!record) throw Object.assign(new Error('OTP expired or not requested'), { statusCode: 400 });
-  if (record.otp !== otp) throw Object.assign(new Error('Invalid OTP'), { statusCode: 400 });
+  if (String(record.otp).trim() !== String(otp).trim()) {
+    // Diagnostic only — never exposed to the client, just server logs.
+    // Helps pin down a mismatch that isn't reproducible from code review alone.
+    logger.warn(`[OTP MISMATCH] phone=${normalizedPhone} expected="${record.otp}" (${typeof record.otp}, len=${record.otp.length}) received="${otp}" (${typeof otp}, len=${otp?.length})`);
+    throw Object.assign(new Error('Invalid OTP'), { statusCode: 400 });
+  }
   if (isExpired(record.expires)) {
     delete otpStore[normalizedPhone];
     throw Object.assign(new Error('OTP expired'), { statusCode: 400 });

@@ -67,7 +67,11 @@ async function addHospital(admin, data) {
   const existing = await Hospital.findOne({ $or: [{ email: data.email }, { registrationNumber: data.registrationNumber }] });
   if (existing) throw Object.assign(new Error('A hospital with this email or registration number already exists'), { statusCode: 409 });
 
-  const hospital = await Hospital.create({ ...data, isVerified: false, isActive: true });
+  // Admin-created hospitals are verified by definition — the admin adding
+  // them IS the verification step. The "pending → approve" flow only makes
+  // sense for hospitals that self-register, which this app doesn't
+  // currently support (all hospitals are added by admin).
+  const hospital = await Hospital.create({ ...data, isVerified: true, isActive: true });
   await logAction(admin, 'add_hospital', 'hospital', hospital._id, hospital.hospitalName);
   const safe = hospital.toObject();
   delete safe.password;
