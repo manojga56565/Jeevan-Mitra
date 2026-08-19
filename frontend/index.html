@@ -1222,6 +1222,16 @@ const TIPS=[
 // ═══ STATE ═══
 const API='https://jeevan-mitra-1vot.onrender.com/api';
 let socket,currentUser,currentRole,otpCtx,selBloodD,selBloodH,selBloodReq,selBloodEd,pendingReq,otpTimer,qlRole='donor',selUrg='normal',selDGender=null,fpRole='hospital',fpIdentifier='';
+
+// The create-request form shows Normal/Urgent/Emergency, but the backend's
+// urgency enum is low/medium/high/critical (see postReq's urgencyMap). This
+// converts a stored backend value back to the display word + CSS class
+// (.req-card.normal/.urgent/.emergency and .urg-badge.normal/.urgent/.emergency)
+// everywhere a request card renders its urgency badge.
+function urgLabel(u){
+  const map={low:'normal',medium:'normal',high:'urgent',critical:'emergency'};
+  return map[u]||'normal';
+}
 let allAdminH=[],allAdminD=[],confirmCallback=null;
 
 // ═══ INIT ═══
@@ -1710,7 +1720,7 @@ async function loadAllReqs(filter){
   try{
     const d=await api('/donors/feed');
     let reqs=d.requests||d||[];
-    if(filter!=='all')reqs=reqs.filter(r=>r.urgency===filter);
+    if(filter!=='all')reqs=reqs.filter(r=>urgLabel(r.urgency)===filter);
     const c=document.getElementById('req-list');
     const cards=reqs.map(r=>reqCard(r)).filter(Boolean);
     if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico">✅</div><div class="empty-title">No requests found</div></div>`;return}
@@ -1727,7 +1737,7 @@ function reqCard(r){
   const inCool=currentUser?.cooldownUntil&&new Date(currentUser.cooldownUntil)>new Date();
   if(full)return'';
   const exp=expiresIn(r.expiresAt);
-  return`<div class="req-card ${r.urgency||'normal'}"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div></div><div class="req-hosp">🏥 ${r.hospital?.hospitalName||r.hospital?.name||'Hospital'}</div><div class="req-details"><span>📍 ${r.hospital?.address||r.hospital?.city||'Hyderabad'}</span><span>🩸 ${got}/${need} accepted</span><span>⏰ ${ago(r.createdAt)}</span></div>${exp?`<div style="font-size:11px;font-weight:700;margin-top:4px;color:${exp.urgent?'var(--red)':'var(--muted)'};">⏳ ${exp.text}</div>`:''}${r.patientName?`<div style="font-size:11px;color:var(--slate);margin-top:3px;">👤 Patient: ${r.patientName}</div>`:''}${r.doctorRefNo?`<div style="font-size:11px;color:var(--slate);">🩺 Dr. Ref: ${r.doctorRefNo}</div>`:''}${r.patientReason?`<div style="font-size:11px;color:var(--slate);margin-top:3px;">📝 ${r.patientReason}</div>`:''}<button class="btn-accept" ${inCool?'disabled style="opacity:.5;cursor:not-allowed;"':''} onclick='showAccept(${JSON.stringify(r).replace(/"/g,"&quot;")})'>${inCool?'On Cooldown':'Accept / అంగీకరించు'}</button></div>`}
+  return`<div class="req-card ${urgLabel(r.urgency)}"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${urgLabel(r.urgency)}">${urgLabel(r.urgency)}</div></div><div class="req-hosp">🏥 ${r.hospital?.hospitalName||r.hospital?.name||'Hospital'}</div><div class="req-details"><span>📍 ${r.hospital?.address||r.hospital?.city||'Hyderabad'}</span><span>🩸 ${got}/${need} accepted</span><span>⏰ ${ago(r.createdAt)}</span></div>${exp?`<div style="font-size:11px;font-weight:700;margin-top:4px;color:${exp.urgent?'var(--red)':'var(--muted)'};">⏳ ${exp.text}</div>`:''}${r.patientName?`<div style="font-size:11px;color:var(--slate);margin-top:3px;">👤 Patient: ${r.patientName}</div>`:''}${r.doctorRefNo?`<div style="font-size:11px;color:var(--slate);">🩺 Dr. Ref: ${r.doctorRefNo}</div>`:''}${r.patientReason?`<div style="font-size:11px;color:var(--slate);margin-top:3px;">📝 ${r.patientReason}</div>`:''}<button class="btn-accept" ${inCool?'disabled style="opacity:.5;cursor:not-allowed;"':''} onclick='showAccept(${JSON.stringify(r).replace(/"/g,"&quot;")})'>${inCool?'On Cooldown':'Accept / అంగీకరించు'}</button></div>`}
 
 function showAccept(req){
   pendingReq=req;
@@ -1771,7 +1781,7 @@ function showRouteMap(req){
     <div class="mchip red">🩸 ${req.bloodGroup||'A+'}</div>
     <div class="mchip blue">🏥 ${hospName}</div>
     <div class="mchip">📍 ${hospCity}</div>
-    <div class="mchip green">⚡ ${req.urgency||'normal'}</div>`;
+    <div class="mchip green">⚡ ${urgLabel(req.urgency)}</div>`;
 
   document.getElementById('map-overlay').classList.add('active');
 
@@ -1931,7 +1941,7 @@ function hospReqCard(r){
   const got=accepted.length;
   const activeEntry=accepted.find(a=>a.status==='accepted'); // the one still awaiting hospital verification
   const exp=expiresIn(r.expiresAt);
-  return`<div class="req-card ${r.urgency||'normal'}" style="margin-bottom:10px;"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div style="display:flex;gap:5px;"><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div><div style="font-size:10px;font-weight:800;color:${sc[r.status]||'#43A047'};background:#F5F5F5;padding:2px 7px;border-radius:10px;">${r.status||'pending'}</div></div></div><div class="req-details"><span>🩸 ${got}/${need} accepted</span><span>⏰ ${ago(r.createdAt)}</span>${r.patientName?`<span>👤 ${r.patientName}</span>`:''}</div>${exp&&r.status==='pending'?`<div style="font-size:11px;font-weight:700;margin-top:4px;color:${exp.urgent?'var(--red)':'var(--muted)'};">⏳ ${exp.text}</div>`:''}${activeEntry?.donor?`<div style="margin-top:7px;padding:7px;background:var(--red-light);border-radius:7px;font-size:12px;"><strong>Donor:</strong> ${activeEntry.donor.name} · ${activeEntry.donor.phone}</div>`:''}${activeEntry?.navigationUrl?`<button class="btn btn-outline" style="margin-top:7px;padding:9px;font-size:12px;" onclick="window.open('${activeEntry.navigationUrl}','_blank')">🧭 View Donor Route on Maps</button>`:''} ${activeEntry?`<button class="btn-accept" style="background:var(--green);" onclick="fulfill('${r._id}','${activeEntry.donor?._id||activeEntry.donor}')">✅ Verify &amp; Complete Donation</button>`:''}</div>`;
+  return`<div class="req-card ${urgLabel(r.urgency)}" style="margin-bottom:10px;"><div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div style="display:flex;gap:5px;"><div class="urg-badge ${urgLabel(r.urgency)}">${urgLabel(r.urgency)}</div><div style="font-size:10px;font-weight:800;color:${sc[r.status]||'#43A047'};background:#F5F5F5;padding:2px 7px;border-radius:10px;">${r.status||'pending'}</div></div></div><div class="req-details"><span>🩸 ${got}/${need} accepted</span><span>⏰ ${ago(r.createdAt)}</span>${r.patientName?`<span>👤 ${r.patientName}</span>`:''}</div>${exp&&r.status==='pending'?`<div style="font-size:11px;font-weight:700;margin-top:4px;color:${exp.urgent?'var(--red)':'var(--muted)'};">⏳ ${exp.text}</div>`:''}${activeEntry?.donor?`<div style="margin-top:7px;padding:7px;background:var(--red-light);border-radius:7px;font-size:12px;"><strong>Donor:</strong> ${activeEntry.donor.name} · ${activeEntry.donor.phone}</div>`:''}${activeEntry?.navigationUrl?`<button class="btn btn-outline" style="margin-top:7px;padding:9px;font-size:12px;" onclick="window.open('${activeEntry.navigationUrl}','_blank')">🧭 View Donor Route on Maps</button>`:''} ${activeEntry?`<button class="btn-accept" style="background:var(--green);" onclick="fulfill('${r._id}','${activeEntry.donor?._id||activeEntry.donor}')">✅ Verify &amp; Complete Donation</button>`:''}</div>`;
 }
 
 function renderHospReqs(){
@@ -1997,10 +2007,15 @@ async function postReq() {
     const notesVal = document.getElementById('req-notes').value;
     const combinedReason = [reasonVal, notesVal].filter(Boolean).join(' — ');
 
+    // UI labels are Normal/Urgent/Emergency for donors & hospital staff,
+    // but the backend's urgency enum is low/medium/high/critical — map
+    // between the two here rather than changing either vocabulary.
+    const urgencyMap = { normal: 'medium', urgent: 'high', emergency: 'critical' };
+
     await api('/hospitals/requests', 'POST', {
       bloodGroup: selBloodReq,
       quantity: parseInt(document.getElementById('req-units').value),
-      urgency: selUrg,
+      urgency: urgencyMap[selUrg] || 'medium',
       patientReference: document.getElementById('req-ref').value,
       patientName: document.getElementById('req-patient').value,
       doctorRefNo: document.getElementById('req-doctor').value,
@@ -2446,8 +2461,8 @@ async function renderAdminRequests(){
 function renderAdminReqList(reqs){
   const c=document.getElementById('adm-req-list');
   if(!reqs||!reqs.length){c.innerHTML=`<div class="empty"><div class="empty-ico">📋</div><div class="empty-title">No requests found</div></div>`;return}
-  c.innerHTML=reqs.map(r=>`<div class="req-card ${r.urgency||'normal'}" style="margin-bottom:10px;">
-    <div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${r.urgency||'normal'}">${r.urgency||'normal'}</div></div>
+  c.innerHTML=reqs.map(r=>`<div class="req-card ${urgLabel(r.urgency)}" style="margin-bottom:10px;">
+    <div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${urgLabel(r.urgency)}">${urgLabel(r.urgency)}</div></div>
     <div class="req-hosp">🏥 ${r.hospital?.hospitalName||'Hospital'}</div>
     <div class="req-details"><span>📍 ${r.hospital?.city||'-'}</span><span>🩸 ${r.units||1} unit(s)</span><span>⏰ ${ago(r.createdAt)}</span></div>
     <div style="font-size:11px;font-weight:700;margin-top:5px;color:var(--slate);">Status: ${r.status||'pending'}</div>
@@ -2865,7 +2880,7 @@ function connectSocket(role){
   try{
     socket=io(API,{auth:{token:getAuthItem('jm_token')}});
     socket.on('connect',()=>{if(currentUser?.city)socket.emit('join_city',currentUser.city)});
-    socket.on('new_blood_request',req=>{if(role==='donor')showToast(`🚨 New ${req.urgency} request for ${req.bloodGroup}!`,'error')});
+    socket.on('new_blood_request',req=>{if(role==='donor')showToast(`🚨 New ${urgLabel(req.urgency)} request for ${req.bloodGroup}!`,'error')});
     socket.on('request_accepted',()=>{if(role==='hospital')showToast('✅ Donor accepted your request!','success')});
   }catch(e){console.log('Socket unavailable')}
 }
@@ -2878,7 +2893,7 @@ function getTier(p){
   if(p>=1000)return{name:'Silver',ico:'🥈',next:2500};
   return{name:'Bronze',ico:'🥉',next:1000};
 }
-function urgPts(u){return u==='emergency'?30:u==='urgent'?20:10}
+function urgPts(u){const l=urgLabel(u);return l==='emergency'?30:l==='urgent'?20:10}
 function ago(date){if(!date)return'Just now';const d=Date.now()-new Date(date);const m=Math.floor(d/60000);if(m<60)return`${m}m ago`;const h=Math.floor(m/60);if(h<24)return`${h}h ago`;return`${Math.floor(h/24)}d ago`}
 function expiresIn(date){
   if(!date)return null;
