@@ -1496,11 +1496,14 @@ async function sendForgotPwOTP(){
     fpIdentifier=identifier;
     document.getElementById('fp-step1').style.display='none';
     document.getElementById('fp-step2').style.display='block';
-    if(res.code){
-      document.getElementById('fp-code').value=res.code;
-      showToast(`Reset code: ${res.code}`,'success',6000);
+    // No live SMS provider is wired in, so the backend echoes the mock code
+    // back here (only when the account actually exists) — auto-fill it so
+    // the reset flow is actually completable end-to-end.
+    if(res.otp){
+      document.getElementById('fp-code').value=res.otp;
+      showToast(`Reset code (mock SMS): ${res.otp}`,'success');
     }else{
-      showToast('Reset code sent!','success');
+      showToast('If that account exists, a reset code has been sent','success');
     }
   }catch(e){showToast(e.message,'error')}
 }
@@ -2416,7 +2419,7 @@ async function renderAdminDonors(){
       <div class="sec-title" style="margin:0;">All Donors</div>
     </div>
     <div class="search-box"><input placeholder="Search donor..." oninput="filterAdminD(this.value)"/></div>
-    <div class="chip-row"><div class="chip active" onclick="filterDBlood('all',this)">All</div><div class="chip" onclick="filterDBlood('A+',this)">A+</div><div class="chip" onclick="filterDBlood('B+',this)">B+</div><div class="chip" onclick="filterDBlood('O+',this)">O+</div><div class="chip" onclick="filterDBlood('AB+',this)">AB+</div></div>
+    <div class="chip-row"><div class="chip active" onclick="filterDBlood('all',this)">All</div><div class="chip" onclick="filterDBlood('A+',this)">A+</div><div class="chip" onclick="filterDBlood('A-',this)">A-</div><div class="chip" onclick="filterDBlood('B+',this)">B+</div><div class="chip" onclick="filterDBlood('B-',this)">B-</div><div class="chip" onclick="filterDBlood('AB+',this)">AB+</div><div class="chip" onclick="filterDBlood('AB-',this)">AB-</div><div class="chip" onclick="filterDBlood('O+',this)">O+</div><div class="chip" onclick="filterDBlood('O-',this)">O-</div></div>
     <div id="adm-d-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
   try{const d=await api('/admin/donors');renderDList(d.donors||[])}
   catch(e){document.getElementById('adm-d-list').innerHTML=loadErrorHtml(e,'renderAdminDonors()')}
