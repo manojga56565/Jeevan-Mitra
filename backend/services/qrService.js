@@ -1,33 +1,16 @@
-const { generateDonorQR, verifyDonorQR } = require('../utils/qrGenerator');
-const Donor = require('../models/Donor');
+const crypto = require('crypto');
 
-async function issueDonorQR(donorId) {
-  const { qrToken, dataUrl } = await generateDonorQR(donorId);
-  await Donor.findByIdAndUpdate(donorId, { qrIssuedAt: new Date() });
-  return { qrToken, dataUrl };
+// The QR code encodes ONLY this token — never name, blood group, or any
+// other personal data. A hospital scan looks the donor up server-side by
+// this token via GET /api/donors/verify/:token, which is the only place
+// donor details are ever returned from a scan.
+function generateQRToken() {
+  return crypto.randomBytes(24).toString('hex');
 }
 
-/**
- * Called when a hospital scans a donor's QR — returns full, LIVE donor
- * details (not cached), so hospital staff always see current eligibility,
- * cooldown, and donation history at the moment of scanning.
- */
-async function scanDonorQR(qrToken) {
-  let donorId;
-  try {
-    donorId = verifyDonorQR(qrToken);
-  } catch (e) {
-    throw Object.assign(new Error('Invalid or corrupted QR code'), { statusCode: 400 });
-  }
-
-  const donor = await Donor.findById(donorId).select('-password -otpCode -otpExpiresAt');
-  if (!donor) throw Object.assign(new Error('Donor not found'), { statusCode: 404 });
-
-  return {
-    donor,
-    eligible: donor.isEligibleToDonate(),
-    remainingCooldownDays: donor.remainingCooldownDays()
-  };
+// What the frontend renders into the QR image.
+function buildDonorQRPayload(donor) {
+  return donor.qrToken;
 }
 
-module.exports = { issueDonorQR, scanDonorQR };
+module.exports = { generateQRToken, buildDonorQRPayload };

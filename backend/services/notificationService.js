@@ -1,57 +1,35 @@
-const Notification = require('../models/Notification');
-const { getIO } = require('../config/socket');
+// Donors join a personal room (donor:<id>) and a blood-group room
+// (donors:group:<bloodGroup>) on connect — see sockets/socketHandler.js.
+// Emitting to only the compatible blood-group rooms means an incompatible
+// donor's client never receives the event at all, not just "receives it
+// but the UI hides it" — the popup-suppression lives on the server, not
+// as a frontend filter that a modified client could ignore.
 
-async function create({ recipientType, recipientId, type, title, message, relatedRequest, relatedDonor, relatedHospital, responseStatus }) {
-  const notif = await Notification.create({
-    recipientType, recipientId, type, title, message,
-    relatedRequest: relatedRequest || null,
-    relatedDonor: relatedDonor || null,
-    relatedHospital: relatedHospital || null,
-    responseStatus: responseStatus || 'n/a'
-  });
-
-  // Push live if they're connected right now; harmless no-op if not (they'll
-  // still see it next time they fetch their notification list).
-  const io = getIO();
-  if (io) io.to(`user:${recipientId}`).emit('notification', notif);
-
-  return notif;
+function notifyDonorsByBloodGroup(io, compatibleDonorGroups, event, payload) {
+  if (!io) return;
+  compatibleDonorGroups.forEach(group => io.to(`donors:group:${group}`).emit(event, payload));
 }
 
-async function listForUser(recipientType, recipientId, limit = 50) {
-  return Notification.find({ recipientType, recipientId }).sort({ createdAt: -1 }).limit(limit);
+function notifyDonor(io, donorId, event, payload) {
+  if (!io) return;
+  io.to(`donor:${donorId}`).emit(event, payload);
 }
 
-async function markRead(notificationId, recipientId) {
-  return Notification.findOneAndUpdate(
-    { _id: notificationId, recipientId },
-    { isRead: true, readAt: new Date() },
-    { new: true }
-  );
+// Legacy broadcast-to-all-donors, still used for admin broadcast messages
+// (which are intentionally for every donor, not blood-group-scoped).
+function notifyDonors(io, event, payload) {
+  if (!io) return;
+  io.to('donors').emit(event, payload);
 }
 
-async function respondToRequestAlert(recipientId, requestId, response) {
-  return Notification.findOneAndUpdate(
-    { recipientId, relatedRequest: requestId, type: 'blood_request' },
-    { responseStatus: response },
-    { new: true }
-  );
+function notifyHospital(io, hospitalId, event, payload) {
+  if (!io) return;
+  io.to(`hospital:${hospitalId}`).emit(event, payload);
 }
 
-/**
- * Admin broadcast — pushes to everyone with the given role currently
- * connected, and does NOT persist per-user (that would mean writing one
- * Notification per donor/hospital in the system). For a project this size,
- * live-only broadcast is the right tradeoff; flagged clearly rather than
- * silently only half-working.
- */
-function broadcast(target, message) {
-  const io = getIO();
-  if (!io) return false;
-  const room = target === 'donors' ? 'donors' : target === 'hospitals' ? 'hospitals' : null;
-  if (room) io.to(room).emit('broadcast', { message, sentAt: new Date() });
-  else io.emit('broadcast', { message, sentAt: new Date() });
-  return true;
+function notifyAdmins(io, event, payload) {
+  if (!io) return;
+  io.to('admins').emit(event, payload);
 }
 
-module.exports = { create, listForUser, markRead, respondToRequestAlert, broadcast };
+module.exports = { notifyDonorsByBloodGroup, notifyDonor, notifyDonors, notifyHospital, notifyAdmins };

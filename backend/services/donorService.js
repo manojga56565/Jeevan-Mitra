@@ -10,7 +10,7 @@ async function getProfile(donorId) {
   return { donor, ...cooldownService.getCooldownInfo(donor) };
 }
 
-async function updateProfile(donorId, { name, email, city, availabilityStatus, district, homeTown, livingTown, emergencyContact, gender, dateOfBirth, profilePhotoUrl }) {
+async function updateProfile(donorId, { name, email, city, availabilityStatus }) {
   const donor = await Donor.findById(donorId);
   if (!donor) throw Object.assign(new Error('Donor not found'), { statusCode: 404 });
 
@@ -18,13 +18,6 @@ async function updateProfile(donorId, { name, email, city, availabilityStatus, d
   if (email) donor.email = email;
   if (city) donor.city = city;
   if (availabilityStatus) donor.availabilityStatus = availabilityStatus;
-  if (district) donor.district = district;
-  if (homeTown) donor.homeTown = homeTown;
-  if (livingTown) donor.livingTown = livingTown;
-  if (emergencyContact) donor.emergencyContact = emergencyContact;
-  if (gender) donor.gender = gender;
-  if (dateOfBirth) donor.dateOfBirth = dateOfBirth;
-  if (profilePhotoUrl) donor.profilePhotoUrl = profilePhotoUrl;
 
   await donor.save();
   return donor;

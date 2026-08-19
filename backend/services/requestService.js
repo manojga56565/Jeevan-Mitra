@@ -16,23 +16,6 @@ async function createRequest(hospitalId, data) {
   const hospital = await Hospital.findById(hospitalId);
   if (!hospital) throw Object.assign(new Error('Hospital not found'), { statusCode: 404 });
 
-  // Don't let a hospital create unlimited duplicate requests for the same
-  // patient — if there's already an open request for this exact patient
-  // reference + blood group, point them at updating that one instead.
-  if (data.patientReference) {
-    const existingActive = await Request.findOne({
-      hospitalId: hospital._id,
-      patientReference: data.patientReference,
-      bloodGroup: data.bloodGroup,
-      status: { $in: ['pending', 'accepted'] }
-    });
-    if (existingActive) {
-      throw Object.assign(new Error('Active Request Already Exists — there is already an open request for this patient and blood group. View or update it instead of creating a new one.'), {
-        statusCode: 409, code: 'ACTIVE_REQUEST_EXISTS', existingRequestId: existingActive._id
-      });
-    }
-  }
-
   const rawHours = parseInt(data.expiryHours);
   const expiryHours = (!isNaN(rawHours) && rawHours >= MIN_REQUEST_EXPIRY_HOURS && rawHours <= MAX_REQUEST_EXPIRY_HOURS)
     ? rawHours : DEFAULT_REQUEST_EXPIRY_HOURS;
@@ -53,10 +36,6 @@ async function createRequest(hospitalId, data) {
     patientAge: data.patientAge || null,
     patientGender: data.patientGender || '',
     patientReason: data.patientReason || '',
-    patientReference: data.patientReference || '',
-    department: data.department || '',
-    contactPerson: data.contactPerson || '',
-    contactNumber: data.contactNumber || '',
     doctorRefNo: data.doctorRefNo || '',
     doctorName: data.doctorName || '',
     districts: data.districts || [],
@@ -66,11 +45,8 @@ async function createRequest(hospitalId, data) {
     location: { type: 'Point', coordinates: [lng, lat] }
   });
 
-  // findByIdAndUpdate with $inc, not hospital.save() — saving the full
-  // document here would re-validate every field on the hospital's profile
-  // (contactPerson, address, etc.), which has nothing to do with posting
-  // a request and would wrongly fail if that profile is incomplete.
-  await Hospital.findByIdAndUpdate(hospital._id, { $inc: { totalRequests: 1 } });
+  hospital.totalRequests += 1;
+  await hospital.save();
 
   const { matchedCount } = await matchingService.matchAndNotify(request);
 
@@ -119,21 +95,6 @@ async function acceptRequest(donorId, requestId) {
 
   const alreadyAccepted = request.acceptedDonors.some(a => String(a.donor) === String(donorId));
   if (alreadyAccepted) throw Object.assign(new Error('You have already accepted this request'), { statusCode: 400 });
-
-  // A donor who's already committed to another still-open request shouldn't
-  // be able to accept a second one at the same time — they'd only be able
-  // to physically show up and donate to one hospital anyway.
-  const conflictingRequest = await Request.findOne({
-    _id: { $ne: requestId },
-    'acceptedDonors.donor': donorId,
-    'acceptedDonors.status': { $ne: 'completed' },
-    status: { $in: ['pending', 'accepted'] }
-  }).select('hospitalName bloodGroup');
-  if (conflictingRequest) {
-    throw Object.assign(new Error(`You already have an open commitment to ${conflictingRequest.hospitalName} (${conflictingRequest.bloodGroup}). Complete or that request must close before accepting another.`), {
-      statusCode: 409, code: 'CONFLICTING_REQUEST'
-    });
-  }
 
   const [lng, lat] = request.location.coordinates;
   const navigationUrl = mapsService.buildDirectionsLink(lat, lng);
@@ -219,13 +180,7 @@ async function adminDeleteRequest(requestId) {
   return true;
 }
 
-async function adminCancelRequest(requestId) {
-  const request = await Request.findByIdAndUpdate(requestId, { $set: { status: 'cancelled' } }, { new: true });
-  if (!request) throw Object.assign(new Error('Request not found'), { statusCode: 404 });
-  return request;
-}
-
 module.exports = {
   createRequest, getDonorFeed, acceptRequest, completeDonation,
-  getHospitalRequests, deleteRequest, getAllRequests, adminDeleteRequest, adminCancelRequest
+  getHospitalRequests, deleteRequest, getAllRequests, adminDeleteRequest
 };

@@ -1,40 +1,33 @@
-const { getIO } = require('../config/socket');
 const logger = require('../utils/logger');
 
-/**
- * Registers custom real-time events on top of the base connection/room
- * logic already set up in config/socket.js. Called once from server.js
- * after the socket server is initialized.
- */
+// Rooms:
+//   'donors'                 — every connected donor (admin broadcasts only)
+//   'donors:group:<A+|...>'  — donors of a specific blood group (emergency
+//                              request matching — a donor only ever joins
+//                              their own group's room, so an incompatible
+//                              request is never even sent to their socket)
+//   'donor:<id>'             — a single donor's personal room (their own
+//                              acceptance confirmations, request-closed pings)
+//   'hospital:<id>'          — a single hospital's room
+//   'admins'                 — every connected admin
 function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
+    logger.info(`Socket connected: ${socket.id}`);
 
-    // Donor taps "I'm on my way" / "I've arrived" after accepting a request
-    socket.on('donor:status', ({ requestId, hospitalId, status }) => {
-      if (!socket.user || socket.user.role !== 'donor') return;
-      if (!['on_the_way', 'arrived'].includes(status)) return;
-
-      io.to(`user:${hospitalId}`).emit('donor:status', {
-        requestId,
-        donorId: socket.user.id,
-        status,
-        at: new Date()
-      });
-      logger.info(`Donor ${socket.user.id} status -> ${status} for request ${requestId}`);
+    socket.on('join', ({ role, id, bloodGroup }) => {
+      if (role === 'donor') {
+        socket.join('donors');
+        if (bloodGroup) socket.join(`donors:group:${bloodGroup}`);
+        if (id) socket.join(`donor:${id}`);
+      }
+      if (role === 'hospital' && id) socket.join(`hospital:${id}`);
+      if (role === 'admin') socket.join('admins');
     });
 
+    socket.on('disconnect', () => {
+      logger.info(`Socket disconnected: ${socket.id}`);
+    });
   });
 }
 
-/** Convenience emitters other parts of the app can call without touching io directly */
-function emitToUser(userId, event, payload) {
-  const io = getIO();
-  if (io) io.to(`user:${userId}`).emit(event, payload);
-}
-
-function emitToRole(role, event, payload) {
-  const io = getIO();
-  if (io) io.to(role + 's').emit(event, payload);
-}
-
-module.exports = { registerSocketHandlers, emitToUser, emitToRole };
+module.exports = { registerSocketHandlers };

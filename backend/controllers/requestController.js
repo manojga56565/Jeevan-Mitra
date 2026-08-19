@@ -1,18 +1,39 @@
-const requestService = require('../services/requestService');
-const { success } = require('../utils/response');
-const { asyncHandler } = require('../middleware/errorHandler');
+const Request = require('../models/Request');
+const { donorGroupsThatCanFulfil } = require('../services/matchingService');
+const { notifyDonorsByBloodGroup, notifyDonor } = require('../services/notificationService');
 
-exports.listAll = asyncHandler(async (req, res) => {
-  const requests = await requestService.getAllRequests();
-  success(res, { requests });
-});
+// PUT /api/requests/:id/cancel
+exports.cancelRequest = async (req, res, next) => {
+  try {
+    const request = await Request.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (request.status === 'completed') {
+      return res.status(409).json({ success: false, message: 'A completed request cannot be cancelled' });
+    }
 
-exports.adminDelete = asyncHandler(async (req, res) => {
-  await requestService.adminDeleteRequest(req.params.id);
-  success(res, {}, 'Request deleted');
-});
+    request.status = 'cancelled';
+    await request.save();
 
-exports.adminCancel = asyncHandler(async (req, res) => {
-  const request = await requestService.adminCancelRequest(req.params.id);
-  success(res, { request }, 'Request cancelled');
-});
+    // Clear this request off every compatible donor's screen — covers
+    // "if the request is cancelled or closed, remove/update the notification."
+    const io = req.app.get('io');
+    notifyDonorsByBloodGroup(io, donorGroupsThatCanFulfil(request.bloodGroup), 'request_closed', { requestId: request._id });
+    if (request.acceptedBy) notifyDonor(io, request.acceptedBy, 'request_closed', { requestId: request._id });
+
+    res.json({ success: true, request });
+  } catch (err) { next(err); }
+};
+
+// DELETE /api/requests/:id
+exports.deleteRequest = async (req, res, next) => {
+  try {
+    const request = await Request.findByIdAndDelete(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+
+    const io = req.app.get('io');
+    notifyDonorsByBloodGroup(io, donorGroupsThatCanFulfil(request.bloodGroup), 'request_closed', { requestId: request._id });
+    if (request.acceptedBy) notifyDonor(io, request.acceptedBy, 'request_closed', { requestId: request._id });
+
+    res.json({ success: true, message: 'Request deleted' });
+  } catch (err) { next(err); }
+};

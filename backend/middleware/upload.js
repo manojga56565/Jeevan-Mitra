@@ -38,10 +38,4 @@ const uploadHospitalImage = multer({
   limits: { fileSize: 3 * 1024 * 1024 }
 });
 
-const uploadDonorPhoto = multer({
-  storage: makeStorage('donors'),
-  fileFilter: imageFilter,
-  limits: { fileSize: 3 * 1024 * 1024 }
-});
-
-module.exports = { uploadHospitalDoc, uploadHospitalImage, uploadDonorPhoto };
+module.exports = { uploadHospitalDoc, uploadHospitalImage };

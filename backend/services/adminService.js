@@ -3,11 +3,7 @@ const Hospital = require('../models/Hospital');
 const Admin = require('../models/Admin');
 const Request = require('../models/Request');
 const SystemLog = require('../models/SystemLog');
-const Reward = require('../models/Reward');
-const Notification = require('../models/Notification');
-const District = require('../models/District');
 const notificationService = require('./notificationService');
-const rewardService = require('./rewardService');
 
 async function logAction(admin, action, target, targetId, details) {
   try {
@@ -41,13 +37,12 @@ async function listPendingHospitals() {
 }
 
 async function verifyHospital(admin, hospitalId, action) {
-  const hospital = await Hospital.findById(hospitalId).select('hospitalName isVerified');
+  const hospital = await Hospital.findById(hospitalId);
   if (!hospital) throw Object.assign(new Error('Hospital not found'), { statusCode: 404 });
 
   if (action === 'approve') {
-    // $set via findByIdAndUpdate, not hospital.save() — see the note in
-    // toggleHospitalActive above; same full-document revalidation issue.
-    await Hospital.findByIdAndUpdate(hospitalId, { $set: { isVerified: true } });
+    hospital.isVerified = true;
+    await hospital.save();
     await logAction(admin, 'approve_hospital', 'hospital', hospital._id, hospital.hospitalName);
     await notificationService.create({
       recipientType: 'hospital', recipientId: hospital._id, type: 'hospital_approved',
@@ -67,11 +62,7 @@ async function addHospital(admin, data) {
   const existing = await Hospital.findOne({ $or: [{ email: data.email }, { registrationNumber: data.registrationNumber }] });
   if (existing) throw Object.assign(new Error('A hospital with this email or registration number already exists'), { statusCode: 409 });
 
-  // Admin-created hospitals are verified by definition — the admin adding
-  // them IS the verification step. The "pending → approve" flow only makes
-  // sense for hospitals that self-register, which this app doesn't
-  // currently support (all hospitals are added by admin).
-  const hospital = await Hospital.create({ ...data, isVerified: true, isActive: true });
+  const hospital = await Hospital.create({ ...data, isVerified: false, isActive: true });
   await logAction(admin, 'add_hospital', 'hospital', hospital._id, hospital.hospitalName);
   const safe = hospital.toObject();
   delete safe.password;
@@ -86,15 +77,12 @@ async function editHospital(admin, hospitalId, data) {
 }
 
 async function toggleHospitalActive(admin, hospitalId) {
-  const hospital = await Hospital.findById(hospitalId).select('isActive hospitalName');
+  const hospital = await Hospital.findById(hospitalId);
   if (!hospital) throw Object.assign(new Error('Hospital not found'), { statusCode: 404 });
-  const newStatus = !hospital.isActive;
-  // $set via findByIdAndUpdate, not hospital.save() — same reasoning as
-  // requestService's totalRequests increment: toggling one flag shouldn't
-  // re-validate every required field on hospitals with incomplete profiles.
-  await Hospital.findByIdAndUpdate(hospitalId, { $set: { isActive: newStatus } });
-  await logAction(admin, newStatus ? 'activate_hospital' : 'suspend_hospital', 'hospital', hospitalId, hospital.hospitalName);
-  return newStatus;
+  hospital.isActive = !hospital.isActive;
+  await hospital.save();
+  await logAction(admin, hospital.isActive ? 'activate_hospital' : 'suspend_hospital', 'hospital', hospital._id, hospital.hospitalName);
+  return hospital.isActive;
 }
 
 async function deleteHospital(admin, hospitalId) {
@@ -186,172 +174,9 @@ async function broadcast(admin, target, message) {
   return delivered;
 }
 
-// ═══ DONATIONS — real events: donors whose acceptedDonors entry is 'completed' ═══
-// There's no separate Donation model; a completed donation IS a completed
-// acceptance on a Request, verified via QR at hospital check-in.
-async function listDonations() {
-  const requests = await Request.find({ 'acceptedDonors.status': 'completed' })
-    .select('bloodGroup hospitalName acceptedDonors createdAt')
-    .populate('acceptedDonors.donor', 'name phone bloodGroup');
-
-  const donations = [];
-  requests.forEach(r => {
-    r.acceptedDonors.forEach(ad => {
-      if (ad.status === 'completed') {
-        donations.push({
-          requestId: r._id,
-          hospitalName: r.hospitalName,
-          bloodGroup: r.bloodGroup,
-          donor: ad.donor,
-          acceptedAt: ad.acceptedAt,
-          completedAt: ad.completedAt
-        });
-      }
-    });
-  });
-  donations.sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0));
-  return donations;
-}
-
-async function getDonationStats() {
-  const all = await listDonations();
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  return {
-    total: all.length,
-    today: all.filter(d => d.completedAt && new Date(d.completedAt) >= startOfDay).length,
-    thisMonth: all.filter(d => d.completedAt && new Date(d.completedAt) >= startOfMonth).length
-  };
-}
-
-// ═══ QR VERIFICATION ACTIVITY ═══
-// Same underlying event as a completed donation — a QR scan at hospital
-// check-in is what marks an acceptedDonors entry 'completed' in the first
-// place, so this reuses that real data rather than a separate fake log.
-async function listQRActivity() {
-  return listDonations();
-}
-
-// ═══ REWARDS OVERVIEW ═══
-async function getRewardsOverview() {
-  const [leaderboard, rewards, pointsAgg] = await Promise.all([
-    rewardService.getLeaderboard(50),
-    Reward.find().sort({ pointsCost: 1 }),
-    Donor.aggregate([{ $group: { _id: null, totalPoints: { $sum: '$points' } } }])
-  ]);
-  const totalRedemptions = rewards.reduce((sum, r) => sum + r.redemptions.length, 0);
-  return {
-    leaderboard,
-    rewards,
-    totalPointsIssued: pointsAgg[0]?.totalPoints || 0,
-    totalRedemptions
-  };
-}
-
-// ═══ NOTIFICATIONS FEED — admin-wide view across all recipients ═══
-async function listNotifications(limit = 100) {
-  return Notification.find().sort({ createdAt: -1 }).limit(limit);
-}
-
-// ═══ DISTRICTS ═══
-async function listDistricts() {
-  return District.find().sort({ name: 1 });
-}
-async function addDistrict(admin, name, state) {
-  if (!name) throw Object.assign(new Error('District name is required'), { statusCode: 400 });
-  const exists = await District.findOne({ name: new RegExp(`^${name}$`, 'i') });
-  if (exists) throw Object.assign(new Error('That district already exists'), { statusCode: 409 });
-  const district = await District.create({ name, state: state || 'Telangana' });
-  await logAction(admin, 'district_add', 'district', district._id, name);
-  return district;
-}
-async function toggleDistrict(admin, id) {
-  const district = await District.findById(id);
-  if (!district) throw Object.assign(new Error('District not found'), { statusCode: 404 });
-  district.isActive = !district.isActive;
-  await district.save();
-  await logAction(admin, 'district_toggle', 'district', id, `now ${district.isActive ? 'enabled' : 'disabled'}`);
-  return district.isActive;
-}
-async function deleteDistrict(admin, id) {
-  const district = await District.findByIdAndDelete(id);
-  if (!district) throw Object.assign(new Error('District not found'), { statusCode: 404 });
-  await logAction(admin, 'district_delete', 'district', id, district.name);
-}
-
-// ═══ ANALYTICS — real aggregations over existing data ═══
-async function getAnalytics() {
-  const [donationsByMonth, requestsByMonth, bloodGroupDemand, bloodGroupSupply, districtDonors] = await Promise.all([
-    Request.aggregate([
-      { $unwind: '$acceptedDonors' },
-      { $match: { 'acceptedDonors.status': 'completed' } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$acceptedDonors.completedAt' } }, count: { $sum: 1 } } },
-      { $sort: { _id: 1 } }
-    ]),
-    Request.aggregate([
-      { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, count: { $sum: 1 } } },
-      { $sort: { _id: 1 } }
-    ]),
-    Request.aggregate([{ $group: { _id: '$bloodGroup', count: { $sum: 1 } } }]),
-    Donor.aggregate([{ $match: { isActive: true } }, { $group: { _id: '$bloodGroup', count: { $sum: 1 } } }]),
-    Donor.aggregate([{ $group: { _id: '$district', count: { $sum: 1 } } }, { $sort: { count: -1 } }])
-  ]);
-  return { donationsByMonth, requestsByMonth, bloodGroupDemand, bloodGroupSupply, districtDonors };
-}
-
-// ═══ REPORTS — CSV export (real data, no PDF/Excel libs installed yet) ═══
-function toCSV(rows, columns) {
-  const header = columns.join(',');
-  const lines = rows.map(row => columns.map(c => {
-    const v = row[c] ?? '';
-    const s = String(v).replace(/"/g, '""');
-    return /[",\n]/.test(s) ? `"${s}"` : s;
-  }).join(','));
-  return [header, ...lines].join('\n');
-}
-async function exportReport(type) {
-  if (type === 'donors') {
-    const donors = await Donor.find().select('name phone email bloodGroup city district points totalDonations isActive createdAt').lean();
-    return toCSV(donors, ['name', 'phone', 'email', 'bloodGroup', 'city', 'district', 'points', 'totalDonations', 'isActive', 'createdAt']);
-  }
-  if (type === 'hospitals') {
-    const hospitals = await Hospital.find().select('hospitalName email phone city district isVerified isActive createdAt').lean();
-    return toCSV(hospitals, ['hospitalName', 'email', 'phone', 'city', 'district', 'isVerified', 'isActive', 'createdAt']);
-  }
-  if (type === 'requests') {
-    const requests = await Request.find().select('bloodGroup hospitalName quantity status urgency createdAt').lean();
-    return toCSV(requests, ['bloodGroup', 'hospitalName', 'quantity', 'status', 'urgency', 'createdAt']);
-  }
-  if (type === 'donations') {
-    const donations = await listDonations();
-    const rows = donations.map(d => ({
-      requestId: d.requestId, hospitalName: d.hospitalName, bloodGroup: d.bloodGroup,
-      donorName: d.donor?.name || '', donorPhone: d.donor?.phone || '', completedAt: d.completedAt
-    }));
-    return toCSV(rows, ['requestId', 'hospitalName', 'bloodGroup', 'donorName', 'donorPhone', 'completedAt']);
-  }
-  throw Object.assign(new Error('Unknown report type — use donors, hospitals, requests, or donations'), { statusCode: 400 });
-}
-
-// ═══ GLOBAL SEARCH ═══
-async function globalSearch(q) {
-  if (!q || q.trim().length < 2) return { donors: [], hospitals: [], requests: [] };
-  const regex = new RegExp(q.trim(), 'i');
-  const [donors, hospitals, requests] = await Promise.all([
-    Donor.find({ $or: [{ name: regex }, { phone: regex }, { email: regex }] }).select('name phone email bloodGroup city').limit(10),
-    Hospital.find({ $or: [{ hospitalName: regex }, { email: regex }, { phone: regex }] }).select('hospitalName email phone city').limit(10),
-    Request.find({ $or: [{ hospitalName: regex }, { bloodGroup: regex }] }).select('hospitalName bloodGroup status').limit(10)
-  ]);
-  return { donors, hospitals, requests };
-}
-
 module.exports = {
   getStats, listHospitals, listPendingHospitals, verifyHospital, addHospital, editHospital,
   toggleHospitalActive, deleteHospital, resetHospitalPassword,
   listDonors, editDonor, toggleDonorActive, deleteDonor, resetDonorPassword, resetDonorCooldown,
-  createAdmin, getLogs, broadcast,
-  listDonations, getDonationStats, listQRActivity, getRewardsOverview, listNotifications,
-  listDistricts, addDistrict, toggleDistrict, deleteDistrict,
-  getAnalytics, exportReport, globalSearch
+  createAdmin, getLogs, broadcast
 };

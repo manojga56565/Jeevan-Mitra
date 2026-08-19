@@ -1,163 +1,195 @@
-const adminService = require('../services/adminService');
-const { success } = require('../utils/response');
-const { asyncHandler } = require('../middleware/errorHandler');
-
-exports.getStats = asyncHandler(async (req, res) => {
-  const stats = await adminService.getStats();
-  success(res, { stats });
-});
+const bcrypt = require('bcryptjs');
+const Hospital = require('../models/Hospital');
+const Donor = require('../models/Donor');
+const Admin = require('../models/Admin');
+const Request = require('../models/Request');
+const { notifyDonors, notifyAdmins } = require('../services/notificationService');
+const logger = require('../utils/logger');
 
 // ═══ HOSPITALS ═══
-exports.listHospitals = asyncHandler(async (req, res) => {
-  const hospitals = await adminService.listHospitals();
-  success(res, { hospitals });
-});
 
-exports.listPendingHospitals = asyncHandler(async (req, res) => {
-  const hospitals = await adminService.listPendingHospitals();
-  success(res, { hospitals });
-});
+// GET /api/admin/hospitals
+exports.getHospitals = async (req, res, next) => {
+  try {
+    const hospitals = await Hospital.find().sort('-createdAt');
+    res.json({ success: true, hospitals });
+  } catch (err) { next(err); }
+};
 
-exports.verifyHospital = asyncHandler(async (req, res) => {
-  const result = await adminService.verifyHospital(req.user, req.params.id, req.body.action);
-  success(res, {}, result.message);
-});
+// POST /api/admin/hospitals/add
+exports.addHospital = async (req, res, next) => {
+  try {
+    const { hospitalName, registrationNumber, address, city, pincode, contactPerson, designation, email, phone, password, licenseDocument } = req.body;
+    if (!hospitalName || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Hospital name, email, and password are required' });
+    }
+    const hashed = await bcrypt.hash(password, 10);
+    const hospital = await Hospital.create({
+      hospitalName, registrationNumber, address, city, pincode, contactPerson,
+      designation, email: email.toLowerCase(), phone, password: hashed, licenseDocument,
+      isVerified: false
+    });
+    const safe = hospital.toObject(); delete safe.password;
+    res.status(201).json({ success: true, hospital: safe });
+  } catch (err) { next(err); }
+};
 
-exports.addHospital = asyncHandler(async (req, res) => {
-  const hospital = await adminService.addHospital(req.user, req.body);
-  res.status(201).json({ success: true, message: 'Hospital added — pending verification', hospital });
-});
+// PUT /api/admin/hospitals/:id
+exports.updateHospital = async (req, res, next) => {
+  try {
+    const allowed = ['hospitalName', 'registrationNumber', 'address', 'city', 'pincode', 'contactPerson', 'designation', 'email', 'phone'];
+    const updates = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+    const hospital = await Hospital.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
+    res.json({ success: true, hospital });
+  } catch (err) { next(err); }
+};
 
-exports.editHospital = asyncHandler(async (req, res) => {
-  const hospital = await adminService.editHospital(req.user, req.params.id, req.body);
-  success(res, { hospital }, 'Hospital updated');
-});
+// PUT /api/admin/hospitals/:id/toggle — flip isVerified (active/disabled)
+exports.toggleHospital = async (req, res, next) => {
+  try {
+    const hospital = await Hospital.findById(req.params.id);
+    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
+    hospital.isVerified = !hospital.isVerified;
+    await hospital.save();
+    res.json({ success: true, hospital });
+  } catch (err) { next(err); }
+};
 
-exports.toggleHospital = asyncHandler(async (req, res) => {
-  const isActive = await adminService.toggleHospitalActive(req.user, req.params.id);
-  success(res, { isActive }, `Hospital ${isActive ? 'activated' : 'suspended'}`);
-});
+// PUT /api/admin/hospitals/:id/reset-password
+exports.resetHospitalPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const hashed = await bcrypt.hash(password, 10);
+    const hospital = await Hospital.findByIdAndUpdate(req.params.id, { password: hashed }, { new: true });
+    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
+    res.json({ success: true, message: 'Password reset' });
+  } catch (err) { next(err); }
+};
 
-exports.deleteHospital = asyncHandler(async (req, res) => {
-  await adminService.deleteHospital(req.user, req.params.id);
-  success(res, {}, 'Hospital deleted');
-});
-
-exports.resetHospitalPassword = asyncHandler(async (req, res) => {
-  await adminService.resetHospitalPassword(req.user, req.params.id, req.body.password);
-  success(res, {}, 'Hospital password reset successfully');
-});
+// DELETE /api/admin/hospitals/:id
+exports.deleteHospital = async (req, res, next) => {
+  try {
+    const hospital = await Hospital.findByIdAndDelete(req.params.id);
+    if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
+    res.json({ success: true, message: 'Hospital deleted' });
+  } catch (err) { next(err); }
+};
 
 // ═══ DONORS ═══
-exports.listDonors = asyncHandler(async (req, res) => {
-  const donors = await adminService.listDonors();
-  success(res, { donors });
-});
 
-exports.editDonor = asyncHandler(async (req, res) => {
-  const donor = await adminService.editDonor(req.user, req.params.id, req.body);
-  success(res, { donor }, 'Donor updated');
-});
+// GET /api/admin/donors
+exports.getDonors = async (req, res, next) => {
+  try {
+    const donors = await Donor.find().sort('-createdAt');
+    res.json({ success: true, donors });
+  } catch (err) { next(err); }
+};
 
-exports.toggleDonor = asyncHandler(async (req, res) => {
-  const isActive = await adminService.toggleDonorActive(req.user, req.params.id);
-  success(res, { isActive }, `Donor ${isActive ? 'activated' : 'suspended'}`);
-});
+// PUT /api/admin/donors/:id
+exports.updateDonor = async (req, res, next) => {
+  try {
+    const allowed = ['name', 'email', 'city', 'homeTown', 'livingTown', 'district', 'bloodGroup', 'weight', 'age', 'gender'];
+    const updates = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+    const donor = await Donor.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    res.json({ success: true, donor });
+  } catch (err) { next(err); }
+};
 
-exports.deleteDonor = asyncHandler(async (req, res) => {
-  await adminService.deleteDonor(req.user, req.params.id);
-  success(res, {}, 'Donor deleted');
-});
+// PUT /api/admin/donors/:id/toggle — flip isActive
+exports.toggleDonor = async (req, res, next) => {
+  try {
+    const donor = await Donor.findById(req.params.id);
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    donor.isActive = donor.isActive === false ? true : false;
+    await donor.save();
+    res.json({ success: true, donor });
+  } catch (err) { next(err); }
+};
 
-exports.resetDonorPassword = asyncHandler(async (req, res) => {
-  await adminService.resetDonorPassword(req.user, req.params.id, req.body.password);
-  success(res, {}, 'Donor password reset successfully');
-});
+// PUT /api/admin/donors/:id/reset-password
+exports.resetDonorPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const hashed = await bcrypt.hash(password, 10);
+    const donor = await Donor.findByIdAndUpdate(req.params.id, { password: hashed }, { new: true });
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    res.json({ success: true, message: 'Password reset' });
+  } catch (err) { next(err); }
+};
 
-exports.resetDonorCooldown = asyncHandler(async (req, res) => {
-  const donor = await adminService.resetDonorCooldown(req.user, req.params.id);
-  success(res, { donor }, 'Cooldown reset');
-});
+// DELETE /api/admin/donors/:id
+exports.deleteDonor = async (req, res, next) => {
+  try {
+    const donor = await Donor.findByIdAndDelete(req.params.id);
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    res.json({ success: true, message: 'Donor deleted' });
+  } catch (err) { next(err); }
+};
+
+// ═══ REQUESTS (admin view) ═══
+
+// GET /api/admin/requests
+exports.getAllRequests = async (req, res, next) => {
+  try {
+    const requests = await Request.find()
+      .populate('hospital', 'hospitalName city')
+      .sort('-createdAt');
+    res.json({ success: true, requests });
+  } catch (err) { next(err); }
+};
+
+// ═══ BROADCAST ═══
+
+// POST /api/admin/broadcast  { target: 'donors'|'hospitals'|'all', message }
+exports.broadcast = async (req, res, next) => {
+  try {
+    const { target, message } = req.body;
+    if (!target || !message) return res.status(400).json({ success: false, message: 'Target and message are required' });
+
+    const io = req.app.get('io');
+    if (target === 'donors' || target === 'all') notifyDonors(io, 'broadcast', { message });
+    if (target === 'hospitals' || target === 'all') io && io.emit('broadcast_hospitals', { message }); // hospitals aren't room-scoped by default
+    notifyAdmins(io, 'broadcast_sent', { target, message });
+
+    logger.info(`Broadcast sent to ${target}: ${message}`);
+    res.json({ success: true, message: 'Broadcast sent' });
+  } catch (err) { next(err); }
+};
 
 // ═══ ADMIN ACCOUNTS ═══
-exports.createAdmin = asyncHandler(async (req, res) => {
-  const admin = await adminService.createAdmin(req.user, req.body);
-  res.status(201).json({ success: true, message: 'Admin account created', admin });
-});
 
-// ═══ LOGS & BROADCAST ═══
-exports.getLogs = asyncHandler(async (req, res) => {
-  const logs = await adminService.getLogs();
-  success(res, { logs });
-});
+// POST /api/admin/create-admin
+exports.createAdmin = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ success: false, message: 'Name, email, and password are required' });
+    if (password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
 
-exports.broadcast = asyncHandler(async (req, res) => {
-  const delivered = await adminService.broadcast(req.user, req.body.target, req.body.message);
-  success(res, { delivered }, 'Broadcast sent');
-});
+    const hashed = await bcrypt.hash(password, 10);
+    const admin = await Admin.create({ name, email: email.toLowerCase(), password: hashed });
+    const safe = admin.toObject(); delete safe.password;
+    res.status(201).json({ success: true, admin: safe });
+  } catch (err) { next(err); }
+};
 
-// ═══ DONATIONS ═══
-exports.listDonations = asyncHandler(async (req, res) => {
-  const donations = await adminService.listDonations();
-  success(res, { donations });
-});
-exports.getDonationStats = asyncHandler(async (req, res) => {
-  const stats = await adminService.getDonationStats();
-  success(res, { stats });
-});
+// ═══ LOGS (lightweight in-memory ring buffer, good enough for an admin panel) ═══
+const recentLogs = [];
+function pushLog(entry) {
+  recentLogs.unshift({ ...entry, at: new Date() });
+  if (recentLogs.length > 200) recentLogs.length = 200;
+}
 
-// ═══ QR ACTIVITY ═══
-exports.listQRActivity = asyncHandler(async (req, res) => {
-  const activity = await adminService.listQRActivity();
-  success(res, { activity });
-});
+// GET /api/admin/logs
+exports.getLogs = async (req, res, next) => {
+  try {
+    res.json({ success: true, logs: recentLogs });
+  } catch (err) { next(err); }
+};
 
-// ═══ REWARDS ═══
-exports.getRewardsOverview = asyncHandler(async (req, res) => {
-  const overview = await adminService.getRewardsOverview();
-  success(res, overview);
-});
-
-// ═══ NOTIFICATIONS ═══
-exports.listNotifications = asyncHandler(async (req, res) => {
-  const notifications = await adminService.listNotifications();
-  success(res, { notifications });
-});
-
-// ═══ DISTRICTS ═══
-exports.listDistricts = asyncHandler(async (req, res) => {
-  const districts = await adminService.listDistricts();
-  success(res, { districts });
-});
-exports.addDistrict = asyncHandler(async (req, res) => {
-  const district = await adminService.addDistrict(req.user, req.body.name, req.body.state);
-  res.status(201).json({ success: true, message: 'District added', district });
-});
-exports.toggleDistrict = asyncHandler(async (req, res) => {
-  const isActive = await adminService.toggleDistrict(req.user, req.params.id);
-  success(res, { isActive }, `District ${isActive ? 'enabled' : 'disabled'}`);
-});
-exports.deleteDistrict = asyncHandler(async (req, res) => {
-  await adminService.deleteDistrict(req.user, req.params.id);
-  success(res, {}, 'District deleted');
-});
-
-// ═══ ANALYTICS ═══
-exports.getAnalytics = asyncHandler(async (req, res) => {
-  const analytics = await adminService.getAnalytics();
-  success(res, { analytics });
-});
-
-// ═══ REPORTS ═══
-exports.exportReport = asyncHandler(async (req, res) => {
-  const csv = await adminService.exportReport(req.params.type);
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', `attachment; filename="${req.params.type}-report.csv"`);
-  res.send(csv);
-});
-
-// ═══ GLOBAL SEARCH ═══
-exports.globalSearch = asyncHandler(async (req, res) => {
-  const results = await adminService.globalSearch(req.query.q);
-  success(res, results);
-});
+exports._pushLog = pushLog; // exported for other controllers to record events, if wired in later

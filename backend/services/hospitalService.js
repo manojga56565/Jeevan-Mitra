@@ -8,25 +8,22 @@ async function getProfile(hospitalId) {
 }
 
 async function updateProfile(hospitalId, { hospitalName, phone, city, email, address, emergencyContact, landmark, googleMapsLink }) {
-  const updates = {};
-  if (hospitalName !== undefined) updates.hospitalName = hospitalName;
-  if (phone !== undefined) updates.phone = phone;
-  if (city !== undefined) updates.city = city;
-  if (email !== undefined) updates.email = email;
-  if (address !== undefined) updates.address = address;
-  if (emergencyContact !== undefined) updates.emergencyContact = emergencyContact;
-  if (landmark !== undefined) updates.landmark = landmark;
-  if (googleMapsLink !== undefined) updates.googleMapsLink = googleMapsLink;
-
-  // findByIdAndUpdate with { runValidators: true, context: 'query' } only
-  // validates the fields being changed — not hospital.save(), which would
-  // re-validate every required field on the document (including ones this
-  // hospital was created without) and block an otherwise-valid partial edit.
-  const hospital = await Hospital.findByIdAndUpdate(hospitalId, updates, {
-    new: true, runValidators: true, context: 'query'
-  }).select('-password');
+  const hospital = await Hospital.findById(hospitalId);
   if (!hospital) throw Object.assign(new Error('Hospital not found'), { statusCode: 404 });
-  return hospital.toObject();
+
+  if (hospitalName !== undefined) hospital.hospitalName = hospitalName;
+  if (phone !== undefined) hospital.phone = phone;
+  if (city !== undefined) hospital.city = city;
+  if (email !== undefined) hospital.email = email;
+  if (address !== undefined) hospital.address = address;
+  if (emergencyContact !== undefined) hospital.emergencyContact = emergencyContact;
+  if (landmark !== undefined) hospital.landmark = landmark;
+  if (googleMapsLink !== undefined) hospital.googleMapsLink = googleMapsLink;
+
+  await hospital.save();
+  const safe = hospital.toObject();
+  delete safe.password;
+  return safe;
 }
 
 async function changePassword(hospitalId, newPassword) {
@@ -38,16 +35,4 @@ async function changePassword(hospitalId, newPassword) {
   return true;
 }
 
-// Manual donor lookup by phone — used at hospital check-in when QR scanning
-// isn't available. Deliberately returns only the fields a front-desk check
-// actually needs, not the full donor record.
-async function lookupDonorByPhone(phone) {
-  const Donor = require('../models/Donor');
-  const { normalizePhone } = require('../utils/normalizePhone');
-  const normalized = normalizePhone(phone);
-  const donor = await Donor.findOne({ phone: normalized }).select('name phone city bloodGroup points totalDonations isActive');
-  if (!donor) throw Object.assign(new Error('No donor found with that phone number'), { statusCode: 404 });
-  return donor;
-}
-
-module.exports = { getProfile, updateProfile, changePassword, lookupDonorByPhone };
+module.exports = { getProfile, updateProfile, changePassword };

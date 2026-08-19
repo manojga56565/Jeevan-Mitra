@@ -1,36 +1,30 @@
 const rateLimit = require('express-rate-limit');
 
-// OTP send: the one most worth protecting — without this, someone could
-// script thousands of "send OTP" requests to a single phone number (or
-// spray across many numbers) and effectively spam-bomb it, or exhaust
-// whatever SMS quota a real provider would eventually be wired in with.
-const otpLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,                    // 5 OTP requests per IP per window
-  message: { success: false, message: 'Too many OTP requests — please wait a few minutes and try again.' },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-// Login endpoints (hospital/admin password login): slows down brute-force
-// password guessing without blocking a normal person who just mistypes
-// their password a couple of times.
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { success: false, message: 'Too many login attempts — please wait a few minutes and try again.' },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-// General API-wide safety net — generous enough that it never affects
-// normal use, just stops a runaway script or scraper from hammering the
-// whole API.
+// General safety net applied to all /api routes in server.js
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests — please slow down and try again shortly.' }
 });
 
-module.exports = { otpLimiter, loginLimiter, generalLimiter };
+// Tighter limit for OTP send, to stop SMS-cost abuse
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many OTP requests. Please wait a few minutes before trying again.' }
+});
+
+// Tighter limit on login endpoints to slow down credential stuffing
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts. Please wait before trying again.' }
+});
+
+module.exports = { generalLimiter, otpLimiter, loginLimiter };

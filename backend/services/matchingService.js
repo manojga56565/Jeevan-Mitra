@@ -1,52 +1,27 @@
-const Donor = require('../models/Donor');
-const notificationService = require('./notificationService');
-const { COMPATIBLE_DONORS } = require('../config/constants');
+// Which donor blood groups can fulfil a request for a given requested group.
+// e.g. a request for A+ can be fulfilled by A+ or O+ donors (O is universal donor for + types; O- is universal).
+const COMPATIBLE_DONORS = {
+  'A+':  ['A+', 'A-', 'O+', 'O-'],
+  'A-':  ['A-', 'O-'],
+  'B+':  ['B+', 'B-', 'O+', 'O-'],
+  'B-':  ['B-', 'O-'],
+  'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], // AB+ is universal recipient
+  'AB-': ['A-', 'B-', 'AB-', 'O-'],
+  'O+':  ['O+', 'O-'],
+  'O-':  ['O-']
+};
 
-/**
- * Finds donors eligible for a request:
- *  - Blood group: exact match, or compatible donor groups if matchingType is 'compatible'
- *  - Same city as the hospital (radius/geo search is a further enhancement —
- *    city match is what the current data model reliably supports)
- *  - isActive, availabilityStatus === 'available'
- *  - Not currently in cooldown
- */
-async function findEligibleDonors(request) {
-  const eligibleGroups = request.matchingType === 'compatible'
-    ? (COMPATIBLE_DONORS[request.bloodGroup] || [request.bloodGroup])
-    : [request.bloodGroup];
-
-  const donors = await Donor.find({
-    bloodGroup: { $in: eligibleGroups },
-    city: request.hospitalCity,
-    isActive: true,
-    availabilityStatus: 'available',
-    $or: [{ cooldownUntil: null }, { cooldownUntil: { $lte: new Date() } }]
-  }).select('-password'); // defense-in-depth — this result should never carry password hashes, even internally
-
-  return donors;
+function donorGroupsThatCanFulfil(requestedGroup) {
+  return COMPATIBLE_DONORS[requestedGroup] || [requestedGroup];
 }
 
-/**
- * Runs immediately after a request is created — finds eligible donors and
- * sends each one a notification/alert.
- */
-async function matchAndNotify(request) {
-  const donors = await findEligibleDonors(request);
-
-  await Promise.all(donors.map(donor =>
-    notificationService.create({
-      recipientType: 'donor',
-      recipientId: donor._id,
-      type: 'blood_request',
-      title: `🩸 ${request.urgency === 'emergency' ? 'EMERGENCY' : 'Blood'} request nearby`,
-      message: `${request.hospitalName} needs ${request.bloodGroup} blood (${request.quantity} unit${request.quantity > 1 ? 's' : ''})`,
-      relatedRequest: request._id,
-      relatedHospital: request.hospitalId,
-      responseStatus: 'pending'
-    })
-  ));
-
-  return { matchedCount: donors.length, donors };
+// Reverse direction: given a donor's own blood group, which requested
+// groups can they fulfil? Derived from the same single source of truth
+// above so the two directions can never drift out of sync.
+function requestGroupsThisDonorCanFulfil(donorGroup) {
+  return Object.keys(COMPATIBLE_DONORS).filter(requestedGroup =>
+    COMPATIBLE_DONORS[requestedGroup].includes(donorGroup)
+  );
 }
 
-module.exports = { findEligibleDonors, matchAndNotify };
+module.exports = { donorGroupsThatCanFulfil, requestGroupsThisDonorCanFulfil };

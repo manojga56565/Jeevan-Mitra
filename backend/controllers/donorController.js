@@ -1,88 +1,163 @@
-const donorService = require('../services/donorService');
-const requestService = require('../services/requestService');
-const rewardService = require('../services/rewardService');
-const qrService = require('../services/qrService');
-const notificationService = require('../services/notificationService');
-const { success } = require('../utils/response');
-const { asyncHandler } = require('../middleware/errorHandler');
+const bcrypt = require('bcryptjs');
+const Donor = require('../models/Donor');
+const Request = require('../models/Request');
+const { donorGroupsThatCanFulfil, requestGroupsThisDonorCanFulfil } = require('../services/matchingService');
+const { isEligibleNow } = require('../services/cooldownService');
+const { notifyHospital, notifyDonorsByBloodGroup } = require('../services/notificationService');
 
-exports.getProfile = asyncHandler(async (req, res) => {
-  const result = await donorService.getProfile(req.user.id);
-  success(res, result);
-});
+// GET /api/donors/profile
+exports.getProfile = async (req, res, next) => {
+  try {
+    const donor = await Donor.findById(req.user.id);
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    const { daysRemaining } = isEligibleNow(donor);
+    res.json({ success: true, donor: { ...donor.toJSON(), daysRemaining } });
+  } catch (err) { next(err); }
+};
 
-exports.updateProfile = asyncHandler(async (req, res) => {
-  const donor = await donorService.updateProfile(req.user.id, req.body);
-  success(res, { donor }, 'Profile updated successfully');
-});
+// PUT /api/donors/profile
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const allowed = ['name', 'email', 'city', 'homeTown', 'livingTown', 'district', 'bloodGroup', 'weight', 'gender', 'emergencyContact', 'dateOfBirth'];
+    const updates = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 
-exports.uploadPhoto = asyncHandler(async (req, res) => {
-  if (!req.file) throw Object.assign(new Error('No photo uploaded'), { statusCode: 400 });
-  const profilePhotoUrl = `/uploads/donors/${req.file.filename}`;
-  const donor = await donorService.updateProfile(req.user.id, { profilePhotoUrl });
-  success(res, { donor, profilePhotoUrl }, 'Photo uploaded successfully');
-});
+    const donor = await Donor.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true });
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    res.json({ success: true, donor });
+  } catch (err) { next(err); }
+};
 
-exports.changePassword = asyncHandler(async (req, res) => {
-  await donorService.changePassword(req.user.id, req.body.password);
-  success(res, {}, 'Password updated successfully');
-});
+// POST /api/donors/photo (multipart, field name "photo")
+exports.uploadPhoto = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No photo uploaded' });
+    const url = `/uploads/${req.file.filename}`;
+    const donor = await Donor.findByIdAndUpdate(req.user.id, { profilePhotoUrl: url }, { new: true });
+    res.json({ success: true, profilePhotoUrl: url, donor });
+  } catch (err) { next(err); }
+};
 
-exports.toggleAvailability = asyncHandler(async (req, res) => {
-  const availabilityStatus = await donorService.toggleAvailability(req.user.id);
-  success(res, { availabilityStatus });
-});
+// PUT /api/donors/change-password
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const hashed = await bcrypt.hash(password, 10);
+    await Donor.findByIdAndUpdate(req.user.id, { password: hashed });
+    res.json({ success: true, message: 'Password updated' });
+  } catch (err) { next(err); }
+};
 
-exports.deactivate = asyncHandler(async (req, res) => {
-  await donorService.deactivateAccount(req.user.id);
-  success(res, {}, 'Account deactivated successfully');
-});
+// PUT /api/donors/deactivate
+exports.deactivate = async (req, res, next) => {
+  try {
+    await Donor.findByIdAndUpdate(req.user.id, { isActive: false });
+    res.json({ success: true, message: 'Account deactivated' });
+  } catch (err) { next(err); }
+};
 
-exports.getHistory = asyncHandler(async (req, res) => {
-  const history = await donorService.getHistory(req.user.id);
-  success(res, { total: history.length, history });
-});
+// GET /api/donors/feed — open requests compatible with this donor's blood group.
+// The compatibility check happens in the DB query itself (not a post-fetch
+// filter), using the single centralized matching function — so a
+// non-compatible request is never even fetched, let alone serialized into
+// the response.
+exports.getFeed = async (req, res, next) => {
+  try {
+    const donor = await Donor.findById(req.user.id);
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
 
-exports.getFeed = asyncHandler(async (req, res) => {
-  const requests = await requestService.getDonorFeed(req.user.id, req.query);
-  success(res, { count: requests.length, requests, data: requests });
-});
+    const compatibleRequestGroups = requestGroupsThisDonorCanFulfil(donor.bloodGroup);
 
-exports.acceptRequest = asyncHandler(async (req, res) => {
-  const result = await requestService.acceptRequest(req.user.id, req.params.id);
-  success(res, {
-    googleMapsUrl: result.navigationUrl,
-    hospitalName: result.hospitalName,
-    request: result.request
-  }, 'Blood request accepted successfully');
-});
+    const feed = await Request.find({
+      status: 'open',
+      bloodGroup: { $in: compatibleRequestGroups }
+    })
+      .populate('hospital', 'hospitalName city address latitude longitude phone')
+      .sort('-createdAt')
+      .limit(100);
 
-exports.getLeaderboard = asyncHandler(async (req, res) => {
-  const leaderboard = await rewardService.getLeaderboard();
-  success(res, { leaderboard });
-});
+    res.json({ success: true, requests: feed });
+  } catch (err) { next(err); }
+};
 
-exports.getRewardsCatalog = asyncHandler(async (req, res) => {
-  const rewards = await rewardService.listRewards();
-  success(res, { rewards });
-});
+// GET /api/donors/history
+exports.getHistory = async (req, res, next) => {
+  try {
+    const history = await Request.find({ completedBy: req.user.id, status: 'completed' })
+      .populate('hospital', 'hospitalName city')
+      .sort('-completedAt');
+    res.json({ success: true, history });
+  } catch (err) { next(err); }
+};
 
-exports.redeemReward = asyncHandler(async (req, res) => {
-  const result = await rewardService.redeemReward(req.user.id, req.params.rewardId);
-  success(res, result, 'Reward redeemed successfully');
-});
+// GET /api/donors/leaderboard?city=
+exports.getLeaderboard = async (req, res, next) => {
+  try {
+    const filter = { isActive: true };
+    if (req.query.city) filter.city = new RegExp(`^${req.query.city}$`, 'i');
+    const leaderboard = await Donor.find(filter)
+      .select('name city bloodGroup points totalDonations profilePhotoUrl')
+      .sort('-points')
+      .limit(50);
+    res.json({ success: true, leaderboard });
+  } catch (err) { next(err); }
+};
 
-exports.getMyQR = asyncHandler(async (req, res) => {
-  const result = await qrService.issueDonorQR(req.user.id);
-  success(res, result);
-});
+// PATCH /api/donors/accept/:requestId — donor accepts an open request.
+// Every check here runs server-side and cannot be bypassed by a direct API
+// call with a "nicer" frontend state — blood-group compatibility, account
+// status, and the 90-day cooldown are all re-verified against the DB, and
+// the status flip is atomic so two simultaneous accepts can't both win.
+exports.acceptRequest = async (req, res, next) => {
+  try {
+    const donor = await Donor.findById(req.user.id);
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    if (donor.isActive === false) {
+      return res.status(403).json({ success: false, message: 'Your account is deactivated' });
+    }
 
-exports.getNotifications = asyncHandler(async (req, res) => {
-  const notifications = await notificationService.listForUser('donor', req.user.id);
-  success(res, { notifications });
-});
+    const request = await Request.findById(req.params.requestId).populate('hospital', 'hospitalName city');
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (request.status !== 'open') {
+      return res.status(409).json({ success: false, message: 'This request is no longer open' });
+    }
 
-exports.markNotificationRead = asyncHandler(async (req, res) => {
-  const notif = await notificationService.markRead(req.params.id, req.user.id);
-  success(res, { notification: notif });
-});
+    if (!donorGroupsThatCanFulfil(request.bloodGroup).includes(donor.bloodGroup)) {
+      return res.status(403).json({ success: false, message: 'Your blood group is not compatible with this request' });
+    }
+
+    const { eligible, daysRemaining } = isEligibleNow(donor);
+    if (!eligible) {
+      return res.status(409).json({
+        success: false,
+        message: `You're not yet eligible to donate — ${daysRemaining} day(s) remaining on your 90-day cooldown`
+      });
+    }
+
+    // Atomic compare-and-set: only succeeds if the request is still 'open'
+    // at the moment of the write, so a second donor accepting a split
+    // second later (or a retried request) can never double-accept it.
+    const updated = await Request.findOneAndUpdate(
+      { _id: request._id, status: 'open' },
+      { status: 'accepted', acceptedBy: donor._id, acceptedAt: new Date() },
+      { new: true }
+    ).populate('hospital', 'hospitalName city');
+
+    if (!updated) {
+      return res.status(409).json({ success: false, message: 'This request was just accepted by someone else' });
+    }
+
+    const io = req.app.get('io');
+    if (updated.hospital) {
+      notifyHospital(io, updated.hospital._id, 'donor_accepted', {
+        requestId: updated._id, donorName: donor.name, donorId: donor._id
+      });
+    }
+    // Tell every other donor who was shown this request to drop it —
+    // covers "remove the popup once someone else has accepted."
+    notifyDonorsByBloodGroup(io, donorGroupsThatCanFulfil(updated.bloodGroup), 'request_closed', { requestId: updated._id });
+
+    res.json({ success: true, request: updated });
+  } catch (err) { next(err); }
+};

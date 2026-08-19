@@ -1,29 +1,28 @@
 const jwt = require('jsonwebtoken');
 
-/**
- * Usage: auth('donor'), auth('hospital'), auth('admin'), or auth() for
- * "any valid token, any role".
- */
-const auth = (role) => (req, res, next) => {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : header;
+// auth('donor'), auth('hospital'), auth('admin') — or auth() to just
+// require any valid token regardless of role.
+function auth(requiredRole) {
+  return (req, res, next) => {
+    try {
+      const header = req.headers.authorization || '';
+      const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+      if (!token) {
+        return res.status(401).json({ success: false, message: 'No token provided', code: 'NO_TOKEN' });
+      }
 
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'No token provided' });
-  }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jeevan-mitra-dev-secret');
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+      if (requiredRole && decoded.role !== requiredRole) {
+        return res.status(403).json({ success: false, message: 'You do not have access to this resource' });
+      }
 
-    if (role && decoded.role !== role) {
-      return res.status(403).json({ success: false, message: `Access denied. Required role: ${role}` });
+      req.user = decoded; // { id, role, ... }
+      next();
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Session expired or invalid — please log in again', code: 'INVALID_TOKEN' });
     }
-
-    next();
-  } catch (e) {
-    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
-  }
-};
+  };
+}
 
 module.exports = { auth };

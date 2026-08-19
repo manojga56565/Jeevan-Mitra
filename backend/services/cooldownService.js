@@ -1,25 +1,10 @@
-const Donor = require('../models/Donor');
+const COOLDOWN_DAYS = 90;
 
-/**
- * Call this whenever a donor's data is fetched (profile, feed check, etc.)
- * so a cooldown that has already elapsed is reflected immediately —
- * "Cooldown Ends -> Availability ON -> Eligible Again" from the flow doc —
- * without needing a separate cron job for a project this size.
- */
-async function refreshCooldownIfElapsed(donor) {
-  if (donor.cooldownUntil && new Date() >= donor.cooldownUntil && donor.availabilityStatus === 'not available') {
-    donor.availabilityStatus = 'available';
-    await donor.save();
-  }
-  return donor;
+function isEligibleNow(donor) {
+  if (!donor.lastDonationDate) return { eligible: true, daysRemaining: 0 };
+  const daysSince = (Date.now() - new Date(donor.lastDonationDate).getTime()) / (1000 * 60 * 60 * 24);
+  const daysRemaining = Math.max(0, Math.ceil(COOLDOWN_DAYS - daysSince));
+  return { eligible: daysSince >= COOLDOWN_DAYS, daysRemaining };
 }
 
-function getCooldownInfo(donor) {
-  return {
-    eligible: donor.isEligibleToDonate(),
-    cooldownUntil: donor.cooldownUntil,
-    remainingDays: donor.remainingCooldownDays()
-  };
-}
-
-module.exports = { refreshCooldownIfElapsed, getCooldownInfo };
+module.exports = { isEligibleNow, COOLDOWN_DAYS };
