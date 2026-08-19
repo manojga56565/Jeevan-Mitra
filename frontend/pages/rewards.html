@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rewards — Jeevan Mitra</title>
+<link rel="stylesheet" href="../assets/css/tokens.css"/>
+<link rel="stylesheet" href="../assets/css/components.css"/>
+<link rel="stylesheet" href="../assets/css/premium.css"/>
+<link rel="stylesheet" href="../assets/css/app-shell.css"/>
+<style>
+  .points-banner{background:var(--ink);color:#fff;border-radius:var(--r-lg);padding:22px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center}
+  .points-banner .n{font-family:var(--font-display);font-size:30px;font-weight:700}
+  .points-banner .l{font-size:12px;color:rgba(255,255,255,0.6);font-weight:600}
+
+  .reward-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:640px){.reward-grid{grid-template-columns:1fr 1fr}}
+  .reward-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-md);padding:18px;text-align:center}
+  .reward-icon{font-size:32px;margin-bottom:10px}
+  .reward-title{font-weight:700;font-size:15px;margin-bottom:4px}
+  .reward-desc{font-size:12.5px;color:var(--slate);margin-bottom:14px;min-height:32px}
+  .reward-cost{font-family:var(--font-display);font-weight:700;color:var(--red);margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+  <div class="app-main">
+    <div id="navbar-root"></div>
+    <div class="app-content">
+      <div class="points-banner">
+        <div><div class="n" id="my-points">0</div><div class="l">AVAILABLE POINTS</div></div>
+        <div style="font-size:32px;">🎖️</div>
+      </div>
+      <h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:16px;">Redeem rewards</h2>
+      <div class="reward-grid" id="reward-list"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../components/toast.js"></script>
+<script src="../components/modal.js"></script>
+<script src="../components/navbar.js"></script>
+<script src="../components/sidebar.js"></script>
+<script>
+let myPoints = 0;
+
+function rewardCard(r){
+  const affordable = myPoints >= r.pointsCost;
+  return `
+    <div class="reward-card">
+      <div class="reward-icon">${r.icon||'🎁'}</div>
+      <div class="reward-title">${r.title}</div>
+      <div class="reward-desc">${r.description||''}</div>
+      <div class="reward-cost">${r.pointsCost} pts</div>
+      <button class="btn ${affordable?'btn-primary':'btn-outline'} btn-block btn-sm" ${affordable?'':'disabled'} onclick="redeem('${r._id}')">${affordable?'Redeem':'Not enough points'}</button>
+    </div>`;
+}
+
+async function loadRewards(){
+  const list = document.getElementById('reward-list');
+  try{
+    const res = await api('/donors/rewards');
+    const rewards = res.rewards || [];
+    if(!rewards.length){
+      list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🎁</div><div class="title">No rewards available yet</div><div class="sub">Check back soon.</div></div>`;
+      return;
+    }
+    list.innerHTML = rewards.map(rewardCard).join('');
+  }catch(e){
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">⚠️</div><div class="title">Could not load rewards</div><div class="sub">${e.message}</div></div>`;
+  }
+}
+
+async function redeem(rewardId){
+  confirmDialog({
+    icon:'🎁', title:'Redeem this reward?', message:'Points will be deducted immediately.', confirmLabel:'Redeem',
+    onConfirm: async ()=>{
+      try{
+        const res = await api(`/donors/rewards/${rewardId}/redeem`, 'POST');
+        showToast('Reward redeemed!', 'success');
+        myPoints = res.donor.points;
+        document.getElementById('my-points').textContent = myPoints;
+        loadRewards();
+      }catch(e){ showToast(e.message, 'error'); }
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('donor');
+  if(!user) return;
+  renderSidebar('sidebar-root', 'donor', 'rewards');
+  renderNavbar('navbar-root', { variant:'app', title:'Rewards', user });
+
+  try{
+    const profileRes = await api('/donors/profile');
+    myPoints = profileRes.donor.points || 0;
+    document.getElementById('my-points').textContent = myPoints;
+  }catch(e){}
+
+  loadRewards();
+});
+</script>
+</body>
+</html>
