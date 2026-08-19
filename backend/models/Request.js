@@ -29,7 +29,11 @@ const requestSchema = new mongoose.Schema({
   acceptedAt: Date,
 
   completedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Donor' },
-  completedAt: Date
+  completedAt: Date,
+  // Real points actually credited for this donation at the time it was
+  // completed (see rewardService.js) — recorded here so donation history
+  // shows the true amount even if the reward formula changes later.
+  pointsEarned: Number
 }, { timestamps: true });
 
 // The donor feed and matching queries filter on these together constantly

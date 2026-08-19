@@ -6,6 +6,7 @@ const { isEligibleNow } = require('../services/cooldownService');
 const { pointsForDonation } = require('../services/rewardService');
 const { donorGroupsThatCanFulfil } = require('../services/matchingService');
 const { notifyDonorsByBloodGroup, notifyDonor } = require('../services/notificationService');
+const { _pushLog } = require('./adminController');
 
 // GET /api/hospitals/profile
 exports.getProfile = async (req, res, next) => {
@@ -39,10 +40,40 @@ exports.changePassword = async (req, res, next) => {
 };
 
 // GET /api/hospitals/requests — this hospital's own requests
+// The frontend's request card (hospReqCard) reads the donor's real name/phone
+// off request.acceptedDonors[].donor, so acceptedBy/completedBy must be
+// populated from Mongo and reshaped into that array — otherwise the card
+// falls back to the literal string "Donor" with nothing to show.
 exports.getMyRequests = async (req, res, next) => {
   try {
-    const requests = await Request.find({ hospital: req.user.id }).sort('-createdAt');
-    res.json({ success: true, requests });
+    const requests = await Request.find({ hospital: req.user.id })
+      .populate('acceptedBy', 'name phone city bloodGroup')
+      .populate('completedBy', 'name phone city bloodGroup')
+      .sort('-createdAt');
+
+    const withAcceptedDonors = requests.map(r => {
+      const obj = r.toJSON();
+      obj.acceptedDonors = [];
+
+      // Whichever donor is currently attached to this request — completedBy
+      // once verified, acceptedBy while still awaiting hospital verification.
+      const donorDoc = r.completedBy || r.acceptedBy;
+      if (donorDoc) {
+        obj.acceptedDonors.push({
+          donor: donorDoc,
+          status: r.status === 'completed' ? 'completed' : 'accepted',
+          respondedAt: r.acceptedAt,
+          // No live donor coordinates are stored, so this points Maps at the
+          // donor's registered city rather than a precise pin.
+          navigationUrl: donorDoc.city
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(donorDoc.city)}`
+            : null
+        });
+      }
+      return obj;
+    });
+
+    res.json({ success: true, requests: withAcceptedDonors });
   } catch (err) { next(err); }
 };
 
@@ -65,17 +96,19 @@ exports.createRequest = async (req, res, next) => {
     });
 
     const io = req.app.get('io');
+    const hospitalDoc = await Hospital.findById(req.user.id).select('hospitalName');
+    const hospLabel = hospitalDoc ? hospitalDoc.hospitalName : 'A hospital';
     if (notifyPush !== false) {
-      const hospitalDoc = await Hospital.findById(req.user.id).select('hospitalName');
       notifyDonorsByBloodGroup(io, donorGroupsThatCanFulfil(bloodGroup), 'new_request', {
         requestId: request._id,
         bloodGroup,
         quantity: request.quantity,
         urgency,
-        hospitalName: hospitalDoc ? hospitalDoc.hospitalName : 'Hospital',
+        hospitalName: hospLabel,
         status: request.status
       });
     }
+    _pushLog({ action: `${hospLabel} requested ${request.quantity || 1} unit(s) of ${bloodGroup} (${urgency || 'medium'})` });
 
     res.status(201).json({ success: true, request, matchCount: null });
   } catch (err) { next(err); }
@@ -191,6 +224,7 @@ exports.completeDonation = async (req, res, next) => {
       request.status = 'completed';
       request.completedBy = donor._id;
       request.completedAt = new Date();
+      request.pointsEarned = earnedPoints;
       await request.save();
     }
 
@@ -201,6 +235,7 @@ exports.completeDonation = async (req, res, next) => {
       totalPoints: donor.points,
       totalDonations: donor.totalDonations
     });
+    _pushLog({ action: `${donor.name} completed a donation${request ? ` (${request.bloodGroup})` : ''} — +${earnedPoints} pts` });
 
     res.json({
       success: true,
