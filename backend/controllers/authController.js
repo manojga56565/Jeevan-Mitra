@@ -70,8 +70,10 @@ exports.donorSendOTP = async (req, res, next) => {
       success: true,
       message: 'OTP sent successfully',
       // Exposed only so the flow is testable without a live SMS provider —
-      // remove this field once a real SMS provider is wired in.
-      devOtp: process.env.NODE_ENV === 'production' ? undefined : code
+      // remove this field (and the matching frontend showOTPHint call)
+      // once a real SMS provider is wired in. Field name 'otp' matches
+      // what the frontend's mock-OTP hint UI already reads.
+      otp: process.env.NODE_ENV === 'production' ? undefined : code
     });
   } catch (err) { next(err); }
 };
@@ -153,15 +155,18 @@ exports.forgotPassword = async (req, res, next) => {
     const field = role === 'hospital' ? { $or: [{ email: identifier.toLowerCase() }, { phone: identifier }] } : { email: identifier.toLowerCase() };
     const account = await Model.findOne(field);
     // Always respond success-shaped, even if not found, so this can't be used to enumerate accounts
+    let devCode;
     if (account) {
       const code = generateCode();
       account.resetCode = code;
       account.resetCodeExpires = new Date(Date.now() + RESET_TTL_MS);
       await account.save();
       await sendSMS(identifier, `Your Jeevan Mitra password reset code is ${code}. Valid for 10 minutes.`);
+      // Same mock-provider pattern as OTP send — remove once a real SMS/email provider is wired in.
+      devCode = process.env.NODE_ENV === 'production' ? undefined : code;
     }
 
-    res.json({ success: true, message: 'If an account exists, a reset code has been sent' });
+    res.json({ success: true, message: 'If an account exists, a reset code has been sent', code: devCode });
   } catch (err) { next(err); }
 };
 
