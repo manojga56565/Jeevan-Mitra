@@ -40,10 +40,40 @@ exports.changePassword = async (req, res, next) => {
 };
 
 // GET /api/hospitals/requests — this hospital's own requests
+// The frontend's request card (hospReqCard) reads the donor's real name/phone
+// off request.acceptedDonors[].donor, so acceptedBy/completedBy must be
+// populated from Mongo and reshaped into that array — otherwise the card
+// falls back to the literal string "Donor" with nothing to show.
 exports.getMyRequests = async (req, res, next) => {
   try {
-    const requests = await Request.find({ hospital: req.user.id }).sort('-createdAt');
-    res.json({ success: true, requests });
+    const requests = await Request.find({ hospital: req.user.id })
+      .populate('acceptedBy', 'name phone city bloodGroup')
+      .populate('completedBy', 'name phone city bloodGroup')
+      .sort('-createdAt');
+
+    const withAcceptedDonors = requests.map(r => {
+      const obj = r.toJSON();
+      obj.acceptedDonors = [];
+
+      // Whichever donor is currently attached to this request — completedBy
+      // once verified, acceptedBy while still awaiting hospital verification.
+      const donorDoc = r.completedBy || r.acceptedBy;
+      if (donorDoc) {
+        obj.acceptedDonors.push({
+          donor: donorDoc,
+          status: r.status === 'completed' ? 'completed' : 'accepted',
+          respondedAt: r.acceptedAt,
+          // No live donor coordinates are stored, so this points Maps at the
+          // donor's registered city rather than a precise pin.
+          navigationUrl: donorDoc.city
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(donorDoc.city)}`
+            : null
+        });
+      }
+      return obj;
+    });
+
+    res.json({ success: true, requests: withAcceptedDonors });
   } catch (err) { next(err); }
 };
 
