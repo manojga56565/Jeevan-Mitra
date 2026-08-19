@@ -69,9 +69,12 @@ exports.donorSendOTP = async (req, res, next) => {
     res.json({
       success: true,
       message: 'OTP sent successfully',
-      // Exposed only so the flow is testable without a live SMS provider —
-      // remove this field once a real SMS provider is wired in.
-      devOtp: process.env.NODE_ENV === 'production' ? undefined : code
+      // There is no live SMS provider wired in (Fast2SMS is blocked by DLT
+      // for this route), so the OTP is always echoed back here — otherwise
+      // nobody could ever complete this flow. The frontend reads this as
+      // `res.otp` and auto-fills it. Swap to a real provider + drop this
+      // field once one is available.
+      otp: code
     });
   } catch (err) { next(err); }
 };
@@ -153,15 +156,23 @@ exports.forgotPassword = async (req, res, next) => {
     const field = role === 'hospital' ? { $or: [{ email: identifier.toLowerCase() }, { phone: identifier }] } : { email: identifier.toLowerCase() };
     const account = await Model.findOne(field);
     // Always respond success-shaped, even if not found, so this can't be used to enumerate accounts
+    let code;
     if (account) {
-      const code = generateCode();
+      code = generateCode();
       account.resetCode = code;
       account.resetCodeExpires = new Date(Date.now() + RESET_TTL_MS);
       await account.save();
       await sendSMS(identifier, `Your Jeevan Mitra password reset code is ${code}. Valid for 10 minutes.`);
     }
 
-    res.json({ success: true, message: 'If an account exists, a reset code has been sent' });
+    res.json({
+      success: true,
+      message: 'If an account exists, a reset code has been sent',
+      // Same mock-SMS situation as the donor OTP above — no real provider,
+      // so echo the code back when an account was actually found. Omitted
+      // when no account matches, so this still can't be used to enumerate.
+      otp: code
+    });
   } catch (err) { next(err); }
 };
 

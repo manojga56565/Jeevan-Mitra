@@ -21,3 +21,24 @@ exports.getStats = async (req, res, next) => {
     });
   } catch (err) { next(err); }
 };
+
+// GET /api/stats/public — no auth; powers the landing page counters
+// (districts / donors / hospitals / lives saved). The frontend was calling
+// this exact path already, but the route never existed, so the counters
+// silently sat at "—" forever. This is real data, not placeholders.
+exports.getPublicStats = async (req, res, next) => {
+  try {
+    const [donors, hospitals, districtList, livesSaved] = await Promise.all([
+      Donor.countDocuments(),
+      Hospital.countDocuments({ isVerified: true }),
+      Donor.distinct('district'),
+      Request.countDocuments({ status: 'completed' })
+    ]);
+    const districts = districtList.filter(Boolean).length;
+
+    res.json({
+      success: true,
+      stats: { districts, donors, hospitals, livesSaved }
+    });
+  } catch (err) { next(err); }
+};
