@@ -1,0 +1,116 @@
+/* ═══════════════════════════════════════════════════════════
+   JEEVAN MITRA — DESIGN TOKENS
+   Matches the original blueprint palette exactly: DM Sans + Nunito,
+   red/pink gradient warmth, bold rounded app-style components.
+═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root{
+  /* Color — exact blueprint values */
+  --ink:        #1A1A2E;
+  --ink-soft:   #3A4150;
+  --slate:      #546E7A;
+  --muted:      #90A4AE;
+  --paper:      #FFFBF7;
+  --paper-dim:  #F5F5F5;
+  --white:      #FFFFFF;
+  --border:     #ECEFF1;
+
+  --red:        #D32F2F;
+  --red-deep:   #B71C1C;
+  --red-soft:   #FFEBEE;
+  --red-mid:    #FFCDD2;
+
+  --amber:      #FFB300;
+  --amber-soft: #FFF3D6;
+
+  --green:      #43A047;
+  --green-soft: #E8F5E9;
+
+  --blue:       #1976D2;
+  --blue-soft:  #E3F2FD;
+
+  /* Type — blueprint's exact font pairing */
+  --font-display: 'Nunito', sans-serif;
+  --font-ui: 'DM Sans', sans-serif;
+
+  /* Shape — bolder, rounder, app-like */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-pill: 999px;
+
+  /* Shadow */
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.07);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.09);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+  --shadow-red: 0 4px 20px rgba(211,47,47,0.12);
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:var(--font-ui);
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+h1,h2,h3,.font-display{font-family:var(--font-display)}
+
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+img{max-width:100%;display:block}
+
+::selection{background:var(--red);color:var(--white)}
+
+:focus-visible{outline:2.5px solid var(--red);outline-offset:2px;border-radius:4px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important}
+}
+
+/* ═══ SIGNATURE — heartbeat pulse divider ═══ */
+.pulse-divider{
+  width:100%;
+  height:32px;
+  overflow:hidden;
+}
+.pulse-divider svg{
+  width:100%;
+  height:100%;
+  stroke:var(--red);
+  stroke-width:2;
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.pulse-divider path{
+  stroke-dasharray:600;
+  stroke-dashoffset:600;
+  animation:pulse-draw 2.4s var(--ease) forwards;
+}
+@keyframes pulse-draw{
+  to{stroke-dashoffset:0}
+}
+
+/* ═══ UTILITY ═══ */
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+.text-red{color:var(--red)}
+.text-muted{color:var(--muted)}
+.text-slate{color:var(--slate)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* ═══ SCROLLBAR (webkit) ═══ */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
