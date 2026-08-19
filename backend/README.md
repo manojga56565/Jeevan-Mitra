@@ -30,10 +30,9 @@ into the Admin portal for the first time.
 ## Notes
 
 - **OTP is mocked.** Fast2SMS is blocked by DLT for this route, so `sendSMS()`
-  in `controllers/authController.js` just logs the code and always returns
-  it in the response as `otp` (there is no live SMS provider, so this is the
-  only way the flow is completable) so the flow is testable end-to-end. Swap
-  in a real SMS provider there when one is available and remove the field.
+  in `controllers/authController.js` just logs the code and (outside
+  production) returns it in the response as `devOtp` so the flow is testable
+  end-to-end. Swap in a real SMS provider there when one is available.
 - **Password reset** uses the same mock-code pattern, for hospital and admin
   accounts (donors log in via OTP, not password).
 - **Hospital accounts** are created by an admin with `isVerified: false` and

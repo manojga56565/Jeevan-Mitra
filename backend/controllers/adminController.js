@@ -30,7 +30,6 @@ exports.addHospital = async (req, res, next) => {
       isVerified: false
     });
     const safe = hospital.toObject(); delete safe.password;
-    pushLog({ action: `Hospital "${hospitalName}" registered — awaiting verification` });
     res.status(201).json({ success: true, hospital: safe });
   } catch (err) { next(err); }
 };
@@ -54,7 +53,6 @@ exports.toggleHospital = async (req, res, next) => {
     if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
     hospital.isVerified = !hospital.isVerified;
     await hospital.save();
-    pushLog({ action: `Hospital "${hospital.hospitalName}" ${hospital.isVerified ? 'verified' : 'unverified/disabled'}` });
     res.json({ success: true, hospital });
   } catch (err) { next(err); }
 };
@@ -76,7 +74,6 @@ exports.deleteHospital = async (req, res, next) => {
   try {
     const hospital = await Hospital.findByIdAndDelete(req.params.id);
     if (!hospital) return res.status(404).json({ success: false, message: 'Hospital not found' });
-    pushLog({ action: `Hospital "${hospital.hospitalName}" deleted` });
     res.json({ success: true, message: 'Hospital deleted' });
   } catch (err) { next(err); }
 };
@@ -110,7 +107,6 @@ exports.toggleDonor = async (req, res, next) => {
     if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
     donor.isActive = donor.isActive === false ? true : false;
     await donor.save();
-    pushLog({ action: `Donor "${donor.name}" ${donor.isActive ? 'reactivated' : 'deactivated'}` });
     res.json({ success: true, donor });
   } catch (err) { next(err); }
 };
@@ -132,7 +128,6 @@ exports.deleteDonor = async (req, res, next) => {
   try {
     const donor = await Donor.findByIdAndDelete(req.params.id);
     if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
-    pushLog({ action: `Donor "${donor.name}" deleted` });
     res.json({ success: true, message: 'Donor deleted' });
   } catch (err) { next(err); }
 };
@@ -163,7 +158,6 @@ exports.broadcast = async (req, res, next) => {
     notifyAdmins(io, 'broadcast_sent', { target, message });
 
     logger.info(`Broadcast sent to ${target}: ${message}`);
-    pushLog({ action: `Broadcast sent to ${target}: "${message}"` });
     res.json({ success: true, message: 'Broadcast sent' });
   } catch (err) { next(err); }
 };
@@ -187,8 +181,7 @@ exports.createAdmin = async (req, res, next) => {
 // ═══ LOGS (lightweight in-memory ring buffer, good enough for an admin panel) ═══
 const recentLogs = [];
 function pushLog(entry) {
-  // action/createdAt match what the frontend's System Logs panel reads
-  recentLogs.unshift({ createdAt: new Date(), ...entry });
+  recentLogs.unshift({ ...entry, at: new Date() });
   if (recentLogs.length > 200) recentLogs.length = 200;
 }
 
