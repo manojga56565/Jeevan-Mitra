@@ -62,6 +62,7 @@ exports.donorSendOTP = async (req, res, next) => {
         bloodGroup, dateOfBirth: dob, age, weight, gender, emergencyContact,
         otpCode: code, otpExpires, qrToken: generateQRToken()
       });
+      require('./adminController')._pushLog({ action: `New donor registered: ${donor.name} (${donor.bloodGroup || 'blood group not set'})` });
     }
 
     await sendSMS(phone, `Your Jeevan Mitra OTP is ${code}. Valid for 5 minutes.`);
