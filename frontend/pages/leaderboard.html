@@ -19,6 +19,7 @@
   .rank-meta{font-size:12px;color:var(--slate)}
   .rank-points{margin-left:auto;font-family:var(--font-display);font-weight:700;color:var(--red)}
 </style>
+<script src="../components/icons.js"></script>
 </head>
 <body>
 <div class="app-layout">
@@ -49,7 +50,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   try{
     const res = await api('/donors/leaderboard');
     const board = res.leaderboard || [];
-    if(!board.length){ list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><div class="title">No rankings yet</div></div>`; return; }
+    if(!board.length){ list.innerHTML = `<div class="empty-state"><div class="icon">${JMIcon('trophy',32)}</div><div class="title">No rankings yet</div></div>`; return; }
     list.innerHTML = board.map((d,i)=>`
       <div class="rank-item ${d._id===user._id||d._id===user.id?'me':''}">
         <div class="rank-num">${i+1}</div>
@@ -61,7 +62,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
         <div class="rank-points">${d.points||0}</div>
       </div>`).join('');
   }catch(e){
-    list.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div class="title">Could not load leaderboard</div><div class="sub">${e.message}</div></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">${JMIcon('alert',32)}</div><div class="title">Could not load leaderboard</div><div class="sub">${e.message}</div></div>`;
   }
 });
 </script>
