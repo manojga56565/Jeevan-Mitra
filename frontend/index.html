@@ -914,8 +914,8 @@ body{
  <div class="bnav" id="hosp-nav">
  <button class="nav-btn active" onclick="hTab('home',this)"><span class="nav-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></span><span class="nav-lbl">Home</span></button>
  <button class="nav-btn" onclick="hTab('requests',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-lbl">Requests</span></button>
- <button class="nav-btn" onclick="hTab('new',this)"><span class="nav-ico"></span><span class="nav-lbl">New</span></button>
- <button class="nav-btn" onclick="hTab('scan',this)"><span class="nav-ico"></span><span class="nav-lbl">Scan</span></button>
+ <button class="nav-btn" onclick="hTab('new',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-lbl">New</span></button>
+ <button class="nav-btn" onclick="hTab('scan',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM18 18h2v2h-2z"/></svg></span><span class="nav-lbl">Scan</span></button>
  <button class="nav-btn" onclick="hTab('profile',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="nav-lbl">Profile</span></button>
  </div>
 </section>
@@ -934,11 +934,11 @@ body{
  </div>
  <div class="body-pad" id="admin-body"></div>
  <div class="bnav" id="adm-nav">
- <button class="nav-btn active" onclick="aTab('dash',this)"><span class="nav-ico"></span><span class="nav-lbl">Dash</span></button>
- <button class="nav-btn" onclick="aTab('hospitals',this)"><span class="nav-ico"></span><span class="nav-lbl">Hospitals</span></button>
- <button class="nav-btn" onclick="aTab('donors',this)"><span class="nav-ico"></span><span class="nav-lbl">Donors</span></button>
+ <button class="nav-btn active" onclick="aTab('dash',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="nav-lbl">Dash</span></button>
+ <button class="nav-btn" onclick="aTab('hospitals',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8"/></svg></span><span class="nav-lbl">Hospitals</span></button>
+ <button class="nav-btn" onclick="aTab('donors',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></span><span class="nav-lbl">Donors</span></button>
  <button class="nav-btn" onclick="aTab('requests',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-lbl">Requests</span></button>
- <button class="nav-btn" onclick="aTab('settings',this)"><span class="nav-ico"></span><span class="nav-lbl">More</span></button>
+ <button class="nav-btn" onclick="aTab('settings',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span><span class="nav-lbl">More</span></button>
  </div>
 </section>
 <div class="modal-overlay" id="accept-modal">
@@ -2144,7 +2144,7 @@ async function renderAdminHosps(){
  <div class="sec-title" style="margin:0;"> All Hospitals</div>
  </div>
  <button class="btn btn-red" onclick="renderAddHospInline()" style="margin-bottom:10px;"> Add New Hospital</button>
- <div class="search-box"><span></span><input placeholder="Search hospital..." oninput="filterAdminH(this.value)"/></div>
+ <div class="search-box"><span class="search-icon"><svg class="jm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><input placeholder="Search hospital..." oninput="filterAdminH(this.value)"/></div>
  <div id="adm-h-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
  try{const d=await api('/admin/hospitals');renderHList(d.hospitals||[])}
  catch(e){document.getElementById('adm-h-list').innerHTML=loadErrorHtml(e,'renderAdminHosps()')}
@@ -2205,7 +2205,7 @@ async function renderAdminDonors(){
  <button onclick="aTab('dash',document.querySelector('#adm-nav .nav-btn'))" style="background:var(--red-light);border:none;border-radius:10px;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--red);flex-shrink:0;">←</button>
  <div class="sec-title" style="margin:0;"> All Donors</div>
  </div>
- <div class="search-box"><span></span><input placeholder="Search donor..." oninput="filterAdminD(this.value)"/></div>
+ <div class="search-box"><span class="search-icon"><svg class="jm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><input placeholder="Search donor..." oninput="filterAdminD(this.value)"/></div>
  <div class="chip-row"><div class="chip active" onclick="filterDBlood('all',this)">All</div><div class="chip" onclick="filterDBlood('A+',this)">A+</div><div class="chip" onclick="filterDBlood('B+',this)">B+</div><div class="chip" onclick="filterDBlood('O+',this)">O+</div><div class="chip" onclick="filterDBlood('AB+',this)">AB+</div></div>
  <div id="adm-d-list"><div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div></div>`;
  try{const d=await api('/admin/donors');renderDList(d.donors||[])}
