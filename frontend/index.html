@@ -69,6 +69,7 @@ body{
  display:flex;
  z-index:100;
  box-shadow:0 -3px 16px rgba(0,0,0,0.06);
+ padding-bottom:env(safe-area-inset-bottom);
 }
 
 /* ════════════════════════════════════════
@@ -123,7 +124,7 @@ body{
  max-width:640px;
  }
 
- .screen{padding-bottom:70px;}
+ .screen{padding-bottom:72px;}
  .landing-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
  .landing-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 }
@@ -251,7 +252,7 @@ body{
  .landing-grid-2{grid-template-columns:repeat(2,1fr)}
  .landing-stats{max-width:900px;margin:0 auto;padding:24px 20px 4px}
 }
-.screen{display:none;min-height:100vh;flex-direction:column}
+.screen{display:none;min-height:100vh;flex-direction:column;padding-bottom:72px}
 .screen.active{display:flex;animation:screen-enter 0.35s ease}
 @keyframes screen-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
@@ -363,9 +364,9 @@ body{
 /* NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--white);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -3px 16px rgba(0,0,0,0.06)}
 .nav-btn{flex:1;padding:10px 4px 13px;text-align:center;cursor:pointer;border:none;background:none;transition:all 0.2s}
-.nav-ico{font-size:20px;display:block}
+.nav-ico{height:22px;display:flex;align-items:center;justify-content:center;color:currentColor}
 .nav-lbl{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;display:block}
-.nav-btn.active .nav-lbl{color:var(--red)}.nav-btn.active .nav-ico{transform:scale(1.1)}
+.nav-btn.active .nav-lbl{color:var(--red)}.nav-btn.active .nav-ico{transform:scale(1.06)}
 
 /* DONOR HOME */
 .d-header{background:linear-gradient(135deg,var(--red) 0%,#EF5350 100%);padding:48px 18px 28px;position:relative;overflow:hidden}
