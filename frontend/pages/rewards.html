@@ -21,6 +21,7 @@
   .reward-desc{font-size:12.5px;color:var(--slate);margin-bottom:14px;min-height:32px}
   .reward-cost{font-family:var(--font-display);font-weight:700;color:var(--red);margin-bottom:12px}
 </style>
+<script src="../components/icons.js"></script>
 </head>
 <body>
 <div class="app-layout">
@@ -30,7 +31,7 @@
     <div class="app-content">
       <div class="points-banner">
         <div><div class="n" id="my-points">0</div><div class="l">AVAILABLE POINTS</div></div>
-        <div style="font-size:32px;">🎖️</div>
+        <div style="font-size:32px;color:var(--red);">${JMIcon('trophy',32)}</div>
       </div>
       <h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:16px;">Redeem rewards</h2>
       <div class="reward-grid" id="reward-list"></div>
@@ -51,7 +52,7 @@ function rewardCard(r){
   const affordable = myPoints >= r.pointsCost;
   return `
     <div class="reward-card">
-      <div class="reward-icon">${r.icon||'🎁'}</div>
+      <div class="reward-icon">${JMIcon(r.icon||'trophy',24)}</div>
       <div class="reward-title">${r.title}</div>
       <div class="reward-desc">${r.description||''}</div>
       <div class="reward-cost">${r.pointsCost} pts</div>
@@ -65,18 +66,18 @@ async function loadRewards(){
     const res = await api('/donors/rewards');
     const rewards = res.rewards || [];
     if(!rewards.length){
-      list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🎁</div><div class="title">No rewards available yet</div><div class="sub">Check back soon.</div></div>`;
+      list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">${JMIcon('trophy',32)}</div><div class="title">No rewards available yet</div><div class="sub">Check back soon.</div></div>`;
       return;
     }
     list.innerHTML = rewards.map(rewardCard).join('');
   }catch(e){
-    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">⚠️</div><div class="title">Could not load rewards</div><div class="sub">${e.message}</div></div>`;
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">${JMIcon('alert',32)}</div><div class="title">Could not load rewards</div><div class="sub">${e.message}</div></div>`;
   }
 }
 
 async function redeem(rewardId){
   confirmDialog({
-    icon:'🎁', title:'Redeem this reward?', message:'Points will be deducted immediately.', confirmLabel:'Redeem',
+    icon:'trophy', title:'Redeem this reward?', message:'Points will be deducted immediately.', confirmLabel:'Redeem',
     onConfirm: async ()=>{
       try{
         const res = await api(`/donors/rewards/${rewardId}/redeem`, 'POST');
