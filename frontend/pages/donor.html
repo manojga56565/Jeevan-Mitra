@@ -33,6 +33,7 @@
   .req-expiry.urgent{color:var(--red)}
   .req-actions{display:flex;gap:8px;margin-top:10px}
 </style>
+<script src="../components/icons.js"></script>
 </head>
 <body>
 
@@ -62,7 +63,7 @@
           <div style="font-weight:700;font-size:14px;">Cooldown active</div>
           <div style="font-size:12.5px;color:var(--ink-soft);" id="cooldown-text">—</div>
         </div>
-        <div style="font-size:24px;">🩹</div>
+        <div style="font-size:24px;">JMIcon('hospital',24)</div>
       </div>
 
       <div class="section-head">
@@ -145,8 +146,8 @@ function requestCard(r){
         <div class="blood-chip">${r.bloodGroup}</div>
       </div>
       <div class="req-meta">
-        <span>📍 ${r.hospitalCity}</span>
-        <span>🩸 ${got}/${need} accepted</span>
+        <span>${JMIcon('mapPin',16)} ${r.hospitalCity}</span>
+        <span>${JMIcon('check',16)} ${got}/${need} accepted</span>
       </div>
       <div class="req-expiry ${exp.urgent?'urgent':''}">⏳ ${exp.text}</div>
       ${r.patientReason?`<div style="font-size:12.5px;color:var(--slate);margin-bottom:8px;">${r.patientReason}</div>`:''}
@@ -164,12 +165,12 @@ async function loadFeed(){
     const res = await api('/donors/feed');
     const requests = res.requests || [];
     if(!requests.length){
-      list.innerHTML = `<div class="empty-state"><div class="icon">✅</div><div class="title">No requests nearby</div><div class="sub">Check back later, or refresh.</div></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="icon">${JMIcon('check',32)}</div><div class="title">No requests nearby</div><div class="sub">Check back later, or refresh.</div></div>`;
       return;
     }
     list.innerHTML = requests.map(requestCard).join('');
   }catch(e){
-    list.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div class="title">Could not load requests</div><div class="sub">${e.message}</div></div><button class="btn btn-outline btn-block" onclick="loadFeed()">Retry</button>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">${JMIcon('alert',32)}</div><div class="title">Could not load requests</div><div class="sub">${e.message}</div></div><button class="btn btn-outline btn-block" onclick="loadFeed()">Retry</button>`;
   }
 }
 
