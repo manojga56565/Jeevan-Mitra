@@ -260,7 +260,7 @@ body{
 #splash::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(211,47,47,0.06);top:-80px;right:-80px}
 #splash::after{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(244,143,177,0.08);bottom:-60px;left:-60px}
 .splash-inner{text-align:center;z-index:1;animation:fadeUp 0.8s ease}
-.splash-drop{font-size:72px;animation:pulse 2s infinite}
+.splash-drop{display:flex;align-items:center;justify-content:center;color:var(--red);animation:pulse 2s infinite}
 .splash-brand{font-family:'Nunito',sans-serif;font-size:40px;font-weight:900;color:var(--red);letter-spacing:-1px;margin-top:4px}
 .splash-telugu{font-size:16px;color:#B71C1C;font-weight:700;margin-top:2px;opacity:0.8}
 .splash-tag{font-size:11px;color:var(--slate);margin-top:8px;letter-spacing:2px;text-transform:uppercase}
@@ -273,7 +273,7 @@ body{
 .ob-card{background:var(--white);border-radius:24px;padding:32px 24px;width:100%;box-shadow:var(--shadow);text-align:center}.landing-grid-4{display:flex;flex-direction:column;gap:10px}
 .landing-grid-2{display:flex;flex-direction:column;gap:10px}
 .landing-section{max-width:100%}
-.ob-logo{font-size:48px;margin-bottom:6px}
+.ob-logo{height:48px;margin-bottom:6px;color:var(--red);display:flex;align-items:center;justify-content:center}
 .ob-brand{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--red)}
 .ob-tel{font-size:13px;color:var(--slate);margin-top:2px}
 .ob-sub{font-size:12px;color:var(--muted);margin:8px 0 24px}
@@ -442,7 +442,7 @@ body{
 .prof-lbl{font-size:13px;font-weight:700;color:var(--dark)}
 .prof-val{font-size:12px;color:var(--muted)}
 .qr-box{background:var(--white);border-radius:var(--r);padding:18px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow-sm)}
-.qr-ph{width:100px;height:100px;border:3px dashed var(--red-mid);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:36px}
+.qr-ph{width:100px;height:100px;border:3px dashed var(--red-mid);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto;color:var(--red)}
 
 /* HOSPITAL HOME */
 .h-header{background:linear-gradient(135deg,#1565C0,#1976D2);padding:48px 18px 24px}
@@ -490,14 +490,14 @@ body{
 
 /* EMPTY */
 .empty{text-align:center;padding:36px 20px}
-.empty-ico{font-size:44px;margin-bottom:10px}
+.empty-ico{font-size:44px;margin-bottom:10px;color:var(--red);display:flex;justify-content:center}
 .empty-title{font-weight:700;font-size:15px;color:var(--dark)}
 .empty-sub{font-size:12px;color:var(--muted);margin-top:4px}
 
 /* DONATION HISTORY */
 .hist-card{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);border-left:4px solid var(--red);}
 .hist-inner{display:flex;gap:12px;align-items:flex-start;}
-.hist-ico{width:40px;height:40px;border-radius:10px;background:var(--red-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hist-ico{width:40px;height:40px;border-radius:10px;background:var(--red-light);display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0;}
 .hist-title{font-weight:700;font-size:13px;color:var(--dark);}
 .hist-sub{font-size:11px;color:var(--muted);margin-top:2px;}
 .hist-pts{font-size:11px;font-weight:800;color:var(--green);margin-top:4px;}
@@ -624,7 +624,7 @@ body{
 <!-- SPLASH -->
 <section class="screen active" id="splash">
  <div class="splash-inner">
- <div class="splash-drop"></div>
+ <div class="splash-drop"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div>
  <div class="splash-brand">Jeevan Mitra</div>
  <div class="splash-telugu">జీవన్ మిత్ర</div>
  <div class="splash-tag">Telangana Blood Network</div>
@@ -637,7 +637,7 @@ body{
  <div class="hero-split">
  <div class="hero-right">
  <div class="ob-card">
- <div class="ob-logo"></div>
+ <div class="ob-logo"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div>
  <div class="ob-brand">Jeevan Mitra</div>
  <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
  <div class="ob-sub">Connecting donors & hospitals across all 33 districts</div>
@@ -656,7 +656,7 @@ body{
  </div>
  </div>
  <div class="ob-card mobile-only-landing" style="margin:20px 20px 0;">
- <div class="ob-logo"></div>
+ <div class="ob-logo"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div>
  <div class="ob-brand">Jeevan Mitra</div>
  <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
  <div class="ob-sub">Connecting donors & hospitals across all 33 districts</div>
@@ -890,11 +890,11 @@ body{
  </div>
  <div class="body-pad" id="donor-body"></div>
  <div class="bnav" id="donor-nav">
- <button class="nav-btn active" onclick="dTab('home',this)"><span class="nav-ico"></span><span class="nav-lbl">Home</span></button>
- <button class="nav-btn" onclick="dTab('requests',this)"><span class="nav-ico"></span><span class="nav-lbl">Requests</span></button>
- <button class="nav-btn" onclick="dTab('history',this)"><span class="nav-ico"></span><span class="nav-lbl">History</span></button>
- <button class="nav-btn" onclick="dTab('leaderboard',this)"><span class="nav-ico"></span><span class="nav-lbl">Leaders</span></button>
- <button class="nav-btn" onclick="dTab('profile',this)"><span class="nav-ico"></span><span class="nav-lbl">Profile</span></button>
+ <button class="nav-btn active" onclick="dTab('home',this)"><span class="nav-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></span><span class="nav-lbl">Home</span></button>
+ <button class="nav-btn" onclick="dTab('requests',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-lbl">Requests</span></button>
+ <button class="nav-btn" onclick="dTab('history',this)"><span class="nav-ico"><svg class="jm-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 7v5l3 2"/></svg></span><span class="nav-lbl">History</span></button>
+ <button class="nav-btn" onclick="dTab('leaderboard',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M6 4h12v5a6 6 0 0 1-12 0z"/><path d="M6 6H3v2a4 4 0 0 0 4 4M18 6h3v2a4 4 0 0 1-4 4"/></svg></span><span class="nav-lbl">Leaders</span></button>
+ <button class="nav-btn" onclick="dTab('profile',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="nav-lbl">Profile</span></button>
  </div>
 </section>
 
@@ -912,11 +912,11 @@ body{
  </div>
  <div class="body-pad" id="hospital-body"></div>
  <div class="bnav" id="hosp-nav">
- <button class="nav-btn active" onclick="hTab('home',this)"><span class="nav-ico"></span><span class="nav-lbl">Home</span></button>
- <button class="nav-btn" onclick="hTab('requests',this)"><span class="nav-ico"></span><span class="nav-lbl">Requests</span></button>
+ <button class="nav-btn active" onclick="hTab('home',this)"><span class="nav-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></span><span class="nav-lbl">Home</span></button>
+ <button class="nav-btn" onclick="hTab('requests',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-lbl">Requests</span></button>
  <button class="nav-btn" onclick="hTab('new',this)"><span class="nav-ico"></span><span class="nav-lbl">New</span></button>
  <button class="nav-btn" onclick="hTab('scan',this)"><span class="nav-ico"></span><span class="nav-lbl">Scan</span></button>
- <button class="nav-btn" onclick="hTab('profile',this)"><span class="nav-ico"></span><span class="nav-lbl">Profile</span></button>
+ <button class="nav-btn" onclick="hTab('profile',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="nav-lbl">Profile</span></button>
  </div>
 </section>
 
@@ -937,7 +937,7 @@ body{
  <button class="nav-btn active" onclick="aTab('dash',this)"><span class="nav-ico"></span><span class="nav-lbl">Dash</span></button>
  <button class="nav-btn" onclick="aTab('hospitals',this)"><span class="nav-ico"></span><span class="nav-lbl">Hospitals</span></button>
  <button class="nav-btn" onclick="aTab('donors',this)"><span class="nav-ico"></span><span class="nav-lbl">Donors</span></button>
- <button class="nav-btn" onclick="aTab('requests',this)"><span class="nav-ico"></span><span class="nav-lbl">Requests</span></button>
+ <button class="nav-btn" onclick="aTab('requests',this)"><span class="nav-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nav-lbl">Requests</span></button>
  <button class="nav-btn" onclick="aTab('settings',this)"><span class="nav-ico"></span><span class="nav-lbl">More</span></button>
  </div>
 </section>
@@ -1704,7 +1704,7 @@ async function loadReqsPreview(){
  const d=await api('/donors/feed');
  const c=document.getElementById('home-reqs');
  const cards=(d.requests||[]).map(r=>reqCard(r)).filter(Boolean);
- if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No requests nearby</div><div class="empty-sub">All good! Check back later</div></div>`;return}
+ if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No requests nearby</div><div class="empty-sub">All good! Check back later</div></div>`;return}
  c.innerHTML=cards.join('');
  }catch(e){document.getElementById('home-reqs').innerHTML=loadErrorHtml(e,'loadReqsPreview()')}
 }
@@ -1729,7 +1729,7 @@ async function loadAllReqs(filter){
  if(filter!=='all')reqs=reqs.filter(r=>urgLabel(r.urgency)===filter);
  const c=document.getElementById('req-list');
  const cards=reqs.map(r=>reqCard(r)).filter(Boolean);
- if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No requests found</div></div>`;return}
+ if(!cards.length){c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No requests found</div></div>`;return}
  c.innerHTML=cards.join('');
  }catch(e){document.getElementById('req-list').innerHTML=loadErrorHtml(e,`loadAllReqs('${filter}')`)}
 }
@@ -1935,7 +1935,7 @@ async function loadHospReqs(preview=false){
  const c=document.getElementById(cid);
  if(!c)return;
  const list=preview?reqs.slice(0,3):reqs;
- if(!list.length){c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No requests yet</div><div class="empty-sub">Create your first blood request</div></div>`;return}
+ if(!list.length){c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No requests yet</div><div class="empty-sub">Create your first blood request</div></div>`;return}
  c.innerHTML=list.map(r=>hospReqCard(r)).join('');
  }catch(e){const c=document.getElementById(preview?'hosp-recent':'hosp-req-list');if(c)c.innerHTML=loadErrorHtml(e,`loadHospReqs(${preview})`)}
 }
@@ -2153,7 +2153,7 @@ async function renderAdminHosps(){
 function renderHList(hosps){
  allAdminH=hosps;
  const c=document.getElementById('adm-h-list');
- if(!hosps.length){c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No hospitals yet</div><div class="empty-sub">Add your first hospital</div></div>`;return}
+ if(!hosps.length){c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No hospitals yet</div><div class="empty-sub">Add your first hospital</div></div>`;return}
  c.innerHTML=hosps.map(h=>`<div class="card" style="margin-bottom:10px;">
  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
  <div style="flex:1"><div style="font-weight:700;font-size:13px;">${h.hospitalName}</div>
@@ -2215,7 +2215,7 @@ async function renderAdminDonors(){
 function renderDList(donors){
  allAdminD=donors;
  const c=document.getElementById('adm-d-list');
- if(!donors.length){c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No donors yet</div></div>`;return}
+ if(!donors.length){c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No donors yet</div></div>`;return}
  c.innerHTML=donors.map(d=>`<div class="card" style="margin-bottom:8px;">
  <div style="display:flex;gap:10px;align-items:center;">
  <div class="prof-av" style="width:40px;height:40px;font-size:16px;flex-shrink:0;">${(d.name||'D')[0]}</div>
@@ -2466,7 +2466,7 @@ async function renderAdminRequests(){
 
 function renderAdminReqList(reqs){
  const c=document.getElementById('adm-req-list');
- if(!reqs||!reqs.length){c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No requests found</div></div>`;return}
+ if(!reqs||!reqs.length){c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No requests found</div></div>`;return}
  c.innerHTML=reqs.map(r=>`<div class="req-card ${urgLabel(r.urgency)}" style="margin-bottom:10px;">
  <div class="req-hdr"><div class="blood-badge">${r.bloodGroup||'A+'}</div><div class="urg-badge ${urgLabel(r.urgency)}">${urgLabel(r.urgency)}</div></div>
  <div class="req-hosp"> ${r.hospital?.hospitalName||'Hospital'}</div>
@@ -2677,7 +2677,7 @@ function renderHistList(history){
  if(!history||!history.length){
  c.innerHTML=`
  <div class="empty">
- <div class="empty-ico"></div>
+ <div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div>
  <div class="empty-title">No donations yet</div>
  <div class="empty-sub">Your donation history will appear here after your first donation</div>
  </div>
@@ -2716,7 +2716,7 @@ function renderHistList(history){
  const timeStr=h.createdAt?new Date(h.createdAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):'-';
  return `<div class="hist-card">
  <div class="hist-inner">
- <div class="hist-ico"></div>
+ <div class="hist-ico"><svg class="jm-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></div>
  <div style="flex:1;">
  <div class="hist-title"> ${hosp}</div>
  <div class="hist-sub"> ${city} · ${h.bloodGroup||currentUser?.bloodGroup||'A+'} · ${h.units||1} unit</div>
@@ -2770,7 +2770,7 @@ function switchLbFilter(filter,btn){
 function renderLbList(donors,filter){
  const c=document.getElementById('lb-body');
  if(!donors||!donors.length){
- c.innerHTML=`<div class="empty"><div class="empty-ico"></div><div class="empty-title">No data yet</div><div class="empty-sub">Be the first to donate!</div></div>`;
+ c.innerHTML=`<div class="empty"><div class="empty-ico"><svg class="jm-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-4h6v4M8 8h8M12 4v8M8 8h8"/></svg></div><div class="empty-title">No data yet</div><div class="empty-sub">Be the first to donate!</div></div>`;
  return;
  }
  const myId=currentUser?._id||'';
