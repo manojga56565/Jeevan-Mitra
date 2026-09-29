@@ -27,6 +27,12 @@
   .row-actions{display:flex;gap:6px;flex-wrap:wrap}
   .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:var(--r-md)}
   .table-wrap table{min-width:600px}
+
+  /* Responsive QA: prevent inline stat-grid widths from overflowing on phones. */
+  #donation-stat-grid{grid-template-columns:1fr!important}
+  @media(min-width:480px){#donation-stat-grid{grid-template-columns:repeat(2,1fr)!important}}
+  @media(min-width:640px){#donation-stat-grid{grid-template-columns:repeat(3,1fr)!important}}
+  .table-wrap{-webkit-overflow-scrolling:touch}
 </style>
 <script src="../components/icons.js"></script>
 </head>
