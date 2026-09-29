@@ -1,22 +1,18 @@
-/* ═══ SIDEBAR / BOTTOM NAV COMPONENT ═══
-   renderSidebar(target, role, activePage)
-   Desktop (≥900px): permanent left sidebar.
-   Mobile: fixed bottom nav, same items.
-*/
+/* SIDEBAR / BOTTOM NAV COMPONENT */
 const NAV_ITEMS = {
   donor: [
-    { page:'donor',       icon:'🏠', label:'Home',   href:'donor.html' },
-    { page:'history',     icon:'📋', label:'History', href:'history.html' },
-    { page:'leaderboard', icon:'🏆', label:'Ranks',  href:'leaderboard.html' },
-    { page:'rewards',     icon:'🎁', label:'Rewards', href:'rewards.html' },
-    { page:'profile',     icon:'👤', label:'Profile', href:'profile.html' }
+    { page:'donor', icon:'home', label:'Home', href:'donor.html' },
+    { page:'history', icon:'history', label:'History', href:'history.html' },
+    { page:'leaderboard', icon:'trophy', label:'Ranks', href:'leaderboard.html' },
+    { page:'rewards', icon:'trophy', label:'Rewards', href:'rewards.html' },
+    { page:'profile', icon:'user', label:'Profile', href:'profile.html' }
   ],
   hospital: [
-    { page:'hospital', icon:'🏥', label:'Dashboard', href:'hospital.html' },
-    { page:'profile',  icon:'👤', label:'Profile',   href:'profile.html' }
+    { page:'hospital', icon:'hospital', label:'Dashboard', href:'hospital.html' },
+    { page:'profile', icon:'user', label:'Profile', href:'profile.html' }
   ],
   admin: [
-    { page:'admin',   icon:'📊', label:'Dashboard', href:'admin.html' }
+    { page:'admin', icon:'home', label:'Dashboard', href:'admin.html' }
   ]
 };
 
@@ -29,11 +25,11 @@ function renderSidebar(targetId, role, activePage){
 
   el.innerHTML = `
     <aside class="app-sidebar">
-      <div class="app-sidebar-brand">🩸 <span>Jeevan Mitra</span></div>
+      <div class="app-sidebar-brand"><span class="brand-mark icon-only">${JMIcon('hospital',18)}</span><span>Jeevan Mitra</span></div>
       <nav class="app-sidebar-nav">
         ${items.map(i => `
           <a href="${i.href}" class="app-sidebar-link ${i.page===activePage?'active':''}">
-            <span class="icon">${i.icon}</span><span>${i.label}</span>
+            <span class="icon icon-only">${JMIcon(i.icon,18)}</span><span>${i.label}</span>
           </a>`).join('')}
       </nav>
       <div class="app-sidebar-footer">
@@ -47,7 +43,7 @@ function renderSidebar(targetId, role, activePage){
     <nav class="app-bottomnav">
       ${items.map(i => `
         <a href="${i.href}" class="app-bottomnav-link ${i.page===activePage?'active':''}">
-          <span class="icon">${i.icon}</span><span>${i.label}</span>
+          <span class="icon icon-only">${JMIcon(i.icon,18)}</span><span>${i.label}</span>
         </a>`).join('')}
     </nav>`;
 }
