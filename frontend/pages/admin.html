@@ -28,6 +28,7 @@
   .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:var(--r-md)}
   .table-wrap table{min-width:600px}
 </style>
+<script src="../components/icons.js"></script>
 </head>
 <body>
 
@@ -54,7 +55,7 @@
         <div class="tab" data-tab="logs" onclick="switchTab('logs',this)">Audit logs</div>
       </div>
 
-      <div style="margin-bottom:16px;"><input class="field-input" id="global-search" placeholder="🔍 Search donors, hospitals, requests…" oninput="doGlobalSearch()"/></div>
+      <div style="margin-bottom:16px;"><input class="field-input" id="global-search" placeholder="Search donors, hospitals, requests…" oninput="doGlobalSearch()"/></div>
       <div id="global-search-results"></div>
 
       <div class="tab-panel active" id="panel-hospitals">
@@ -318,7 +319,7 @@ async function toggleHospital(id){
   catch(e){ showToast(e.message, 'error'); }
 }
 function deleteHospitalRow(id, name){
-  confirmDialog({ icon:'🗑', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+  confirmDialog({ icon:'alert', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
     onConfirm: async ()=>{ try{ await api(`/admin/hospitals/${id}`,'DELETE'); showToast('Deleted','success'); loadHospitals(); loadStats(); }catch(e){ showToast(e.message,'error'); } }
   });
 }
@@ -417,7 +418,7 @@ async function toggleDonorRow(id){
   catch(e){ showToast(e.message,'error'); }
 }
 function deleteDonorRow(id, name){
-  confirmDialog({ icon:'🗑', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+  confirmDialog({ icon:'alert', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
     onConfirm: async ()=>{ try{ await api(`/admin/donors/${id}`,'DELETE'); showToast('Deleted','success'); loadDonors(); loadStats(); }catch(e){ showToast(e.message,'error'); } }
   });
 }
@@ -439,7 +440,7 @@ async function loadRequests(){
   }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
 }
 function deleteRequestRow(id){
-  confirmDialog({ icon:'🗑', title:'Delete request?', message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+  confirmDialog({ icon:'alert', title:'Delete request?', message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
     onConfirm: async ()=>{ try{ await api(`/admin/requests/${id}`,'DELETE'); showToast('Deleted','success'); loadRequests(); loadStats(); }catch(e){ showToast(e.message,'error'); } }
   });
 }
@@ -551,7 +552,7 @@ async function loadNotifications(){
         <td><span class="badge badge-slate">${n.type}</span></td>
         <td>${n.recipientType}</td>
         <td>${n.title}</td>
-        <td>${n.isRead ? '✓ Read' : 'Unread'}</td>
+        <td>${n.isRead ? 'Read' : 'Unread'}</td>
       </tr>`).join('');
     table.innerHTML = `<thead><tr><th>When</th><th>Type</th><th>To</th><th>Title</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);">No notifications yet</td></tr>'}</tbody>`;
   }catch(e){ table.innerHTML = `<tr><td style="padding:20px;color:var(--red);">${e.message}</td></tr>`; }
@@ -587,7 +588,7 @@ async function toggleDistrictRow(id){
   catch(e){ showToast(e.message,'error'); }
 }
 function deleteDistrictRow(id, name){
-  confirmDialog({ icon:'🗑', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
+  confirmDialog({ icon:'alert', title:`Delete ${name}?`, message:'This cannot be undone.', confirmLabel:'Delete', danger:true,
     onConfirm: async ()=>{ try{ await api(`/admin/districts/${id}`,'DELETE'); showToast('Deleted','success'); loadDistricts(); }catch(e){ showToast(e.message,'error'); } }
   });
 }
