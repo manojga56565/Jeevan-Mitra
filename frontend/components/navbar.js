@@ -1,9 +1,7 @@
-/* ═══ NAVBAR COMPONENT ═══
-   renderNavbar(target, { variant: 'public'|'app', title, user }) */
+/* NAVBAR COMPONENT */
 function renderNavbar(targetId, opts={}){
   const el = document.getElementById(targetId);
   if(!el) return;
-
   if(opts.variant === 'app'){
     el.innerHTML = `
       <div class="app-navbar">
@@ -16,7 +14,7 @@ function renderNavbar(targetId, opts={}){
   } else {
     el.innerHTML = `
       <div class="public-navbar">
-        <a href="index.html" class="public-navbar-brand">🩸 Jeevan Mitra</a>
+        <a href="index.html" class="public-navbar-brand"><span class="brand-mark icon-only">${JMIcon('hospital',18)}</span> Jeevan Mitra</a>
         <div class="public-navbar-links">
           <a href="index.html#how-it-works">How it works</a>
           <a href="index.html#faq">FAQ</a>
