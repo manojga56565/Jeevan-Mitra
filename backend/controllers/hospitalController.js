@@ -151,6 +151,7 @@ exports.verifyDonorForScan = async (req, res, next) => {
     }
 
     const { eligible, daysRemaining } = isEligibleNow(donor);
+    res.set('Cache-Control', 'no-store');
     res.json({
       success: true,
       donor: {
