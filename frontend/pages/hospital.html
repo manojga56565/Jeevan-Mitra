@@ -125,7 +125,7 @@ async function loadStats(){
     const res = await api('/hospitals/requests');
     allRequests = res.requests || [];
     document.getElementById('s-total').textContent = allRequests.length;
-    document.getElementById('s-pending').textContent = allRequests.filter(r=>r.status==='pending').length;
+    document.getElementById('s-pending').textContent = allRequests.filter(r=>r.status==='open'||r.status==='pending').length;
     document.getElementById('s-accepted').textContent = allRequests.filter(r=>r.status==='accepted').length;
     document.getElementById('s-completed').textContent = allRequests.filter(r=>r.status==='completed').length;
     renderRequests('all');
@@ -143,14 +143,15 @@ function filterRequests(status, tabEl){
 function requestCard(r){
   const need = r.quantity||1;
   const got = (r.acceptedDonors||[]).filter(a=>a.status!=='no_show').length;
-  const statusColor = { pending:'badge-slate', accepted:'badge-amber', completed:'badge-green', cancelled:'badge-slate', expired:'badge-slate' }[r.status]||'badge-slate';
+  const displayStatus = r.status==='open'?'pending':r.status;
+  const statusColor = { pending:'badge-slate', accepted:'badge-amber', completed:'badge-green', cancelled:'badge-slate', expired:'badge-slate' }[displayStatus]||'badge-slate';
   const acceptedList = (r.acceptedDonors||[]).filter(a=>a.status==='accepted');
   return `
     <div class="req-card">
       <div class="req-top">
         <div>
           <span class="blood-chip" style="width:34px;height:34px;font-size:12px;display:inline-flex;">${r.bloodGroup}</span>
-          <span class="badge ${statusColor}" style="margin-left:8px;">${r.status}</span>
+          <span class="badge ${statusColor}" style="margin-left:8px;">${displayStatus}</span>
         </div>
         <div style="font-size:12px;color:var(--muted);">${got}/${need} filled</div>
       </div>
@@ -159,14 +160,14 @@ function requestCard(r){
         ${acceptedList.map(a=>`Donor accepted · ${new Date(a.acceptedAt).toLocaleTimeString()}`).join('<br/>')}
       </div>`:''}
       <div class="req-actions">
-        ${r.status!=='completed'&&r.status!=='cancelled'?`<button class="btn btn-outline btn-sm" onclick="deleteRequest('${r._id}')">Delete</button>`:''}
+        
         ${r.status==='accepted'?`<button class="btn btn-primary btn-sm" onclick="openCompleteFlow('${r._id}')">Verify & complete</button>`:''}
       </div>
     </div>`;
 }
 
 function renderRequests(status){
-  const list = status==='all' ? allRequests : allRequests.filter(r=>r.status===status);
+  const list = status==='all' ? allRequests : allRequests.filter(r=>status==='pending' ? (r.status==='open'||r.status==='pending') : r.status===status);
   const el = document.getElementById('req-list');
   if(!list.length){ el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><div class="title">No requests here</div></div>`; return; }
   el.innerHTML = list.map(requestCard).join('');
@@ -188,8 +189,9 @@ async function submitRequest(){
   try{
     await api('/hospitals/requests', 'POST', {
       bloodGroup: selectedBlood,
-      urgency: selectedUrgency,
+      urgency: ({ normal:'low', urgent:'high', emergency:'critical' })[selectedUrgency] || 'medium',
       quantity,
+      requiredBefore: new Date(Date.now() + parseInt(document.getElementById('nr-expiry').value,10)*60*60*1000).toISOString(),
       expiryHours: parseInt(document.getElementById('nr-expiry').value),
       patientName: document.getElementById('nr-patient').value,
       doctorRefNo: document.getElementById('nr-doctor').value,
