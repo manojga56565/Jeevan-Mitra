@@ -55,6 +55,7 @@ app.use('/api/hospitals', require('./routes/hospitalRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/requests', require('./routes/requestsRoot'));
 app.use('/api/stats', require('./routes/statsRoutes'));
+app.use('/api/districts', require('./routes/districtRoutes'));
 // The blueprint frontend also calls /api/hospital/complete/:id (singular,
 // distinct from the plural /api/hospitals mount above) — same handler as
 // the existing /api/hospitals/requests/:requestId/complete route.
