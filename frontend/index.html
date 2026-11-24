@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Jeevan Mitra — Telangana Blood Donation Network | జీవన్ మిత్ర</title>
-<meta name="description" content="Jeevan Mitra connects blood donors with hospitals across Telangana in real time — register as a donor, request blood for a patient, and track emergency response, all in one place."/>
-<meta property="og:title" content="Jeevan Mitra — Telangana Blood Donation Network"/>
-<meta property="og:description" content="Connecting blood donors with hospitals across Telangana in real time."/>
+<title>Jeevan Mitra — Connecting Hospitals, Blood Banks & Donors</title>
+<meta name="description" content="Jeevan Mitra is an early-stage coordination platform concept designed to connect hospitals, blood banks and willing blood donors through a clearer request workflow."/>
+<meta property="og:title" content="Jeevan Mitra — A blood-request coordination platform"/>
+<meta property="og:description" content="Connecting hospitals, blood banks and willing donors through a coordinated request workflow."/>
 <meta property="og:type" content="website"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
@@ -1221,43 +1221,16 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('conf-ok').onclick=function(){if(confirmCallback){confirmCallback();closeConfirm()}};
   populateDistricts();
   renderFAQ();
-  loadLandingStats();
   autoLogin();
   setTimeout(()=>{if(!sessionRestored)showScreen('onboarding')},2000);
 });
-async function loadLandingStats(){
-  try{
-    const res=await fetch(`${API}/stats/public`);
-    const data=await res.json();
-    if(!data.success)return;
-    const s=data.stats;
-    // Two copies of these stat boxes exist — the mobile-stacked one (always
-    // in the DOM) and the desktop split-hero one (only shown above 900px).
-    // Update both so whichever is visible always has the real number.
-    const setText=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
-    setText('ls-districts',s.districts); setText('ls-districts-d',s.districts);
-    setText('ls-donors',s.donors.toLocaleString('en-IN')); setText('ls-donors-d',s.donors.toLocaleString('en-IN'));
-    setText('ls-hospitals',s.hospitals.toLocaleString('en-IN')); setText('ls-hospitals-d',s.hospitals.toLocaleString('en-IN'));
-    setText('ls-lives',s.livesSaved.toLocaleString('en-IN')); setText('ls-lives-d',s.livesSaved.toLocaleString('en-IN'));
-  }catch(e){
-    // Backend unreachable (e.g. Render waking up) — leave the — placeholders
-    // rather than showing a wrong number.
-  }
-}
-// Keep the landing counts feeling "live" — re-check every 8s while the
-// onboarding/landing screen is what's showing, without needing sockets
-// wired up for anonymous (not-yet-logged-in) visitors.
-setInterval(()=>{
-  const onboarding=document.getElementById('onboarding');
-  if(onboarding && onboarding.classList.contains('active')) loadLandingStats();
-},1000);
 const FAQ_DATA=[
-  {q:'Who can donate blood?',a:'Any healthy person aged 18–65, weighing at least 45kg, can register as a donor.'},
-  {q:'How often can I donate?',a:'A 60-day cooldown is enforced after every donation to protect donor health.'},
-  {q:'Is my data safe?',a:'Yes. Your contact details are only shared with the hospital once you accept a request.'},
-  {q:'How do I know a request is genuine?',a:'All requests come from hospitals verified and approved by Jeevan Mitra admins.'},
-  {q:'Do I get rewarded for donating?',a:'Yes — every verified donation earns reward points and moves you up the leaderboard.'}
-];
+  {q:'Does Jeevan Mitra replace a blood bank?',a:'No. The platform is intended to support coordination. Blood banks and hospitals remain responsible for blood availability, screening, testing, collection, storage and transfusion.'},
+  {q:'Does a software match mean a donor is medically suitable?',a:'No. A match only identifies a potential contact. Qualified healthcare professionals must assess donor eligibility and confirm clinical compatibility.'},
+  {q:'Can anyone register as a donor?',a:'People can express interest through registration. Registration does not establish medical eligibility; the participating blood bank or healthcare team makes that assessment.'},
+  {q:'Will my personal details be shared?',a:'Personal information should be collected with clear consent and shared only when necessary with authorized participants. Do not submit another person’s details without permission.'},
+  {q:'Is Jeevan Mitra operating across Telangana today?',a:'Jeevan Mitra is an early-stage project. A live, verified network of participating hospitals, blood banks and donors must be established before broad availability can be claimed.'}
+]
 function renderFAQ(){
   const el=document.getElementById('faq-list');if(!el)return;
   el.innerHTML=FAQ_DATA.map((f,i)=>`
