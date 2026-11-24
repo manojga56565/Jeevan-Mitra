@@ -123,6 +123,7 @@ exports.lookupDonorByPhone = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'This donor account has been deactivated' });
     }
     const { eligible, daysRemaining } = isEligibleNow(donor);
+    res.set('Cache-Control', 'no-store');
     res.json({
       success: true,
       donor: {
