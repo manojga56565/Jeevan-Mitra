@@ -2787,22 +2787,19 @@ function generateQR(containerId,size){
   const container=document.getElementById(containerId);
   if(!container)return;
   container.innerHTML='';
-  const u=currentUser||{};
-  // QR data — donor ID + blood group + name (what hospital scans)
-  const qrData=JSON.stringify({
-    id:u._id||u.qrCode||'JM-DONOR-'+Date.now(),
-    name:u.name||'Donor',
-    blood:u.bloodGroup||'A+',
-    phone:u.phone||'',
-    city:u.city||'',
-    app:'JeevanMitra'
-  });
+  const token=currentUser?.qrToken;
+  // The backend issues an opaque QR token. Never place donor name, blood
+  // group, phone number, city, or a predictable/fabricated ID in the QR.
+  if(!token){
+    container.textContent='Secure QR is not available for this account yet.';
+    return;
+  }
   try{
     new QRCode(container,{
-      text:qrData,
+      text:token,
       width:size||180,
       height:size||180,
-      colorDark:'#B71C1C',
+      colorDark:'#0D6B55',
       colorLight:'#ffffff',
       correctLevel:QRCode.CorrectLevel.M
     });
