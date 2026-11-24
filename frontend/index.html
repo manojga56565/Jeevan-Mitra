@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#0D6B55"/>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml"/>
 <title>Jeevan Mitra — Connecting Hospitals, Blood Banks & Donors</title>
 <meta name="description" content="Jeevan Mitra is an early-stage coordination platform concept designed to connect hospitals, blood banks and willing blood donors through a clearer request workflow."/>
 <meta property="og:title" content="Jeevan Mitra — A blood-request coordination platform"/>
@@ -2867,5 +2870,12 @@ function showToast(msg,type='',duration=3500){
 </script>
 </div><!-- /app-content -->
 </div><!-- /app-shell -->
+<script>
+// PWA shell caching is intentionally limited to static same-origin assets.
+// Authenticated API responses and donor/hospital data are never cached.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+</script>
 </body>
 </html>
