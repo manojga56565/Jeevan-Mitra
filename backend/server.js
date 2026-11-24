@@ -10,11 +10,32 @@ const { registerSocketHandlers } = require('./sockets/socketHandler');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
+// Fail closed: never boot with a predictable or missing token-signing secret.
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be set to a random value of at least 32 characters');
+}
+
 const app = express();
 const server = http.createServer(app);
 
+const allowedOrigins = (process.env.CORS_ORIGINS || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5500,http://127.0.0.1:5500,http://localhost:5173,http://127.0.0.1:5173'))
+  .split(',').map(origin => origin.trim()).filter(Boolean);
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  throw new Error('CORS_ORIGINS must contain the trusted frontend origin(s) in production');
+}
+const corsOptions = {
+  origin(origin, callback) {
+    // Requests without an Origin header include server-to-server and native clients.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin not allowed by CORS'));
+  },
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+};
+
 // ═══ GLOBAL MIDDLEWARE ═══
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', require('./middleware/rateLimiter').generalLimiter); // safety net — specific endpoints below have their own tighter limits
