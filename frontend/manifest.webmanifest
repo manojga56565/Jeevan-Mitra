@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Jeevan Mitra",
+  "short_name": "Jeevan Mitra",
+  "description": "A coordination platform connecting hospitals, blood banks and eligible blood donors.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0D6B55",
+  "icons": [
+    { "src": "./assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
