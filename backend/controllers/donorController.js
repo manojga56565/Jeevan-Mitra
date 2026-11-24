@@ -4,6 +4,7 @@ const Request = require('../models/Request');
 const { donorGroupsThatCanFulfil, requestGroupsThisDonorCanFulfil } = require('../services/matchingService');
 const { isEligibleNow } = require('../services/cooldownService');
 const { notifyHospital, notifyDonorsByBloodGroup } = require('../services/notificationService');
+const { generateQRToken } = require('../services/qrService');
 
 // GET /api/donors/profile
 exports.getProfile = async (req, res, next) => {
@@ -12,6 +13,21 @@ exports.getProfile = async (req, res, next) => {
     if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
     const { daysRemaining } = isEligibleNow(donor);
     res.json({ success: true, donor: { ...donor.toJSON(), daysRemaining } });
+  } catch (err) { next(err); }
+};
+
+// GET /api/donors/qr — return only the authenticated donor's opaque QR token.
+// The token contains no personal data and is verified through a hospital-only route.
+exports.getQR = async (req, res, next) => {
+  try {
+    const donor = await Donor.findById(req.user.id).select('qrToken');
+    if (!donor) return res.status(404).json({ success: false, message: 'Donor not found' });
+    if (!donor.qrToken) {
+      donor.qrToken = generateQRToken();
+      await donor.save();
+    }
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, qrToken: donor.qrToken });
   } catch (err) { next(err); }
 };
 
