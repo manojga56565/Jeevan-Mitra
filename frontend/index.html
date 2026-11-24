@@ -632,109 +632,80 @@ body{
 </section>
 
 <!-- ONBOARDING / LANDING -->
-<section class="screen" id="onboarding">
-  <div class="hero-split">
-    <div class="hero-right">
-      <div class="ob-card">
-        <div class="ob-logo">🩸</div>
-        <div class="ob-brand">Jeevan Mitra</div>
-        <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
-        <div class="ob-sub">Connecting donors & hospitals across all 33 districts</div>
-        <button class="btn btn-red" onclick="showScreen('donor-register')">🫀 Join as Donor / దాతగా చేరండి</button>
-        <button class="btn btn-outline" onclick="showScreen('hospital-login')">🏥 Hospital Login / ఆసుపత్రి లాగిన్</button>
-        <div class="divider">or</div>
-        <div class="link-text" onclick="showScreen('quick-login')">Already have an account? <span>Quick Login →</span></div>
-        <div style="margin-top:14px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="showScreen('admin-login')">🔐 Admin Access</span></div>
+<section class="screen jm-landing" id="onboarding">
+  <div class="jm-landing-wrap">
+    <header class="jm-landing-nav">
+      <a class="jm-wordmark" href="#" onclick="showScreen('onboarding');return false;" aria-label="Jeevan Mitra home">
+        <span class="jm-mark" aria-hidden="true">♥</span>
+        <span><strong>Jeevan Mitra</strong><small>జీవన్ మిత్ర</small></span>
+      </a>
+      <div class="jm-nav-actions">
+        <button class="jm-nav-link" onclick="showScreen('quick-login')">Sign in</button>
+        <button class="jm-nav-cta" onclick="showScreen('donor-register')">Become a donor <span aria-hidden="true">→</span></button>
       </div>
-      <div class="landing-stats" style="display:flex;gap:10px;padding:24px 0 4px;">
-        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-districts-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
-        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-donors-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
-        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-hospitals-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
-        <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-lives-d">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Lives Saved</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="ob-card mobile-only-landing" style="margin:20px 20px 0;">
-    <div class="ob-logo">🩸</div>
-    <div class="ob-brand">Jeevan Mitra</div>
-    <div class="ob-tel">జీవన్ మిత్ర · Telangana Blood Network</div>
-    <div class="ob-sub">Connecting donors & hospitals across all 33 districts</div>
-    <button class="btn btn-red" onclick="showScreen('donor-register')">🫀 Join as Donor / దాతగా చేరండి</button>
-    <button class="btn btn-outline" onclick="showScreen('hospital-login')">🏥 Hospital Login / ఆసుపత్రి లాగిన్</button>
-    <div class="divider">or</div>
-    <div class="link-text" onclick="showScreen('quick-login')">Already have an account? <span>Quick Login →</span></div>
-    <div style="margin-top:14px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="showScreen('admin-login')">🔐 Admin Access</span></div>
-  </div>
+    </header>
 
-  <!-- STATS -->
-  <div class="landing-stats mobile-only-landing" style="display:flex;gap:10px;padding:24px 20px 4px;">
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-districts">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Districts</div></div>
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-donors">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Donors</div></div>
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-hospitals">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Hospitals</div></div>
-    <div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:14px 6px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;font-weight:800;color:var(--red);" id="ls-lives">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">Lives Saved</div></div>
-  </div>
+    <main>
+      <section class="jm-hero">
+        <div class="jm-hero-copy">
+          <div class="jm-eyebrow"><span></span> A better-connected response to blood needs</div>
+          <h1>When every minute matters, <em>connection matters.</em></h1>
+          <p class="jm-hero-lead">Jeevan Mitra is being built to help hospitals, blood banks and willing donors coordinate blood requests through one clearer, more organized process.</p>
+          <div class="jm-hero-actions">
+            <button class="jm-primary" onclick="showScreen('donor-register')">Join as a donor <span aria-hidden="true">→</span></button>
+            <button class="jm-secondary" onclick="showScreen('hospital-login')">Hospital access</button>
+          </div>
+          <p class="jm-hero-note"><span aria-hidden="true">●</span> We coordinate connections. Medical screening and transfusion decisions stay with authorized healthcare professionals.</p>
+        </div>
+        <div class="jm-hero-art" aria-label="Illustration of a connected healthcare network">
+          <div class="jm-orbit jm-orbit-one"></div><div class="jm-orbit jm-orbit-two"></div>
+          <div class="jm-center-mark"><span>♥</span><strong>JM</strong><small>CONNECT</small></div>
+          <div class="jm-node jm-node-hospital"><span>✚</span><small>Hospitals</small></div>
+          <div class="jm-node jm-node-donor"><span>♥</span><small>Donors</small></div>
+          <div class="jm-node jm-node-bank"><span>＋</span><small>Blood banks</small></div>
+          <div class="jm-connecting-line"></div>
+          <div class="jm-art-caption">One coordinated network</div>
+        </div>
+      </section>
 
-  <!-- ABOUT -->
-  <div class="landing-section" style="padding:22px 20px 4px;">
-    <div class="sec-title" style="margin-bottom:8px;">❤️ About Jeevan Mitra</div>
-    <p style="font-size:13px;color:var(--slate);line-height:1.6;">Jeevan Mitra is Telangana's real-time blood donation network, matching willing donors with hospitals in urgent need. We use intelligent blood-group matching, GPS navigation, and QR-verified donations to make every drop count — safely and quickly.</p>
-  </div>
+      <section class="jm-principles" aria-label="Our principles">
+        <article><span class="jm-principle-icon">01</span><div><strong>Right request</strong><p>A clear, structured blood requirement from a participating hospital.</p></div></article>
+        <article><span class="jm-principle-icon">02</span><div><strong>Relevant connection</strong><p>Identify potentially suitable, available donors using recorded information.</p></div></article>
+        <article><span class="jm-principle-icon">03</span><div><strong>Professional verification</strong><p>Healthcare teams confirm eligibility, compatibility and fulfilment.</p></div></article>
+      </section>
 
-  <!-- HOW IT WORKS -->
-  <div class="landing-section" style="padding:22px 20px 4px;">
-    <div class="sec-title" style="margin-bottom:10px;">⚙️ How It Works</div>
-    <div class="landing-grid-4">
-      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">🏥</div><div><div style="font-weight:700;font-size:13px;">Hospital posts a request</div><div style="font-size:11px;color:var(--muted);">Blood group, units, and urgency are shared instantly.</div></div></div>
-      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">🎯</div><div><div style="font-weight:700;font-size:13px;">Eligible donors matched</div><div style="font-size:11px;color:var(--muted);">We match by blood group, location, and cooldown status.</div></div></div>
-      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">🧭</div><div><div style="font-weight:700;font-size:13px;">Donor accepts & navigates</div><div style="font-size:11px;color:var(--muted);">Google Maps opens automatically with directions.</div></div></div>
-      <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);"><div style="font-size:20px;">✅</div><div><div style="font-weight:700;font-size:13px;">QR verified & rewarded</div><div style="font-size:11px;color:var(--muted);">Hospital scans QR, confirms donation, points added.</div></div></div>
-    </div>
-  </div>
+      <section class="jm-section jm-how">
+        <div class="jm-section-heading"><span>HOW IT WORKS</span><h2>From a request to a coordinated response.</h2><p>A simple process designed to reduce scattered calls and unclear updates.</p></div>
+        <div class="jm-steps">
+          <article><span>1</span><div><strong>Request is raised</strong><p>A participating hospital records the required blood component, group, quantity and urgency.</p></div></article>
+          <article><span>2</span><div><strong>Potential matches are identified</strong><p>The platform checks recorded donor details, availability, location and donation history.</p></div></article>
+          <article><span>3</span><div><strong>Donors are contacted</strong><p>Relevant donors can respond. Their decision to participate is always voluntary.</p></div></article>
+          <article><span>4</span><div><strong>Care teams verify and coordinate</strong><p>Authorized blood-bank and hospital professionals handle screening, testing, collection and transfusion.</p></div></article>
+        </div>
+      </section>
 
-  <!-- BLOOD COMPATIBILITY -->
-  <div class="landing-section" style="padding:22px 20px 4px;">
-    <div class="sec-title" style="margin-bottom:10px;">🩸 Blood Compatibility Guide</div>
-    <div style="background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);overflow-x:auto;">
-      <table style="width:100%;font-size:11px;border-collapse:collapse;">
-        <tr style="color:var(--muted);font-weight:700;"><td style="padding:5px;">Group</td><td style="padding:5px;">Can Donate To</td><td style="padding:5px;">Can Receive From</td></tr>
-        <tr><td style="padding:5px;font-weight:700;">O-</td><td style="padding:5px;">All groups</td><td style="padding:5px;">O-</td></tr>
-        <tr><td style="padding:5px;font-weight:700;">O+</td><td style="padding:5px;">O+,A+,B+,AB+</td><td style="padding:5px;">O+,O-</td></tr>
-        <tr><td style="padding:5px;font-weight:700;">A+</td><td style="padding:5px;">A+,AB+</td><td style="padding:5px;">A+,A-,O+,O-</td></tr>
-        <tr><td style="padding:5px;font-weight:700;">B+</td><td style="padding:5px;">B+,AB+</td><td style="padding:5px;">B+,B-,O+,O-</td></tr>
-        <tr><td style="padding:5px;font-weight:700;">AB+</td><td style="padding:5px;">AB+ only</td><td style="padding:5px;">All groups</td></tr>
-      </table>
-    </div>
-  </div>
+      <section class="jm-safety">
+        <div class="jm-safety-symbol">+</div>
+        <div><span>BUILT AROUND RESPONSIBILITY</span><h2>A match is a starting point, not a medical approval.</h2><p>Blood-group matching in software cannot establish clinical compatibility. Donor eligibility, component suitability, blood grouping, cross-matching, collection and transfusion must be determined by qualified professionals at authorized facilities.</p></div>
+      </section>
 
-  <!-- TESTIMONIALS -->
-  <div class="landing-section" style="padding:22px 20px 4px;">
-    <div class="sec-title" style="margin-bottom:10px;">💬 What People Say</div>
-    <div class="landing-grid-2">
-      <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);"><div style="font-size:13px;color:var(--slate);font-style:italic;">"I got a request notification and reached the hospital in 20 minutes. The app made it effortless."</div><div style="font-size:11px;font-weight:700;margin-top:8px;color:var(--red);">— Ravi K., Donor, Hyderabad</div></div>
-      <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);"><div style="font-size:13px;color:var(--slate);font-style:italic;">"Jeevan Mitra cut our emergency response time drastically during a critical case."</div><div style="font-size:11px;font-weight:700;margin-top:8px;color:var(--red);">— Dr. Lakshmi, Government Hospital</div></div>
-    </div>
-  </div>
+      <section class="jm-section jm-about">
+        <div class="jm-section-heading"><span>WHY JEEVAN MITRA</span><h2>The gap is often coordination.</h2><p>Families may have to contact people one by one while hospitals and blood banks work through their own processes. Jeevan Mitra aims to make those connections easier to organize—without replacing the institutions responsible for safe blood services.</p></div>
+        <div class="jm-about-points"><div><b>01</b><strong>One clearer request</strong><p>Keep the need and its status organized.</p></div><div><b>02</b><strong>Less indiscriminate outreach</strong><p>Reach relevant donors instead of broadcasting every request to everyone.</p></div><div><b>03</b><strong>Privacy with purpose</strong><p>Share personal information only when necessary and with appropriate consent and access controls.</p></div></div>
+      </section>
 
-  <!-- FAQ -->
-  <div class="landing-section" style="padding:22px 20px 4px;">
-    <div class="sec-title" style="margin-bottom:10px;">❓ Frequently Asked Questions</div>
-    <div id="faq-list" class="landing-grid-2" style="align-items:start;"></div>
-  </div>
+      <section class="jm-faq-section">
+        <div class="jm-section-heading"><span>COMMON QUESTIONS</span><h2>Know what the platform does—and doesn't do.</h2></div>
+        <div id="faq-list" class="landing-grid-2 jm-faq-list"></div>
+      </section>
 
-  <!-- CONTACT -->
-  <div class="landing-section" style="padding:22px 20px 4px;">
-    <div class="sec-title" style="margin-bottom:8px;">📞 Contact Us</div>
-    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);font-size:12px;color:var(--slate);line-height:1.8;">
-      ✉️ support@jeevanmitra.in<br/>
-      📱 +91 40-1234-5678<br/>
-      📍 Hyderabad, Telangana, India
-    </div>
-  </div>
+      <section class="jm-final-cta">
+        <div><span>BE PART OF THE NETWORK</span><h2>Help make blood-request coordination clearer.</h2><p>Register your interest as a donor, or use the hospital access flow if your institution is participating.</p></div>
+        <div class="jm-final-actions"><button class="jm-primary" onclick="showScreen('donor-register')">Register as donor <span aria-hidden="true">→</span></button><button class="jm-secondary" onclick="showScreen('hospital-login')">Hospital access</button></div>
+      </section>
+    </main>
 
-  <!-- FOOTER -->
-  <div style="padding:24px 20px 30px;text-align:center;">
-    <div style="font-size:12px;color:var(--muted);">© 2026 Jeevan Mitra · జీవన్ మిత్ర</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px;">Made with ❤️ for Telangana</div>
+    <footer class="jm-footer"><a class="jm-wordmark" href="#" onclick="showScreen('onboarding');return false;"><span class="jm-mark" aria-hidden="true">♥</span><span><strong>Jeevan Mitra</strong><small>జీవన్ మిత్ర</small></span></a><p>An early-stage coordination platform concept · Telangana, India</p><button onclick="showScreen('admin-login')">Administrator access</button></footer>
   </div>
 </section>
 
