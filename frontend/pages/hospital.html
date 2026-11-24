@@ -221,14 +221,14 @@ async function scanQR(){
   const token = document.getElementById('qr-token').value.trim();
   if(!token) return showToast('Paste the donor QR token', 'error');
   try{
-    const res = await api('/hospitals/scan-qr', 'POST', { qrToken: token });
+    const res = await api(`/donors/verify/${encodeURIComponent(token)}`);
     scannedDonor = res.donor;
     document.getElementById('qr-result').innerHTML = `
       <div class="card">
         <div style="font-weight:700;font-size:15px;">${res.donor.name}</div>
         <div style="font-size:13px;color:var(--slate);margin:4px 0 10px;">${res.donor.bloodGroup} · ${res.donor.phone}</div>
-        <div class="badge ${res.eligible?'badge-green':'badge-red'}">${res.eligible?'Eligible to donate':'In cooldown'}</div>
-        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="finalizeCompletion()" ${!res.eligible?'disabled':''}>✅ Confirm donation complete</button>
+        <div class="badge ${res.donor.eligibleNow?'badge-green':'badge-red'}">${res.donor.eligibleNow?'Eligible to donate':'In cooldown'}</div>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="finalizeCompletion()" ${!res.donor.eligibleNow?'disabled':''}>✅ Confirm donation complete</button>
       </div>`;
   }catch(e){ showToast(e.message, 'error'); }
 }
@@ -236,7 +236,7 @@ async function scanQR(){
 async function finalizeCompletion(){
   if(!scannedDonor || !activeRequestForComplete) return;
   try{
-    await api(`/hospitals/requests/${activeRequestForComplete}/complete`, 'PATCH', { donorId: scannedDonor._id });
+    await api(`/hospitals/requests/${activeRequestForComplete}/complete`, 'PATCH', { donorId: scannedDonor.id });
     closeModal('complete-modal');
     showToast('Donation completed — cooldown & points applied', 'success');
     loadStats();
