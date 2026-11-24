@@ -2786,18 +2786,17 @@ function renderLbList(donors,filter){
 // ═══════════════════════════════════════════
 // 📱 QR CODE
 // ═══════════════════════════════════════════
-function generateQR(containerId,size){
+async function generateQR(containerId,size){
   const container=document.getElementById(containerId);
   if(!container)return;
-  container.innerHTML='';
-  const token=currentUser?.qrToken;
-  // The backend issues an opaque QR token. Never place donor name, blood
-  // group, phone number, city, or a predictable/fabricated ID in the QR.
-  if(!token){
-    container.textContent='Secure QR is not available for this account yet.';
-    return;
-  }
+  container.innerHTML='Loading secure QR…';
   try{
+    // Fetch the opaque token from the authenticated backend instead of
+    // relying on a possibly stale profile object in browser storage.
+    const result=await api('/donors/qr');
+    const token=result.qrToken;
+    if(!token) throw new Error('Secure QR is unavailable for this account.');
+    container.innerHTML='';
     new QRCode(container,{
       text:token,
       width:size||180,
@@ -2807,7 +2806,7 @@ function generateQR(containerId,size){
       correctLevel:QRCode.CorrectLevel.M
     });
   }catch(e){
-    container.innerHTML=`<div style="width:${size||180}px;height:${size||180}px;background:#f5f5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;">QR unavailable</div>`;
+    container.textContent=e.message||'QR unavailable';
   }
 }
 
