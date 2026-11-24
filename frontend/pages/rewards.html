@@ -64,32 +64,16 @@ function rewardCard(r){
 
 async function loadRewards(){
   const list = document.getElementById('reward-list');
-  try{
-    const res = await api('/donors/rewards');
-    const rewards = res.rewards || [];
-    if(!rewards.length){
-      list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🎁</div><div class="title">No rewards available yet</div><div class="sub">Check back soon.</div></div>`;
-      return;
-    }
-    list.innerHTML = rewards.map(rewardCard).join('');
-  }catch(e){
-    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">⚠️</div><div class="title">Could not load rewards</div><div class="sub">${e.message}</div></div>`;
-  }
+  list.innerHTML = `
+    <div class="empty-state" style="grid-column:1/-1;">
+      <div class="icon">🎁</div>
+      <div class="title">Reward redemption is being prepared</div>
+      <div class="sub">Your points remain in your account. Rewards will appear here once a verified reward catalogue and fulfilment process are configured.</div>
+    </div>`;
 }
 
-async function redeem(rewardId){
-  confirmDialog({
-    icon:'🎁', title:'Redeem this reward?', message:'Points will be deducted immediately.', confirmLabel:'Redeem',
-    onConfirm: async ()=>{
-      try{
-        const res = await api(`/donors/rewards/${rewardId}/redeem`, 'POST');
-        showToast('Reward redeemed!', 'success');
-        myPoints = res.donor.points;
-        document.getElementById('my-points').textContent = myPoints;
-        loadRewards();
-      }catch(e){ showToast(e.message, 'error'); }
-    }
-  });
+async function redeem(){
+  showToast('Reward redemption is not available yet. Your points have not been changed.','info');
 }
 
 window.addEventListener('DOMContentLoaded', async ()=>{
