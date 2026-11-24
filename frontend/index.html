@@ -1250,12 +1250,27 @@ function toggleFAQ(i){
   if(!open){a.style.maxHeight=a.scrollHeight+'px';ico.style.transform='rotate(180deg)'}
 }
 
-function populateDistricts(){
-  const dists=Object.keys(TG).sort();
+async function populateDistricts(){
+  // Prefer the live list from registered donor records. Keep the bundled
+  // Telangana list as a fallback so first-time users can still register
+  // before any donors have been added to the database.
+  let dists=[];
+  try{
+    const result=await api('/districts');
+    dists=Array.isArray(result.districts)?result.districts:[];
+  }catch(e){}
+  if(!dists.length)dists=Object.keys(TG);
+  dists=[...new Set(dists.filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   ['d-dist'].forEach(id=>{
     const s=document.getElementById(id);
     if(!s)return;
-    dists.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;s.appendChild(o)});
+    const selected=s.value;
+    s.innerHTML='<option value="">Select District</option>';
+    dists.forEach(d=>{
+      const o=document.createElement('option');
+      o.value=d;o.textContent=d;s.appendChild(o);
+    });
+    if(selected&&dists.includes(selected))s.value=selected;
   });
 }
 
