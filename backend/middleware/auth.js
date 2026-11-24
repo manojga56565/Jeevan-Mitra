@@ -11,7 +11,7 @@ function auth(requiredRole) {
         return res.status(401).json({ success: false, message: 'No token provided', code: 'NO_TOKEN' });
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jeevan-mitra-dev-secret');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       if (requiredRole && decoded.role !== requiredRole) {
         return res.status(403).json({ success: false, message: 'You do not have access to this resource' });
