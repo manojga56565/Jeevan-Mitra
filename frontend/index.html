@@ -672,6 +672,15 @@ body{
         </div>
       </section>
 
+      <section class="jm-section" aria-label="Live platform records" style="padding-top:24px;padding-bottom:24px;">
+        <div class="jm-section-heading"><span>LIVE PLATFORM RECORDS</span><h2>What is currently registered.</h2><p>These counts come from the platform database and may be small while the network is being established.</p></div>
+        <div class="jm-steps" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+          <article><span id="public-stat-donors" style="font-size:26px;">—</span><div><strong>Registered donors</strong><p>Donor accounts in the platform.</p></div></article>
+          <article><span id="public-stat-hospitals" style="font-size:26px;">—</span><div><strong>Verified hospitals</strong><p>Hospital accounts approved by an administrator.</p></div></article>
+          <article><span id="public-stat-districts" style="font-size:26px;">—</span><div><strong>Districts represented</strong><p>Districts recorded in donor profiles.</p></div></article>
+        </div>
+      </section>
+
       <section class="jm-principles" aria-label="Our principles">
         <article><span class="jm-principle-icon">01</span><div><strong>Right request</strong><p>A clear, structured blood requirement from a participating hospital.</p></div></article>
         <article><span class="jm-principle-icon">02</span><div><strong>Relevant connection</strong><p>Identify potentially suitable, available donors using recorded information.</p></div></article>
@@ -1223,6 +1232,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Confirm dialog OK button
   document.getElementById('conf-ok').onclick=function(){if(confirmCallback){confirmCallback();closeConfirm()}};
   populateDistricts();
+  loadPublicStats();
   renderFAQ();
   autoLogin();
   setTimeout(()=>{if(!sessionRestored)showScreen('onboarding')},2000);
@@ -1248,6 +1258,24 @@ function toggleFAQ(i){
   document.querySelectorAll('[id^="faq-a-"]').forEach(x=>x.style.maxHeight='0px');
   document.querySelectorAll('[id^="faq-ico-"]').forEach(x=>x.style.transform='rotate(0deg)');
   if(!open){a.style.maxHeight=a.scrollHeight+'px';ico.style.transform='rotate(180deg)'}
+}
+
+async function loadPublicStats(){
+  try{
+    const result=await api('/stats/public');
+    const stats=result.stats||{};
+    const values={
+      'public-stat-donors':stats.donors,
+      'public-stat-hospitals':stats.hospitals,
+      'public-stat-districts':stats.districts
+    };
+    Object.entries(values).forEach(([id,value])=>{
+      const el=document.getElementById(id);
+      if(el&&Number.isFinite(Number(value)))el.textContent=Number(value).toLocaleString('en-IN');
+    });
+  }catch(e){
+    // Keep neutral placeholders if the public stats endpoint is unavailable.
+  }
 }
 
 async function populateDistricts(){
