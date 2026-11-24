@@ -21,6 +21,7 @@ router.get('/leaderboard', auth('donor'), donorController.getLeaderboard);
 router.get('/feed', auth('donor'), donorController.getFeed);
 router.get('/history', auth('donor'), donorController.getHistory);
 router.get('/profile', auth('donor'), donorController.getProfile);
+router.get('/qr', auth('donor'), donorController.getQR);
 router.put('/profile', auth('donor'), donorController.updateProfile);
 router.post('/photo', auth('donor'), upload.single('photo'), donorController.uploadPhoto);
 router.put('/change-password', auth('donor'), donorController.changePassword);
